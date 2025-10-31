@@ -3,10 +3,10 @@ name: 🪞 Mirror to Private Repository
 on:
   push:
     branches:
-      - '**'  # Synchronizuje všechny větve
-  create:  # Pro nové větve a tagy
-  delete:  # Pro smazané větve
-  workflow_dispatch:  # Manuální spuštění
+      - "**" # Synchronizuje všechny větve
+  create: # Pro nové větve a tagy
+  delete: # Pro smazané větve
+  workflow_dispatch: # Manuální spuštění
 
 jobs:
   mirror:
@@ -16,7 +16,7 @@ jobs:
       - name: 📥 Checkout source repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Stáhne celou historii
+          fetch-depth: 0 # Stáhne celou historii
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: ⚙️ Configure Git
@@ -31,17 +31,16 @@ jobs:
         run: |
           # Remove bugged github auth header
           git config --unset-all http.https://github.com/.extraheader
-          
+
           # Přidá mirror remote s access tokenem
           git remote add mirror https://$MIRROR_TOKEN@github.com/$MIRROR_REPO.git
-          
+
           # Synchronizuje všechny větve
           git push mirror --all --force
-          
+
           # Synchronizuje všechny tagy
           git push mirror --tags --force
 
       - name: 🧹 Clean up
         run: |
           git remote remove mirror
-
