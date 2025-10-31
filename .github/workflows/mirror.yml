@@ -34,6 +34,10 @@ jobs:
 
           # Přidá mirror remote s access tokenem
           git remote add mirror https://$MIRROR_TOKEN@github.com/$MIRROR_REPO.git
+          
+          # Vymaže workflow soubor z mirror (nepotřebujeme ho v privátním repo)
+          git rm --cached .github/workflows/mirror.yml
+          git commit -m "Remove mirror workflow from mirror copy" || true
 
           # Synchronizuje všechny větve
           git push mirror --all --force
