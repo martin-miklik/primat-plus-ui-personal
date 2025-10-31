@@ -1,0 +1,405 @@
+{
+  "common": {
+    "loading": "Načítání...",
+    "error": "Chyba",
+    "success": "Úspěch",
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "create": "Vytvořit",
+    "back": "Zpět",
+    "tryAgain": "Zkusit znovu",
+    "required": "Povinné",
+    "optional": "Volitelné"
+  },
+  "brand": {
+    "name": "Primát Plus",
+    "tagline": "AI Vzdělávací Platforma"
+  },
+  "nav": {
+    "dashboard": "Přehled",
+    "subjects": "Předměty",
+    "learn": "Učit se",
+    "tests": "Testy",
+    "settings": "Nastavení",
+    "navigationLabel": "Navigace"
+  },
+  "user": {
+    "menu": "Můj účet",
+    "profile": "Profil",
+    "logout": "Odhlásit se",
+    "free": "zdarma",
+    "premium": "premium"
+  },
+  "dashboard": {
+    "title": "Přehled",
+    "subtitle": "Vítejte zpět! Zde je přehled vašeho učení.",
+    "failedToLoad": "Nepodařilo se načíst přehled",
+    "errorOccurred": "Došlo k chybě",
+    "welcome": {
+      "greeting": "Vítejte zpět, {name}!",
+      "greetingDefault": "Vítejte zpět!",
+      "subtitle": "Zde je přehled vašeho učení"
+    },
+    "stats": {
+      "dueToday": "K procvičení dnes",
+      "studyStreak": "Série dní učení",
+      "totalCards": "Celkem kartiček",
+      "days": "dní",
+      "cards": "kartiček"
+    },
+    "recentSubjects": {
+      "title": "Nedávné předměty",
+      "viewAll": "Zobrazit vše",
+      "topics": "témat",
+      "materials": "materiálů",
+      "empty": "Zatím žádné předměty",
+      "emptyDescription": "Začněte vytvořením prvního předmětu",
+      "createSubject": "Vytvořit předmět"
+    },
+    "recentTopics": {
+      "title": "Nedávná témata",
+      "viewAll": "Zobrazit vše",
+      "lastStudied": "Naposledy studováno",
+      "cards": "kartiček",
+      "empty": "Zatím žádná témata",
+      "emptyDescription": "Témata se zobrazí po přidání do předmětů",
+      "browseSubjects": "Procházet předměty"
+    },
+    "recentCards": {
+      "title": "Nedávné kartičky",
+      "viewAll": "Zobrazit vše",
+      "reviewed": "Procvičeno",
+      "difficulty": {
+        "easy": "Snadné",
+        "medium": "Střední",
+        "hard": "Těžké",
+        "again": "Zopakovat"
+      },
+      "empty": "Zatím žádné kartičky",
+      "emptyDescription": "Začněte učit se a kartičky se zde zobrazí",
+      "startLearning": "Začít se učit"
+    },
+    "recentTests": {
+      "title": "Nedávné testy",
+      "viewAll": "Zobrazit vše",
+      "score": "Skóre",
+      "completedOn": "Dokončeno",
+      "questions": "otázek",
+      "empty": "Zatím žádné testy",
+      "emptyDescription": "Vyzkoušejte své znalosti testem",
+      "takeTest": "Udělat test"
+    },
+    "dueCards": {
+      "title": "Kartičky k procvičení dnes",
+      "allCaughtUp": "Máte hotovo!",
+      "readyToReview": "Připraveno k procvičení",
+      "startReview": "Začít procvičovat",
+      "browseSubjects": "Procházet předměty"
+    },
+    "sections": {
+      "subjects": {
+        "title": "Vaše předměty",
+        "viewAll": "Zobrazit vše",
+        "empty": "Vytvořte první předmět",
+        "detail": "Detail",
+        "learn": "Učit se"
+      },
+      "topics": {
+        "title": "Nedávná témata",
+        "viewAll": "Zobrazit vše",
+        "empty": "Začněte přidáním témat",
+        "detail": "Detail",
+        "learn": "Učit se"
+      },
+      "cards": {
+        "title": "Naposledy procvičeno",
+        "viewAll": "Zobrazit vše",
+        "empty": "Začněte s učením",
+        "detail": "Detail",
+        "learn": "Učit se"
+      },
+      "tests": {
+        "title": "Nedávné testy",
+        "viewAll": "Zobrazit vše",
+        "empty": "Vyzkoušejte své znalosti testem",
+        "detail": "Detail",
+        "retake": "Zkusit znovu"
+      }
+    },
+    "quickActions": {
+      "title": "Rychlé akce",
+      "newSubject": {
+        "title": "Nový předmět",
+        "description": "Vytvořit nový předmět"
+      },
+      "learn": {
+        "title": "Učit se",
+        "description": "Procvičit flashkarty"
+      },
+      "browseSubjects": {
+        "title": "Procházet předměty",
+        "description": "Prozkoumat všechny vaše předměty"
+      },
+      "takeTest": {
+        "title": "Testování",
+        "description": "Otestovat své znalosti"
+      },
+      "cards": {
+        "title": "Kartičky",
+        "description": "Procházet kartičky"
+      },
+      "statistics": {
+        "title": "Statistiky",
+        "description": "Zobrazit pokrok"
+      }
+    },
+    "dailyOverview": {
+      "title": "Dnešní přehled",
+      "streak": "Série dní",
+      "dueToday": "K procvičení dnes",
+      "reviewedToday": "Procvičeno dnes",
+      "totalCards": "Celkem kartiček"
+    }
+  },
+  "subjects": {
+    "title": "Předměty",
+    "subtitle": "Spravovat vaše studijní předměty",
+    "create": "Vytvořit předmět",
+    "comingSoon": "Seznam předmětů se zde zobrazí...",
+    "empty": {
+      "title": "Zatím žádné předměty",
+      "description": "Začněte vytvořením vašeho prvního předmětu pro organizaci studijních materiálů.",
+      "action": "Vytvořit první předmět"
+    },
+    "error": {
+      "title": "Nepodařilo se načíst předměty",
+      "description": "Došlo k chybě při načítání předmětů. Zkuste to prosím znovu.",
+      "retry": "Zkusit znovu"
+    },
+    "dialog": {
+      "createTitle": "Vytvořit nový předmět",
+      "createDescription": "Přidejte nový předmět pro organizaci vašich studijních materiálů.",
+      "editTitle": "Upravit předmět",
+      "editDescription": "Upravte informace o předmětu.",
+      "deleteTitle": "Smazat předmět",
+      "deleteDescription": "Tato akce je nevratná.",
+      "deleteConfirmation": "Opravdu chcete smazat předmět \"{name}\"?",
+      "deleteWarning": "Všechna témata, materiály a kartičky spojené s tímto předmětem budou také smazány.",
+      "nameLabel": "Název",
+      "namePlaceholder": "např. Matematika",
+      "descriptionLabel": "Popis",
+      "descriptionPlaceholder": "Stručný popis předmětu...",
+      "descriptionHelp": "Volitelné, max 500 znaků",
+      "colorLabel": "Barva",
+      "iconLabel": "Ikona",
+      "creating": "Vytváření...",
+      "createButton": "Vytvořit předmět",
+      "updating": "Ukládání...",
+      "updateButton": "Uložit změny",
+      "deleting": "Mazání...",
+      "deleteButton": "Smazat předmět"
+    }
+  },
+  "topics": {
+    "title": "Témata",
+    "create": "Nové téma",
+    "empty": {
+      "title": "Zatím žádná témata",
+      "description": "Začněte vytvořením prvního tématu.",
+      "action": "Vytvořit první téma"
+    },
+    "error": {
+      "title": "Nepodařilo se načíst témata",
+      "description": "Došlo k chybě při načítání témat. Zkuste to prosím znovu.",
+      "retry": "Zkusit znovu"
+    },
+    "dialog": {
+      "createTitle": "Vytvořit nové téma",
+      "createDescription": "Přidejte nové téma do tohoto předmětu.",
+      "editTitle": "Upravit téma",
+      "editDescription": "Upravte název tématu.",
+      "deleteTitle": "Smazat téma",
+      "deleteDescription": "Tato akce je nevratná.",
+      "deleteConfirmation": "Opravdu chcete smazat téma \"{name}\"?",
+      "deleteWarning": "Všechny materiály v tomto tématu budou také smazány.",
+      "nameLabel": "Název tématu",
+      "namePlaceholder": "např. Kvadratické rovnice",
+      "creating": "Vytváření...",
+      "updating": "Ukládání...",
+      "deleting": "Mazání...",
+      "createButton": "Vytvořit téma",
+      "updateButton": "Uložit změny",
+      "deleteButton": "Smazat téma"
+    }
+  },
+  "materials": {
+    "title": "Materiály",
+    "materials": "Materiály",
+    "uploadMaterial": "Nahrát materiál",
+    "noTopicSelected": "Žádné téma není vybráno",
+    "selectTopicToView": "Vyberte téma pro zobrazení materiálů",
+    "materialsForTopic": "Studijní materiály pro toto téma",
+    "comingSoon": "Již brzy",
+    "materialsWillBeAvailable": "Správa materiálů bude k dispozici v další verzi.",
+    "empty": {
+      "title": "Zatím žádné materiály",
+      "description": "Začněte nahráním studijních materiálů pro toto téma.",
+      "action": "Nahrát materiál"
+    },
+    "error": {
+      "title": "Nepodařilo se načíst materiály",
+      "description": "Došlo k chybě při načítání materiálů. Zkuste to prosím znovu.",
+      "retry": "Zkusit znovu"
+    },
+    "card": {
+      "note": "Poznámka",
+      "edit": "Upravit",
+      "delete": "Smazat",
+      "flashcards": "{count} kartičky",
+      "tests": "{count} testy",
+      "status": {
+        "pending": "Čeká",
+        "processing": "Zpracovává se",
+        "completed": "Dokončeno",
+        "failed": "Selhalo"
+      }
+    }
+  },
+  "upload": {
+    "dialog": {
+      "title": "Přidat zdroje",
+      "description": "Nahrajte soubory nebo přidejte odkazy na YouTube či webové stránky.",
+      "files": "Soubory",
+      "youtube": "YouTube",
+      "website": "Webové stránky",
+      "cancel": "Zrušit",
+      "upload": "Nahrát"
+    },
+    "dropzone": {
+      "title": "Nahrát zdroje",
+      "dragDrop": "Přetáhněte sem soubory nebo",
+      "chooseFile": "vyberte soubor",
+      "toUpload": "k nahrání",
+      "formats": "Podporované formáty: PDF, TXT, DOCX • Max 50MB"
+    },
+    "youtube": {
+      "label": "URL YouTube videa",
+      "placeholder": "https://www.youtube.com/watch?v=...",
+      "notesTitle": "Poznámky",
+      "note1": "Bude importován pouze textový přepis",
+      "note2": "Podporována jsou pouze veřejná YouTube videa",
+      "note3": "Nedávno nahrané videa nemusí být k dispozici pro import"
+    },
+    "website": {
+      "label": "URL webové stránky",
+      "placeholder": "https://example.com",
+      "notesTitle": "Poznámky",
+      "note1": "Bude importován textový obsah stránky",
+      "note2": "Některé stránky mohou blokovat scraping"
+    },
+    "status": {
+      "pending": "Čeká ve frontě",
+      "uploading": "Nahrává se...",
+      "processing": "Zpracovává se...",
+      "completed": "Dokončeno",
+      "error": "Chyba při nahrávání"
+    },
+    "errors": {
+      "fileSize": "Soubor je příliš velký (max {size})",
+      "fileType": "Nepodporovaný typ souboru. Povoleny jsou pouze PDF, DOCX, TXT",
+      "invalidYoutubeUrl": "Neplatná URL YouTube videa",
+      "invalidWebsiteUrl": "Neplatná URL webové stránky",
+      "uploadFailed": "Nahrání selhalo. Zkuste to prosím znovu.",
+      "invalidFiles": "Některé soubory jsou neplatné"
+    },
+    "success": {
+      "fileUploaded": "Soubor {name} byl úspěšně nahrán",
+      "youtubeAdded": "YouTube video bylo úspěšně přidáno",
+      "websiteAdded": "Webová stránka byla úspěšně přidána"
+    }
+  },
+  "learn": {
+    "title": "Učit se",
+    "subtitle": "Procvičujte flashkarty a studijní materiály"
+  },
+  "tests": {
+    "title": "Testy",
+    "subtitle": "Testujte své znalosti"
+  },
+  "settings": {
+    "title": "Nastavení",
+    "subtitle": "Spravujte svůj účet a předvolby"
+  },
+  "theme": {
+    "light": "Světlý režim",
+    "dark": "Tmavý režim",
+    "system": "Systémový",
+    "toggle": "Výběr motivu"
+  },
+  "auth": {
+    "login": {
+      "title": "Přihlášení",
+      "subtitle": "Přihlaste se ke svému účtu",
+      "email": "E-mail",
+      "password": "Heslo",
+      "rememberMe": "Zapamatovat si mě",
+      "signingIn": "Přihlašování...",
+      "signIn": "Přihlásit se",
+      "emailPlaceholder": "vas@email.cz",
+      "success": "Přihlášení úspěšné",
+      "errors": {
+        "invalidCredentials": "Neplatný e-mail nebo heslo",
+        "networkError": "Chyba sítě. Zkuste to prosím znovu.",
+        "unknownError": "Došlo k neočekávané chybě"
+      }
+    },
+    "session": {
+      "validating": "Ověřování session...",
+      "expired": "Vaše session vypršela. Prosím, přihlaste se znovu.",
+      "invalid": "Neplatná session. Prosím, přihlaste se znovu.",
+      "loading": "Načítání...",
+      "checkingAuth": "Kontrola autentizace..."
+    }
+  },
+  "states": {
+    "error": {
+      "title": "Něco se pokazilo",
+      "message": "Došlo k neočekávané chybě. Zkuste to prosím znovu.",
+      "notFound": "Nenalezeno",
+      "notFoundMessage": "Zdroj, který hledáte, neexistuje.",
+      "networkError": "Připojení k síti selhalo. Zkontrolujte prosím své internetové připojení.",
+      "goBack": "Jít zpět"
+    },
+    "empty": {
+      "noResults": "Nenalezeny žádné výsledky",
+      "noResultsFor": "Nenalezeny žádné výsledky pro \"{query}\"",
+      "clearSearch": "Vymazat vyhledávání",
+      "noDataYet": "Zatím žádné {entity}",
+      "getStarted": "Začněte vytvořením prvního {entity}.",
+      "noFiles": "Zatím žádné soubory",
+      "uploadFiles": "Nahrajte své studijní materiály."
+    }
+  },
+  "validation": {
+    "subjectNameRequired": "Název předmětu je povinný",
+    "subjectNameTooLong": "Název předmětu je příliš dlouhý",
+    "descriptionTooLong": "Popis je příliš dlouhý",
+    "invalidColorFormat": "Neplatný formát barvy",
+    "emailInvalid": "Neplatná e-mailová adresa",
+    "passwordMin": "Heslo musí mít alespoň 8 znaků",
+    "passwordUppercase": "Heslo musí obsahovat alespoň jedno velké písmeno",
+    "passwordNumber": "Heslo musí obsahovat alespoň jedno číslo",
+    "passwordsNoMatch": "Hesla se neshodují",
+    "nameMinLength": "Jméno musí mít alespoň 2 znaky",
+    "topicNameRequired": "Název tématu je povinný",
+    "topicNameTooLong": "Název tématu je příliš dlouhý"
+  },
+  "errorBoundary": {
+    "title": "Něco se pokazilo",
+    "defaultMessage": "Došlo k neočekávané chybě",
+    "tryAgain": "Zkusit znovu",
+    "reloadPage": "Obnovit stránku"
+  }
+}
