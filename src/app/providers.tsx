@@ -73,7 +73,7 @@ export function Providers({ children }: ProvidersProps) {
     >
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster position="top-right" expand={false} richColors closeButton />
+        <Toaster position="top-right" expand={false} richColors closeButton/>
         <ReactQueryDevtools
           initialIsOpen={false}
           buttonPosition="bottom-right"
