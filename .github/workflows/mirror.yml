@@ -1,0 +1,47 @@
+name: 🪞 Mirror to Private Repository
+
+on:
+  push:
+    branches:
+      - '**'  # Synchronizuje všechny větve
+  create:  # Pro nové větve a tagy
+  delete:  # Pro smazané větve
+  workflow_dispatch:  # Manuální spuštění
+
+jobs:
+  mirror:
+    if: github.repository == 'BePositive-s-r-o/primat-plus-ui'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Stáhne celou historii
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ⚙️ Configure Git
+        run: |
+          git config --global user.name "GitHub Mirror Bot"
+          git config --global user.email "action@github.com"
+
+      - name: 🪞 Add mirror remote and push
+        env:
+          MIRROR_TOKEN: ${{ secrets.MIRROR_ACCESS_TOKEN }}
+          MIRROR_REPO: ${{ secrets.MIRROR_REPOSITORY_URL }}
+        run: |
+          # Remove bugged github auth header
+          git config --unset-all http.https://github.com/.extraheader
+          
+          # Přidá mirror remote s access tokenem
+          git remote add mirror https://$MIRROR_TOKEN@github.com/$MIRROR_REPO.git
+          
+          # Synchronizuje všechny větve
+          git push mirror --all --force
+          
+          # Synchronizuje všechny tagy
+          git push mirror --tags --force
+
+      - name: 🧹 Clean up
+        run: |
+          git remote remove mirror
+
