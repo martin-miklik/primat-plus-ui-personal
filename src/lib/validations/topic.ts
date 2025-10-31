@@ -34,6 +34,7 @@ export const createTopicSchema = topicSchema
   })
   .extend({
     subjectId: z.string().optional(), // Optional since it's passed in the mutation
+    order: z.number().int().nonnegative().optional(), // Optional, defaults provided in forms
   });
 
 // Update topic schema (partial, no ID, timestamps)

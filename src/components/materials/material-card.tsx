@@ -65,7 +65,8 @@ export function MaterialCard({
       case "note":
         return t("card.note");
       default:
-        return material.type.toUpperCase();
+        // This case should never be reached due to exhaustive type checking
+        return "FILE";
     }
   };
 
@@ -190,9 +191,3 @@ export function MaterialCard({
     </div>
   );
 }
-
-
-
-
-
-
