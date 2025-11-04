@@ -76,32 +76,89 @@ export function useSubscription<T = unknown>(
   const subscriptionRef = useRef<Subscription | null>(null);
   const { client, isConnected } = useCentrifuge({ enabled });
 
-  useEffect(() => {
-    if (!enabled || !client || !isConnected) return;
+  // Use refs for callbacks to avoid effect re-runs
+  const onPublicationRef = useRef(onPublication);
+  const onSubscribedRef = useRef(onSubscribed);
+  const onUnsubscribedRef = useRef(onUnsubscribed);
+  const onErrorRef = useRef(onError);
 
-    // Create subscription
+  // Update refs when callbacks change
+  useEffect(() => {
+    onPublicationRef.current = onPublication;
+    onSubscribedRef.current = onSubscribed;
+    onUnsubscribedRef.current = onUnsubscribed;
+    onErrorRef.current = onError;
+  });
+
+  useEffect(() => {
+    if (!enabled || !client || !isConnected || !channel) return;
+
+    // Check if subscription already exists
+    const existingSub = client.getSubscription(channel);
+    if (existingSub) {
+      // Reuse existing subscription
+      subscriptionRef.current = existingSub;
+      setIsSubscribed(existingSub.state === "subscribed");
+      
+      // Add our handlers to the existing subscription
+      const publicationHandler = (ctx: any) => {
+        const pubData = ctx.data as T;
+        setData(pubData);
+        onPublicationRef.current?.(pubData);
+      };
+
+      const subscribedHandler = () => {
+        setIsSubscribed(true);
+        onSubscribedRef.current?.();
+      };
+
+      const unsubscribedHandler = () => {
+        setIsSubscribed(false);
+        onUnsubscribedRef.current?.();
+      };
+
+      const errorHandler = (ctx: any) => {
+        const error = new Error(ctx.error?.message || "Subscription error");
+        onErrorRef.current?.(error);
+      };
+
+      existingSub.on("publication", publicationHandler);
+      existingSub.on("subscribed", subscribedHandler);
+      existingSub.on("unsubscribed", unsubscribedHandler);
+      existingSub.on("error", errorHandler);
+
+      // Cleanup only removes our handlers, doesn't unsubscribe
+      return () => {
+        existingSub.off("publication", publicationHandler);
+        existingSub.off("subscribed", subscribedHandler);
+        existingSub.off("unsubscribed", unsubscribedHandler);
+        existingSub.off("error", errorHandler);
+      };
+    }
+
+    // Create new subscription
     const sub = client.newSubscription(channel);
 
     // Set up subscription handlers
     sub.on("publication", (ctx) => {
       const pubData = ctx.data as T;
       setData(pubData);
-      onPublication?.(pubData);
+      onPublicationRef.current?.(pubData);
     });
 
     sub.on("subscribed", () => {
       setIsSubscribed(true);
-      onSubscribed?.();
+      onSubscribedRef.current?.();
     });
 
     sub.on("unsubscribed", () => {
       setIsSubscribed(false);
-      onUnsubscribed?.();
+      onUnsubscribedRef.current?.();
     });
 
     sub.on("error", (ctx) => {
       const error = new Error(ctx.error?.message || "Subscription error");
-      onError?.(error);
+      onErrorRef.current?.(error);
     });
 
     // Subscribe
@@ -114,16 +171,7 @@ export function useSubscription<T = unknown>(
       sub.removeAllListeners();
       subscriptionRef.current = null;
     };
-  }, [
-    enabled,
-    client,
-    isConnected,
-    channel,
-    onPublication,
-    onSubscribed,
-    onUnsubscribed,
-    onError,
-  ]);
+  }, [enabled, client, isConnected, channel]);
 
   return {
     subscription: subscriptionRef.current,

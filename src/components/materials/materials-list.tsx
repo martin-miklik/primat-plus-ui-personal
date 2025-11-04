@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { useQueryClient } from "@tanstack/react-query";
 import { Upload, FolderOpen, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/states/empty-states";
@@ -10,9 +9,8 @@ import { MaterialCard } from "@/components/materials/material-card";
 import { MaterialCardSkeleton } from "@/components/materials/material-card-skeleton";
 import { UploadMaterialDialog } from "@/components/dialogs/upload-material-dialog";
 import { useDialog } from "@/hooks/use-dialog";
-import { useUpload } from "@/hooks/use-upload";
+import { useUpload, useUploadSubscription } from "@/hooks/use-upload";
 import { useSources } from "@/lib/api/queries/sources";
-import { useSubscription } from "@/hooks/use-centrifuge";
 import { useUploadStore } from "@/stores/upload-store";
 
 interface MaterialsListProps {
@@ -20,18 +18,25 @@ interface MaterialsListProps {
   topicName?: string;
 }
 
-interface CentrifugoUploadMessage {
-  type: "upload_progress" | "upload_complete" | "upload_error";
-  sourceId: number;
-  progress: number;
-  status: "uploading" | "processing" | "completed" | "error";
-  error?: string;
+/**
+ * Component that handles Centrifugo subscription for a single upload
+ */
+function UploadSubscriptionHandler({ fileId }: { fileId: string }) {
+  const uploadFile = useUploadStore((state) =>
+    state.files.find((f) => f.id === fileId)
+  );
+
+  const isActive =
+    uploadFile?.status === "uploading" || uploadFile?.status === "processing";
+
+  useUploadSubscription(fileId, uploadFile?.channel, isActive);
+
+  return null;
 }
 
 export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
   const t = useTranslations("sources");
   const uploadDialog = useDialog("upload-material");
-  const queryClient = useQueryClient();
 
   // Fetch sources
   const {
@@ -50,29 +55,9 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
     [allUploadFiles, topicId]
   );
   const removeFile = useUploadStore((state) => state.removeFile);
-  const updateFileProgress = useUploadStore(
-    (state) => state.updateFileProgress
-  );
-  const updateFileStatus = useUploadStore((state) => state.updateFileStatus);
 
   // Initialize upload hook
   useUpload(topicId);
-
-  // Subscribe to Centrifugo channel for real-time updates
-  useSubscription<CentrifugoUploadMessage>(`sources:${topicId}`, {
-    enabled: !!topicId,
-    onPublication: (data) => {
-      if (data.type === "upload_progress") {
-        updateFileProgress(String(data.sourceId), data.progress);
-      } else if (data.type === "upload_complete") {
-        updateFileStatus(String(data.sourceId), "completed");
-        // Refetch sources to show the new one
-        queryClient.invalidateQueries({ queryKey: ["sources", topicId] });
-      } else if (data.type === "upload_error") {
-        updateFileStatus(String(data.sourceId), "error", data.error);
-      }
-    },
-  });
 
   if (!topicId) {
     return (
@@ -88,6 +73,11 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
 
   return (
     <>
+      {/* Render subscription handlers for active uploads */}
+      {uploadingFiles.map((uploadFile) => (
+        <UploadSubscriptionHandler key={uploadFile.id} fileId={uploadFile.id} />
+      ))}
+
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="border-b p-6">

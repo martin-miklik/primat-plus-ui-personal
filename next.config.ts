@@ -23,7 +23,7 @@ const nextConfig: NextConfig = {
     }
 
     // When MSW is disabled, proxy to real backend
-    const backendUrl = process.env.BACKEND_URL || "http://api.primat-plus";
+    const backendUrl = process.env.BACKEND_URL || "http://api.primat-plus.localhost";
     
     return [
       {

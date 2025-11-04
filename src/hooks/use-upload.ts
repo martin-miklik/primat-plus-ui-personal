@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import { useUploadStore } from "@/stores/upload-store";
+import { useSubscription } from "@/hooks/use-centrifuge";
+import { SourceProcessingMessage } from "@/types/centrifugo";
 import {
   API_BASE_URL,
   MAX_FILE_SIZE,
@@ -12,8 +15,17 @@ import {
 
 export function useUpload(topicId: number | null) {
   const t = useTranslations("upload");
-  const { addFiles, updateFileProgress, updateFileStatus, setSourceId } =
-    useUploadStore();
+  const queryClient = useQueryClient();
+  const {
+    addFiles,
+    updateFileProgress,
+    updateFileStatus,
+    setSourceId,
+    setJobData,
+  } = useUploadStore();
+
+  // Track active subscriptions
+  const subscriptionsRef = useRef<Map<string, () => void>>(new Map());
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -41,59 +53,31 @@ export function useUpload(topicId: number | null) {
         // Create form data
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("topicId", String(topicId));
 
-        // Simulate progress updates
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-          progress += 10;
-          if (progress <= 90) {
-            updateFileProgress(fileId, progress);
-          }
-        }, 200);
-
-        // Upload file
-        const uploadResponse = await fetch(`${API_BASE_URL}/upload`, {
+        // Upload file to real backend endpoint
+        const response = await fetch(`${API_BASE_URL}/sources`, {
           method: "POST",
           body: formData,
-          credentials: "include", // Include cookies for PHP sessions
+          credentials: "include",
         });
 
-        clearInterval(progressInterval);
-
-        if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
+        if (!response.ok) {
+          const errorData = await response.json();
           throw new Error(errorData.error || "Upload failed");
         }
 
-        const uploadData = await uploadResponse.json();
-        updateFileProgress(fileId, 95);
+        const responseData = await response.json();
 
-        // Create source (topicId in body, not URL)
-        const sourceResponse = await fetch(`${API_BASE_URL}/sources`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Include cookies for PHP sessions
-          body: JSON.stringify({
-            topicId: topicId,
-            name: file.name,
-            type: getFileType(file),
-            fileUrl: uploadData.data.fileUrl,
-            fileSize: file.size,
-          }),
-        });
+        // Backend returns: { success: true, data: { id, jobId, channel, ... }, timestamp, version }
+        const { id: sourceId, jobId, channel } = responseData.data || responseData;
 
-        if (!sourceResponse.ok) {
-          throw new Error("Failed to create source");
-        }
+        // Store the source ID and job data
+        setSourceId(fileId, sourceId);
+        setJobData(fileId, jobId, channel);
 
-        const sourceData = await sourceResponse.json();
-        updateFileProgress(fileId, 100);
-
-        // Set source ID and mark as completed
-        setSourceId(fileId, sourceData.data.id);
-        updateFileStatus(fileId, "completed");
+        // Update to processing status (backend will send updates via Centrifugo)
+        updateFileStatus(fileId, "processing");
 
         toast.success(t("success.fileUploaded", { name: file.name }));
       } catch (error) {
@@ -103,41 +87,53 @@ export function useUpload(topicId: number | null) {
         toast.error(t("errors.uploadFailed"));
       }
     },
-    [updateFileStatus, updateFileProgress, setSourceId, topicId, t]
+    [
+      updateFileStatus,
+      setSourceId,
+      setJobData,
+      topicId,
+      t,
+    ]
   );
 
-  const uploadYoutubeUrl = useCallback(
-    async (url: string, fileId: string) => {
+  const uploadFromUrl = useCallback(
+    async (url: string, fileId: string, name: string) => {
       try {
         updateFileStatus(fileId, "processing");
 
-        // Extract video title or use URL as name
-        const videoName = new URL(url).searchParams.get("v") || "YouTube Video";
-
-        // Create source from YouTube URL (backend expects 'url' field)
-        const sourceResponse = await fetch(`${API_BASE_URL}/sources`, {
+        // Create source from URL (YouTube or Website)
+        const response = await fetch(`${API_BASE_URL}/sources`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // Include cookies for PHP sessions
+          credentials: "include",
           body: JSON.stringify({
             topicId: topicId,
-            url: url, // Backend expects 'url' field for URL-based sources
-            name: videoName,
+            url: url,
+            name: name,
           }),
         });
 
-        if (!sourceResponse.ok) {
-          throw new Error("Failed to create source from YouTube URL");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create source from URL");
         }
 
-        const sourceData = await sourceResponse.json();
-        setSourceId(fileId, sourceData.data.id);
-        updateFileProgress(fileId, 100);
-        updateFileStatus(fileId, "completed");
+        const responseData = await response.json();
 
-        toast.success(t("success.youtubeAdded"));
+        // Backend returns: { success: true, data: { id, jobId, channel, ... }, timestamp, version }
+        const { id: sourceId, jobId, channel } = responseData.data || responseData;
+
+        // Store the source ID and job data
+        setSourceId(fileId, sourceId);
+        setJobData(fileId, jobId, channel);
+
+        toast.success(
+          url.includes("youtube") || url.includes("youtu.be")
+            ? t("success.youtubeAdded")
+            : t("success.websiteAdded")
+        );
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : t("errors.uploadFailed");
@@ -145,49 +141,7 @@ export function useUpload(topicId: number | null) {
         toast.error(t("errors.uploadFailed"));
       }
     },
-    [updateFileStatus, updateFileProgress, setSourceId, topicId, t]
-  );
-
-  const uploadWebsiteUrl = useCallback(
-    async (url: string, fileId: string) => {
-      try {
-        updateFileStatus(fileId, "processing");
-
-        // Extract domain as name
-        const websiteName = new URL(url).hostname;
-
-        // Create source from website URL (backend expects 'url' field)
-        const sourceResponse = await fetch(`${API_BASE_URL}/sources`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Include cookies for PHP sessions
-          body: JSON.stringify({
-            topicId: topicId,
-            url: url, // Backend expects 'url' field for URL-based sources
-            name: websiteName,
-          }),
-        });
-
-        if (!sourceResponse.ok) {
-          throw new Error("Failed to create source from website URL");
-        }
-
-        const sourceData = await sourceResponse.json();
-        setSourceId(fileId, sourceData.data.id);
-        updateFileProgress(fileId, 100);
-        updateFileStatus(fileId, "completed");
-
-        toast.success(t("success.websiteAdded"));
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("errors.uploadFailed");
-        updateFileStatus(fileId, "error", errorMessage);
-        toast.error(t("errors.uploadFailed"));
-      }
-    },
-    [updateFileStatus, updateFileProgress, setSourceId, topicId, t]
+    [updateFileStatus, setSourceId, setJobData, topicId, t]
   );
 
   const startUpload = useCallback(
@@ -217,21 +171,14 @@ export function useUpload(topicId: number | null) {
         if (sourceType === "file") {
           uploadSingleFile(uploadFileItem.file, uploadFileItem.id);
         } else if (sourceType === "youtube" && sourceUrl) {
-          uploadYoutubeUrl(sourceUrl, uploadFileItem.id);
+          uploadFromUrl(sourceUrl, uploadFileItem.id, "YouTube Video");
         } else if (sourceType === "website" && sourceUrl) {
-          uploadWebsiteUrl(sourceUrl, uploadFileItem.id);
+          const websiteName = new URL(sourceUrl).hostname;
+          uploadFromUrl(sourceUrl, uploadFileItem.id, websiteName);
         }
       });
     },
-    [
-      addFiles,
-      topicId,
-      t,
-      validateFile,
-      uploadSingleFile,
-      uploadYoutubeUrl,
-      uploadWebsiteUrl,
-    ]
+    [addFiles, topicId, t, validateFile, uploadSingleFile, uploadFromUrl]
   );
 
   // Listen for upload events from dialog
@@ -264,25 +211,104 @@ export function useUpload(topicId: number | null) {
       window.removeEventListener("upload:youtube", handleYoutubeUpload);
       window.removeEventListener("upload:website", handleWebsiteUpload);
     };
-  }, [topicId, startUpload]);
+  }, [startUpload]);
+
+  // Subscribe to Centrifugo channels for active uploads
+  useEffect(() => {
+    const store = useUploadStore.getState();
+    const activeUploads = store.files.filter(
+      (f) =>
+        f.topicId === topicId &&
+        f.channel &&
+        (f.status === "uploading" || f.status === "processing")
+    );
+
+    // Clean up subscriptions for completed/error uploads
+    subscriptionsRef.current.forEach((unsubscribe, fileId) => {
+      const upload = store.files.find((f) => f.id === fileId);
+      if (
+        !upload ||
+        upload.status === "completed" ||
+        upload.status === "error"
+      ) {
+        unsubscribe();
+        subscriptionsRef.current.delete(fileId);
+      }
+    });
+
+    // Note: The actual subscription logic is handled by a separate component
+    // that renders subscriptions for each upload. This is because useSubscription
+    // is a hook and can't be called conditionally in a loop.
+  }, [topicId]);
 
   return {
     startUpload,
   };
 }
 
-function getFileType(file: File): "pdf" | "docx" | "doc" | "txt" | "note" {
-  const extension = file.name.split(".").pop()?.toLowerCase();
-  switch (extension) {
-    case "pdf":
-      return "pdf";
-    case "docx":
-      return "docx";
-    case "doc":
-      return "doc";
-    case "txt":
-      return "txt";
-    default:
-      return "note";
-  }
+/**
+ * Hook to subscribe to a specific upload's Centrifugo channel
+ * This should be used in a component that renders for each active upload
+ */
+export function useUploadSubscription(
+  fileId: string,
+  channel: string | undefined,
+  enabled: boolean
+) {
+  const queryClient = useQueryClient();
+  const { updateFileProgress, updateFileStatus, files } = useUploadStore();
+  const t = useTranslations("upload");
+
+  const uploadFile = files.find((f) => f.id === fileId);
+  const topicId = uploadFile?.topicId;
+
+  useSubscription<SourceProcessingMessage>(channel || "", {
+    enabled: enabled && !!channel,
+    onPublication: (data) => {
+      switch (data.type) {
+        case "processing":
+          // Backend started processing
+          updateFileStatus(fileId, "processing");
+          updateFileProgress(fileId, 10);
+          break;
+
+        case "gemini_chunk":
+          // AI is generating content (streaming)
+          // Update progress gradually from 10% to 90%
+          const currentFile = useUploadStore.getState().files.find(f => f.id === fileId);
+          const currentProgress = currentFile?.progress || 10;
+          if (currentProgress < 90) {
+            updateFileProgress(fileId, Math.min(currentProgress + 2, 90));
+          }
+          break;
+
+        case "gemini_complete":
+          // AI generation finished
+          updateFileProgress(fileId, 95);
+          break;
+
+        case "completed":
+          // Full processing done
+          updateFileProgress(fileId, 100);
+          updateFileStatus(fileId, "completed");
+          // Refetch sources to show the new one
+          if (topicId) {
+            queryClient.invalidateQueries({ queryKey: ["sources", topicId] });
+          }
+          toast.success(t("success.processingComplete"));
+          break;
+
+        case "error":
+        case "gemini_error":
+          // Processing failed
+          updateFileStatus(fileId, "error", data.error);
+          toast.error(t("errors.processingFailed"));
+          break;
+      }
+    },
+    onError: (error) => {
+      console.error(`Subscription error for ${fileId}:`, error);
+      updateFileStatus(fileId, "error", error.message);
+    },
+  });
 }

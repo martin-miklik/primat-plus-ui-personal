@@ -8,9 +8,11 @@ export interface UploadFile {
   status: "pending" | "uploading" | "processing" | "completed" | "error";
   error?: string;
   sourceId?: number; // ID of created source after upload
+  jobId?: string; // Backend job ID for tracking
+  channel?: string; // Centrifugo channel for this upload
   topicId: number | null;
   sourceType: "file" | "youtube" | "website";
-  sourceUrl?: string; // For YouTube/Website uploads
+  url?: string; // For YouTube/Website uploads
 }
 
 interface UploadState {
@@ -21,7 +23,7 @@ interface UploadState {
     files: File[],
     topicId: number | null,
     sourceType: UploadFile["sourceType"],
-    sourceUrl?: string
+    url?: string
   ) => void;
   updateFileProgress: (id: string, progress: number) => void;
   updateFileStatus: (
@@ -30,6 +32,7 @@ interface UploadState {
     error?: string
   ) => void;
   setSourceId: (id: string, sourceId: number) => void;
+  setJobData: (id: string, jobId: string, channel: string) => void;
   removeFile: (id: string) => void;
   clearCompleted: () => void;
   clearAll: () => void;
@@ -40,7 +43,7 @@ export const useUploadStore = create<UploadState>()(
     (set) => ({
       files: [],
 
-      addFiles: (newFiles, topicId, sourceType, sourceUrl) =>
+      addFiles: (newFiles, topicId, sourceType, url) =>
         set(
           (state) => ({
             files: [
@@ -52,7 +55,7 @@ export const useUploadStore = create<UploadState>()(
                 status: "pending" as const,
                 topicId,
                 sourceType,
-                sourceUrl,
+                url,
               })),
             ],
           }),
@@ -91,6 +94,17 @@ export const useUploadStore = create<UploadState>()(
           }),
           false,
           "upload/setSourceId"
+        ),
+
+      setJobData: (id, jobId, channel) =>
+        set(
+          (state) => ({
+            files: state.files.map((f) =>
+              f.id === id ? { ...f, jobId, channel } : f
+            ),
+          }),
+          false,
+          "upload/setJobData"
         ),
 
       removeFile: (id) =>
