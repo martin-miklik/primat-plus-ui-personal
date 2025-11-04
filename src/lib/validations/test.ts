@@ -14,8 +14,8 @@ export const testSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Test name is required"),
   description: z.string().optional(),
-  materialId: z.string().uuid().optional(),
-  subjectId: z.string().uuid().optional(),
+  sourceId: z.number().int().positive().optional(), // Changed from materialId
+  subjectId: z.number().int().positive().optional(), // Changed to number
   subjectName: z.string().optional(),
   subjectColor: z
     .string()
@@ -33,7 +33,7 @@ export const testSchema = z.object({
 export const testResultSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Test name is required"),
-  subjectId: z.string().uuid(),
+  subjectId: z.number().int().positive(), // Changed to number
   subjectName: z.string(),
   subjectColor: z
     .string()

@@ -26,6 +26,7 @@ export async function apiClient<T>(
         "Content-Type": "application/json",
         ...headers,
       },
+      credentials: "include",
       signal: controller.signal,
     });
 

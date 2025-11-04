@@ -4,7 +4,7 @@ export const mockFlashcards: Flashcard[] = [
   // Introduction to Limits flashcards
   {
     id: "f1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c",
-    materialId: "m1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c",
+    sourceId: 1,
     question: "What is the definition of a limit?",
     answer:
       "A limit describes the value that a function approaches as the input approaches some value.",
@@ -19,7 +19,7 @@ export const mockFlashcards: Flashcard[] = [
   },
   {
     id: "f2b3c4d5-e6f7-8a9b-0c1d-2e3f4a5b6c7d",
-    materialId: "m1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c",
+    sourceId: 1,
     question: "What is lim(x→0) sin(x)/x?",
     answer: "1",
     difficulty: "hard",
@@ -34,7 +34,7 @@ export const mockFlashcards: Flashcard[] = [
   // Derivatives flashcards
   {
     id: "f3c4d5e6-f7a8-9b0c-1d2e-3f4a5b6c7d8e",
-    materialId: "m2b3c4d5-e6f7-8a9b-0c1d-2e3f4a5b6c7d",
+    sourceId: 1,
     question: "What is the derivative of x²?",
     answer: "2x",
     difficulty: "easy",
@@ -48,7 +48,7 @@ export const mockFlashcards: Flashcard[] = [
   },
   {
     id: "f4d5e6f7-a8b9-0c1d-2e3f-4a5b6c7d8e9f",
-    materialId: "m2b3c4d5-e6f7-8a9b-0c1d-2e3f4a5b6c7d",
+    sourceId: 1,
     question: "What is the chain rule?",
     answer:
       "d/dx[f(g(x))] = f'(g(x)) × g'(x). The derivative of a composition of functions.",
@@ -64,7 +64,7 @@ export const mockFlashcards: Flashcard[] = [
   // Matrix Operations flashcards
   {
     id: "f5e6f7a8-b9c0-1d2e-3f4a-5b6c7d8e9f0a",
-    materialId: "m3c4d5e6-f7a8-9b0c-1d2e-3f4a5b6c7d8e",
+    sourceId: 1,
     question: "What is the identity matrix?",
     answer: "A square matrix with 1s on the diagonal and 0s elsewhere.",
     difficulty: "easy",
@@ -79,7 +79,7 @@ export const mockFlashcards: Flashcard[] = [
   // Newton's Laws flashcards
   {
     id: "f6f7a8b9-c0d1-2e3f-4a5b-6c7d8e9f0a1b",
-    materialId: "m4d5e6f7-a8b9-0c1d-2e3f-4a5b6c7d8e9f",
+    sourceId: 1,
     question: "State Newton's First Law",
     answer:
       "An object at rest stays at rest, and an object in motion stays in motion with the same speed and direction unless acted upon by a force.",
@@ -95,7 +95,7 @@ export const mockFlashcards: Flashcard[] = [
   // Data Structures flashcards
   {
     id: "f7a8b9c0-d1e2-3f4a-5b6c-7d8e9f0a1b2c",
-    materialId: "m6f7a8b9-c0d1-2e3f-4a5b-6c7d8e9f0a1b",
+    sourceId: 1,
     question: "What is the time complexity of accessing an array element?",
     answer: "O(1) - constant time",
     difficulty: "medium",
@@ -109,7 +109,7 @@ export const mockFlashcards: Flashcard[] = [
   },
   {
     id: "f8b9c0d1-e2f3-4a5b-6c7d-8e9f0a1b2c3d",
-    materialId: "m6f7a8b9-c0d1-2e3f-4a5b-6c7d8e9f0a1b",
+    sourceId: 1,
     question: "What is a linked list?",
     answer:
       "A linear data structure where elements are stored in nodes, each containing data and a reference to the next node.",
@@ -128,8 +128,8 @@ export function getMockFlashcardById(id: string): Flashcard | undefined {
   return mockFlashcards.find((card) => card.id === id);
 }
 
-export function getMockFlashcardsByMaterialId(materialId: string): Flashcard[] {
-  return mockFlashcards.filter((card) => card.materialId === materialId);
+export function getMockFlashcardsBySourceId(sourceId: number): Flashcard[] {
+  return mockFlashcards.filter((card) => card.sourceId === sourceId);
 }
 
 export function createMockFlashcard(

@@ -8,13 +8,13 @@ export const cardSchema = z.object({
   id: z.string().uuid(),
   question: z.string().min(1, "Question is required"),
   answer: z.string().min(1, "Answer is required"),
-  subjectId: z.string().uuid(),
+  subjectId: z.number().int().positive(),
   subjectName: z.string(),
   subjectColor: z
     .string()
     .regex(/^#[0-9A-F]{6}$/i)
     .optional(),
-  topicId: z.string().uuid().optional(),
+  topicId: z.number().int().positive().optional(),
   topicName: z.string().optional(),
   reviewedAt: z.string().datetime().optional(),
   difficulty: z.enum(difficultyLevels).optional(),
@@ -44,6 +44,7 @@ export type Card = z.infer<typeof cardSchema>;
 export type CreateCardInput = z.infer<typeof createCardSchema>;
 export type UpdateCardInput = z.infer<typeof updateCardSchema>;
 export type Difficulty = (typeof difficultyLevels)[number];
+
 
 
 

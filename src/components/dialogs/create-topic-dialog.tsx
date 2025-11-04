@@ -23,7 +23,7 @@ import { useCreateTopic } from "@/lib/api/mutations/topics";
 import { createTopicSchema, CreateTopicInput } from "@/lib/validations/topic";
 
 interface CreateTopicDialogProps {
-  subjectId: string;
+  subjectId: number;
 }
 
 export function CreateTopicDialog({ subjectId }: CreateTopicDialogProps) {

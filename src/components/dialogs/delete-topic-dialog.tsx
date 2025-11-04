@@ -17,7 +17,7 @@ import { Topic } from "@/lib/validations/topic";
 
 interface DeleteTopicDialogProps {
   topic: Topic | null;
-  onDeleted?: (deletedId: string) => void;
+  onDeleted?: (deletedId: number) => void;
 }
 
 export function DeleteTopicDialog({
@@ -27,7 +27,7 @@ export function DeleteTopicDialog({
   const t = useTranslations("topics.dialog");
   const tCommon = useTranslations("common");
   const dialog = useDialog("delete-topic");
-  const deleteTopic = useDeleteTopic(topic?.subjectId || "");
+  const deleteTopic = useDeleteTopic(topic?.subjectId || 0);
 
   const handleDelete = async () => {
     if (!topic) return;

@@ -35,7 +35,7 @@ export function EditTopicDialog({ topic }: EditTopicDialogProps) {
   const t = useTranslations("topics.dialog");
   const tCommon = useTranslations("common");
   const dialog = useDialog("edit-topic");
-  const updateTopic = useUpdateTopic(topic?.id || "", topic?.subjectId || "");
+  const updateTopic = useUpdateTopic(topic?.id || 0, topic?.subjectId || 0);
 
   const form = useForm<UpdateTopicInput>({
     resolver: zodResolver(updateTopicSchema),
@@ -120,6 +120,7 @@ export function EditTopicDialog({ topic }: EditTopicDialogProps) {
     </Dialog>
   );
 }
+
 
 
 

@@ -32,7 +32,7 @@ export default function SubjectsPage() {
 
   const subjects = data?.data || [];
 
-  const handleEdit = (id: string) => {
+  const handleEdit = (id: number) => {
     const subject = subjects.find((s) => s.id === id);
     if (subject) {
       setSelectedSubject(subject);
@@ -40,7 +40,7 @@ export default function SubjectsPage() {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     const subject = subjects.find((s) => s.id === id);
     if (subject) {
       setSelectedSubject(subject);
@@ -126,7 +126,7 @@ export default function SubjectsPage() {
                   icon={subject.icon}
                   color={subject.color}
                   topicsCount={subject.topicsCount}
-                  materialsCount={subject.materialsCount}
+                  sourcesCount={subject.sourcesCount}
                   variant="grid"
                   onEdit={handleEdit}
                   onDelete={handleDelete}

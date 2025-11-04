@@ -5,6 +5,7 @@ import {
   createMockTest,
 } from "@/mocks/fixtures/tests";
 import { Test, TestAttempt } from "@/lib/validations/test";
+import { apiPath } from "@/mocks/config";
 
 const tests = [...mockTests];
 const testAttempts = [...mockTestAttempts];
@@ -33,21 +34,21 @@ function calculateScore(
 }
 
 export const testsHandlers = [
-  // GET /api/materials/:materialId/tests - List tests for a material
-  http.get("/api/materials/:materialId/tests", async ({ params }) => {
+  // GET /api/v1/sources/:sourceId/tests - List tests for a source
+  http.get(apiPath("/sources/:sourceId/tests"), async ({ params }) => {
     await delay(250);
 
-    const { materialId } = params;
-    const materialTests = tests.filter((t) => t.materialId === materialId);
+    const { sourceId } = params;
+    const sourceTests = tests.filter((t) => t.sourceId === Number(sourceId));
 
     return HttpResponse.json({
-      data: materialTests,
-      total: materialTests.length,
+      data: sourceTests,
+      total: sourceTests.length,
     });
   }),
 
-  // GET /api/tests/:id - Get single test
-  http.get("/api/tests/:id", async ({ params }) => {
+  // GET /api/v1/tests/:id - Get single test
+  http.get(apiPath("/tests/:id"), async ({ params }) => {
     await delay(200);
 
     const { id } = params;
@@ -63,49 +64,52 @@ export const testsHandlers = [
     return HttpResponse.json({ data: test });
   }),
 
-  // POST /api/materials/:materialId/tests - Create new test
-  http.post("/api/materials/:materialId/tests", async ({ params, request }) => {
-    await delay(500);
+  // POST /api/v1/sources/:sourceId/tests - Create new test
+  http.post(
+    apiPath("/sources/:sourceId/tests"),
+    async ({ params, request }) => {
+      await delay(500);
 
-    const { materialId } = params;
-    const body = (await request.json()) as Record<string, unknown>;
+      const { sourceId } = params;
+      const body = (await request.json()) as Record<string, unknown>;
 
-    if (!body.name || typeof body.name !== "string") {
+      if (!body.name || typeof body.name !== "string") {
+        return HttpResponse.json(
+          { error: "Název testu je povinný", code: "VALIDATION_ERROR" },
+          { status: 400 }
+        );
+      }
+
+      if (!Array.isArray(body.questions) || body.questions.length === 0) {
+        return HttpResponse.json(
+          {
+            error: "Test musí obsahovat alespoň jednu otázku",
+            code: "VALIDATION_ERROR",
+          },
+          { status: 400 }
+        );
+      }
+
+      const newTest = createMockTest({
+        sourceId: Number(sourceId),
+        name: body.name,
+        description: body.description as string | undefined,
+        questions: body.questions as Test["questions"],
+        timeLimit: body.timeLimit as number | undefined,
+        passingScore: (body.passingScore as number) || 70,
+      });
+
+      tests.push(newTest);
+
       return HttpResponse.json(
-        { error: "Název testu je povinný", code: "VALIDATION_ERROR" },
-        { status: 400 }
+        { data: newTest, message: "Test byl úspěšně vytvořen" },
+        { status: 201 }
       );
     }
+  ),
 
-    if (!Array.isArray(body.questions) || body.questions.length === 0) {
-      return HttpResponse.json(
-        {
-          error: "Test musí obsahovat alespoň jednu otázku",
-          code: "VALIDATION_ERROR",
-        },
-        { status: 400 }
-      );
-    }
-
-    const newTest = createMockTest({
-      materialId: materialId as string,
-      name: body.name,
-      description: body.description as string | undefined,
-      questions: body.questions as Test["questions"],
-      timeLimit: body.timeLimit as number | undefined,
-      passingScore: (body.passingScore as number) || 70,
-    });
-
-    tests.push(newTest);
-
-    return HttpResponse.json(
-      { data: newTest, message: "Test byl úspěšně vytvořen" },
-      { status: 201 }
-    );
-  }),
-
-  // POST /api/tests/:id/submit - Submit test answers
-  http.post("/api/tests/:id/submit", async ({ params, request }) => {
+  // POST /api/v1/tests/:id/submit - Submit test answers
+  http.post(apiPath("/tests/:id/submit"), async ({ params, request }) => {
     await delay(500);
 
     const { id } = params;
@@ -159,8 +163,8 @@ export const testsHandlers = [
     });
   }),
 
-  // GET /api/tests/:id/attempts - Get attempts for a test
-  http.get("/api/tests/:id/attempts", async ({ params }) => {
+  // GET /api/v1/tests/:id/attempts - Get attempts for a test
+  http.get(apiPath("/tests/:id/attempts"), async ({ params }) => {
     await delay(250);
 
     const { id } = params;
@@ -172,8 +176,8 @@ export const testsHandlers = [
     });
   }),
 
-  // DELETE /api/tests/:id - Delete test
-  http.delete("/api/tests/:id", async ({ params }) => {
+  // DELETE /api/v1/tests/:id - Delete test
+  http.delete(apiPath("/tests/:id"), async ({ params }) => {
     await delay(300);
 
     const { id } = params;

@@ -10,9 +10,9 @@ import {
   ALLOWED_FILE_TYPES,
 } from "@/lib/constants";
 
-export function useUpload(topicId: string) {
+export function useUpload(topicId: number | null) {
   const t = useTranslations("upload");
-  const { addFiles, updateFileProgress, updateFileStatus, setMaterialId } =
+  const { addFiles, updateFileProgress, updateFileStatus, setSourceId } =
     useUploadStore();
 
   const validateFile = useCallback(
@@ -55,6 +55,7 @@ export function useUpload(topicId: string) {
         const uploadResponse = await fetch(`${API_BASE_URL}/upload`, {
           method: "POST",
           body: formData,
+          credentials: "include", // Include cookies for PHP sessions
         });
 
         clearInterval(progressInterval);
@@ -67,32 +68,31 @@ export function useUpload(topicId: string) {
         const uploadData = await uploadResponse.json();
         updateFileProgress(fileId, 95);
 
-        // Create material
-        const materialResponse = await fetch(
-          `${API_BASE_URL}/topics/${topicId}/materials`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: file.name,
-              type: getFileType(file),
-              fileUrl: uploadData.data.fileUrl,
-              fileSize: file.size,
-            }),
-          }
-        );
+        // Create source (topicId in body, not URL)
+        const sourceResponse = await fetch(`${API_BASE_URL}/sources`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Include cookies for PHP sessions
+          body: JSON.stringify({
+            topicId: topicId,
+            name: file.name,
+            type: getFileType(file),
+            fileUrl: uploadData.data.fileUrl,
+            fileSize: file.size,
+          }),
+        });
 
-        if (!materialResponse.ok) {
-          throw new Error("Failed to create material");
+        if (!sourceResponse.ok) {
+          throw new Error("Failed to create source");
         }
 
-        const materialData = await materialResponse.json();
+        const sourceData = await sourceResponse.json();
         updateFileProgress(fileId, 100);
 
-        // Set material ID and mark as completed
-        setMaterialId(fileId, materialData.data.id);
+        // Set source ID and mark as completed
+        setSourceId(fileId, sourceData.data.id);
         updateFileStatus(fileId, "completed");
 
         toast.success(t("success.fileUploaded", { name: file.name }));
@@ -103,7 +103,7 @@ export function useUpload(topicId: string) {
         toast.error(t("errors.uploadFailed"));
       }
     },
-    [updateFileStatus, updateFileProgress, setMaterialId, topicId, t]
+    [updateFileStatus, updateFileProgress, setSourceId, topicId, t]
   );
 
   const uploadYoutubeUrl = useCallback(
@@ -114,28 +114,26 @@ export function useUpload(topicId: string) {
         // Extract video title or use URL as name
         const videoName = new URL(url).searchParams.get("v") || "YouTube Video";
 
-        // Create material from YouTube URL
-        const materialResponse = await fetch(
-          `${API_BASE_URL}/topics/${topicId}/materials`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: videoName,
-              type: "note", // YouTube videos stored as notes for now
-              content: url,
-            }),
-          }
-        );
+        // Create source from YouTube URL (backend expects 'url' field)
+        const sourceResponse = await fetch(`${API_BASE_URL}/sources`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Include cookies for PHP sessions
+          body: JSON.stringify({
+            topicId: topicId,
+            url: url, // Backend expects 'url' field for URL-based sources
+            name: videoName,
+          }),
+        });
 
-        if (!materialResponse.ok) {
-          throw new Error("Failed to create material from YouTube URL");
+        if (!sourceResponse.ok) {
+          throw new Error("Failed to create source from YouTube URL");
         }
 
-        const materialData = await materialResponse.json();
-        setMaterialId(fileId, materialData.data.id);
+        const sourceData = await sourceResponse.json();
+        setSourceId(fileId, sourceData.data.id);
         updateFileProgress(fileId, 100);
         updateFileStatus(fileId, "completed");
 
@@ -147,7 +145,7 @@ export function useUpload(topicId: string) {
         toast.error(t("errors.uploadFailed"));
       }
     },
-    [updateFileStatus, updateFileProgress, setMaterialId, topicId, t]
+    [updateFileStatus, updateFileProgress, setSourceId, topicId, t]
   );
 
   const uploadWebsiteUrl = useCallback(
@@ -158,28 +156,26 @@ export function useUpload(topicId: string) {
         // Extract domain as name
         const websiteName = new URL(url).hostname;
 
-        // Create material from website URL
-        const materialResponse = await fetch(
-          `${API_BASE_URL}/topics/${topicId}/materials`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: websiteName,
-              type: "note", // Websites stored as notes for now
-              content: url,
-            }),
-          }
-        );
+        // Create source from website URL (backend expects 'url' field)
+        const sourceResponse = await fetch(`${API_BASE_URL}/sources`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Include cookies for PHP sessions
+          body: JSON.stringify({
+            topicId: topicId,
+            url: url, // Backend expects 'url' field for URL-based sources
+            name: websiteName,
+          }),
+        });
 
-        if (!materialResponse.ok) {
-          throw new Error("Failed to create material from website URL");
+        if (!sourceResponse.ok) {
+          throw new Error("Failed to create source from website URL");
         }
 
-        const materialData = await materialResponse.json();
-        setMaterialId(fileId, materialData.data.id);
+        const sourceData = await sourceResponse.json();
+        setSourceId(fileId, sourceData.data.id);
         updateFileProgress(fileId, 100);
         updateFileStatus(fileId, "completed");
 
@@ -191,7 +187,7 @@ export function useUpload(topicId: string) {
         toast.error(t("errors.uploadFailed"));
       }
     },
-    [updateFileStatus, updateFileProgress, setMaterialId, topicId, t]
+    [updateFileStatus, updateFileProgress, setSourceId, topicId, t]
   );
 
   const startUpload = useCallback(

@@ -14,7 +14,7 @@ interface TopicResponse {
 }
 
 // Query: Get all topics for a subject
-export function useTopics(subjectId: string) {
+export function useTopics(subjectId: number) {
   return useQuery({
     queryKey: QUERY_KEYS.TOPICS(subjectId),
     queryFn: () => get<TopicsResponse>(`/subjects/${subjectId}/topics`),
@@ -23,17 +23,10 @@ export function useTopics(subjectId: string) {
 }
 
 // Query: Get single topic by ID (optional, for future use)
-export function useTopic(topicId: string) {
+export function useTopic(topicId: number) {
   return useQuery({
     queryKey: ["topics", topicId],
     queryFn: () => get<TopicResponse>(`/topics/${topicId}`),
     enabled: !!topicId,
   });
 }
-
-
-
-
-
-
-

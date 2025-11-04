@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,7 +28,9 @@ interface SubjectDetailPageProps {
 }
 
 export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
-  const { id: subjectId } = use(params);
+  const { id: subjectIdParam } = use(params);
+  const subjectId = Number(subjectIdParam); // Parse string to number
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -53,27 +55,33 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
   } = useTopics(subjectId);
 
   const subject = subjectData?.data;
-  const topics = topicsData?.data || [];
+  const topics = useMemo(() => topicsData?.data || [], [topicsData?.data]);
 
   // Get selected topic ID from URL or default to first topic
-  const selectedTopicId = searchParams.get("topic") || topics[0]?.id;
+  const selectedTopicIdParam = searchParams.get("topic");
+  const selectedTopicId = selectedTopicIdParam
+    ? Number(selectedTopicIdParam)
+    : topics[0]?.id;
   const selectedTopicData = topics.find((t) => t.id === selectedTopicId);
 
   // Update URL when topic is selected
-  const handleTopicSelect = (topicId: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("topic", topicId);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
+  const handleTopicSelect = useCallback(
+    (topicId: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("topic", String(topicId)); // Convert number to string for URL
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   // Auto-select first topic when topics load
   useEffect(() => {
     if (topics.length > 0 && !selectedTopicId) {
       handleTopicSelect(topics[0].id);
     }
-  }, [topics, selectedTopicId]);
+  }, [topics, selectedTopicId, handleTopicSelect]);
 
-  const handleEdit = (id: string) => {
+  const handleEdit = (id: number) => {
     const topic = topics.find((t) => t.id === id);
     if (topic) {
       setSelectedTopic(topic);
@@ -81,7 +89,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     const topic = topics.find((t) => t.id === id);
     if (topic) {
       setSelectedTopic(topic);
@@ -90,7 +98,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
   };
 
   // Handle topic deletion - select next/previous topic
-  const handleTopicDeleted = (deletedId: string) => {
+  const handleTopicDeleted = (deletedId: number) => {
     if (selectedTopicId === deletedId) {
       const currentIndex = topics.findIndex((t) => t.id === deletedId);
       const nextTopic = topics[currentIndex + 1] || topics[currentIndex - 1];

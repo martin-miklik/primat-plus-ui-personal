@@ -13,13 +13,13 @@ import {
 import { cn } from "@/lib/utils";
 
 export interface TopicListItemProps {
-  id: string;
+  id: number;
   name: string;
   cardsCount: number;
   isActive?: boolean;
-  onSelect: (id: string) => void;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  onSelect: (id: number) => void;
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
 export function TopicListItem({

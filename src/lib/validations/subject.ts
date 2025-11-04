@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Subject schema
 export const subjectSchema = z.object({
-  id: z.string().uuid(),
+  id: z.number().int().positive(),
   name: z
     .string()
     .min(1, "Subject name is required")
@@ -16,7 +16,7 @@ export const subjectSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   topicsCount: z.number().int().nonnegative().default(0),
-  materialsCount: z.number().int().nonnegative().default(0),
+  sourcesCount: z.number().int().nonnegative().default(0),
 });
 
 // Create subject schema (no ID, timestamps)
@@ -25,7 +25,7 @@ export const createSubjectSchema = subjectSchema.omit({
   createdAt: true,
   updatedAt: true,
   topicsCount: true,
-  materialsCount: true,
+  sourcesCount: true,
 });
 
 // Update subject schema (partial, no ID, timestamps)

@@ -13,9 +13,9 @@ import { formatDistanceToNow } from "date-fns";
 import { cs } from "date-fns/locale";
 
 interface TopicCardProps {
-  id: string;
+  id: number;
   name: string;
-  subjectId: string;
+  subjectId: number;
   subjectName: string;
   subjectColor?: string;
   cardsCount: number;

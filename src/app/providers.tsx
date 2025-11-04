@@ -13,8 +13,23 @@ async function enableMocking() {
     return;
   }
 
-  // Only enable MSW in development
+  // Only enable MSW in development AND if the flag is enabled
   if (process.env.NODE_ENV !== "development") {
+    return;
+  }
+
+  // Check if MSW should be enabled via env var
+  const mswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === "true";
+
+  if (!mswEnabled) {
+    // Unregister service worker if MSW is disabled
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+      }
+      console.log("✅ MSW Service Worker unregistered");
+    }
     return;
   }
 
@@ -55,8 +70,9 @@ export function Providers({ children }: ProvidersProps) {
   //   }
   // }, [mswReady, user, setAuth]);
 
-  // In development, wait for MSW to be ready
-  if (process.env.NODE_ENV === "development" && !mswReady) {
+  // In development, wait for MSW to be ready (only if MSW is enabled)
+  const mswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === "true";
+  if (process.env.NODE_ENV === "development" && mswEnabled && !mswReady) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-muted-foreground">Loading...</div>
@@ -73,7 +89,7 @@ export function Providers({ children }: ProvidersProps) {
     >
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster position="top-right" expand={false} richColors closeButton/>
+        <Toaster position="top-right" expand={false} richColors closeButton />
         <ReactQueryDevtools
           initialIsOpen={false}
           buttonPosition="bottom-right"

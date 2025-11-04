@@ -3,9 +3,10 @@ import { mockSubjects } from "@/mocks/fixtures/subjects";
 import { mockTopics } from "@/mocks/fixtures/topics";
 import { mockCards } from "@/mocks/fixtures/cards";
 import { mockTestResults } from "@/mocks/fixtures/tests";
+import { apiPath } from "@/mocks/config";
 
 export const dashboardHandlers = [
-  http.get("/api/dashboard", async () => {
+  http.get(apiPath("/dashboard"), async () => {
     await delay(300);
 
     // Get random 3-5 subjects for "recent"

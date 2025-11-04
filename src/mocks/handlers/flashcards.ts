@@ -4,6 +4,7 @@ import {
   createMockFlashcard,
 } from "@/mocks/fixtures/flashcards";
 import { Flashcard } from "@/lib/validations/flashcard";
+import { apiPath } from "@/mocks/config";
 
 const flashcards = [...mockFlashcards];
 
@@ -38,23 +39,23 @@ function calculateNextReview(
 }
 
 export const flashcardsHandlers = [
-  // GET /api/materials/:materialId/flashcards - List flashcards for a material
-  http.get("/api/materials/:materialId/flashcards", async ({ params }) => {
+  // GET /api/v1/sources/:sourceId/flashcards - List flashcards for a source
+  http.get(apiPath("/sources/:sourceId/flashcards"), async ({ params }) => {
     await delay(250);
 
-    const { materialId } = params;
-    const materialFlashcards = flashcards.filter(
-      (f) => f.materialId === materialId
+    const { sourceId } = params;
+    const sourceFlashcards = flashcards.filter(
+      (f) => f.sourceId === Number(sourceId)
     );
 
     return HttpResponse.json({
-      data: materialFlashcards,
-      total: materialFlashcards.length,
+      data: sourceFlashcards,
+      total: sourceFlashcards.length,
     });
   }),
 
-  // GET /api/flashcards/:id - Get single flashcard
-  http.get("/api/flashcards/:id", async ({ params }) => {
+  // GET /api/v1/flashcards/:id - Get single flashcard
+  http.get(apiPath("/flashcards/:id"), async ({ params }) => {
     await delay(200);
 
     const { id } = params;
@@ -70,13 +71,13 @@ export const flashcardsHandlers = [
     return HttpResponse.json({ data: flashcard });
   }),
 
-  // POST /api/materials/:materialId/flashcards - Create flashcard
+  // POST /api/v1/sources/:sourceId/flashcards - Create flashcard
   http.post(
-    "/api/materials/:materialId/flashcards",
+    apiPath("/sources/:sourceId/flashcards"),
     async ({ params, request }) => {
       await delay(400);
 
-      const { materialId } = params;
+      const { sourceId } = params;
       const body = (await request.json()) as Record<string, unknown>;
 
       if (!body.question || typeof body.question !== "string") {
@@ -94,7 +95,7 @@ export const flashcardsHandlers = [
       }
 
       const newFlashcard = createMockFlashcard({
-        materialId: materialId as string,
+        sourceId: Number(sourceId),
         question: body.question,
         answer: body.answer,
         difficulty: (body.difficulty as "easy" | "medium" | "hard") || "medium",
@@ -110,8 +111,8 @@ export const flashcardsHandlers = [
     }
   ),
 
-  // POST /api/flashcards/:id/review - Review flashcard (spaced repetition)
-  http.post("/api/flashcards/:id/review", async ({ params, request }) => {
+  // POST /api/v1/flashcards/:id/review - Review flashcard (spaced repetition)
+  http.post(apiPath("/flashcards/:id/review"), async ({ params, request }) => {
     await delay(200);
 
     const { id } = params;
@@ -155,8 +156,8 @@ export const flashcardsHandlers = [
     });
   }),
 
-  // PATCH /api/flashcards/:id - Update flashcard
-  http.patch("/api/flashcards/:id", async ({ params, request }) => {
+  // PATCH /api/v1/flashcards/:id - Update flashcard
+  http.patch(apiPath("/flashcards/:id"), async ({ params, request }) => {
     await delay(300);
 
     const { id } = params;
@@ -184,8 +185,8 @@ export const flashcardsHandlers = [
     });
   }),
 
-  // DELETE /api/flashcards/:id - Delete flashcard
-  http.delete("/api/flashcards/:id", async ({ params }) => {
+  // DELETE /api/v1/flashcards/:id - Delete flashcard
+  http.delete(apiPath("/flashcards/:id"), async ({ params }) => {
     await delay(300);
 
     const { id } = params;
@@ -205,8 +206,8 @@ export const flashcardsHandlers = [
     });
   }),
 
-  // GET /api/flashcards/due - Get due flashcards for review
-  http.get("/api/flashcards/due", async () => {
+  // GET /api/v1/flashcards/due - Get due flashcards for review
+  http.get(apiPath("/flashcards/due"), async () => {
     await delay(300);
 
     const now = new Date().toISOString();

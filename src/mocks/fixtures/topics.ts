@@ -3,7 +3,7 @@ import { mockSubjects } from "./subjects";
 
 export const mockTopics: Topic[] = [
   {
-    id: "t1-math-quadratic",
+    id: 1,
     name: "Kvadratické rovnice",
     subjectId: mockSubjects[0].id,
     subjectName: mockSubjects[0].name,
@@ -15,7 +15,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t2-math-derivatives",
+    id: 2,
     name: "Derivace a integrály",
     subjectId: mockSubjects[0].id,
     subjectName: mockSubjects[0].name,
@@ -27,7 +27,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t3-physics-newton",
+    id: 3,
     name: "Newtonovy zákony",
     subjectId: mockSubjects[1].id,
     subjectName: mockSubjects[1].name,
@@ -39,7 +39,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t4-physics-thermodynamics",
+    id: 4,
     name: "Termodynamika",
     subjectId: mockSubjects[1].id,
     subjectName: mockSubjects[1].name,
@@ -51,7 +51,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t5-cs-algorithms",
+    id: 5,
     name: "Algoritmy řazení",
     subjectId: mockSubjects[2].id,
     subjectName: mockSubjects[2].name,
@@ -63,7 +63,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t6-cs-data-structures",
+    id: 6,
     name: "Datové struktury",
     subjectId: mockSubjects[2].id,
     subjectName: mockSubjects[2].name,
@@ -75,7 +75,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t7-bio-cells",
+    id: 7,
     name: "Buněčná biologie",
     subjectId: mockSubjects[3].id,
     subjectName: mockSubjects[3].name,
@@ -87,7 +87,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t8-chem-reactions",
+    id: 8,
     name: "Chemické reakce",
     subjectId: mockSubjects[4].id,
     subjectName: mockSubjects[4].name,
@@ -99,7 +99,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t9-history-wwii",
+    id: 9,
     name: "Druhá světová válka",
     subjectId: mockSubjects[5].id,
     subjectName: mockSubjects[5].name,
@@ -111,7 +111,7 @@ export const mockTopics: Topic[] = [
     updatedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "t10-lit-poetry",
+    id: 10,
     name: "Česká poezie 19. století",
     subjectId: mockSubjects[6].id,
     subjectName: mockSubjects[6].name,
@@ -124,13 +124,16 @@ export const mockTopics: Topic[] = [
   },
 ];
 
+// Counter for generating new IDs
+let nextTopicId = 11;
+
 // Helper to get a topic by ID
-export function getMockTopicById(id: string): Topic | undefined {
+export function getMockTopicById(id: number): Topic | undefined {
   return mockTopics.find((topic) => topic.id === id);
 }
 
 // Helper to get topics by subject ID
-export function getMockTopicsBySubjectId(subjectId: string): Topic[] {
+export function getMockTopicsBySubjectId(subjectId: number): Topic[] {
   return mockTopics.filter((topic) => topic.subjectId === subjectId);
 }
 
@@ -149,7 +152,7 @@ export function createMockTopic(
 ): Topic {
   const subject = mockSubjects.find((s) => s.id === data.subjectId);
   return {
-    id: crypto.randomUUID(),
+    id: nextTopicId++,
     ...data,
     subjectName: subject?.name || "Unknown Subject",
     subjectColor: subject?.color,

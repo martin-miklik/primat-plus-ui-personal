@@ -52,7 +52,7 @@ export function HorizontalSubjectsSection({
               icon={subject.icon}
               color={subject.color}
               topicsCount={subject.topicsCount}
-              materialsCount={subject.materialsCount}
+              sourcesCount={subject.sourcesCount}
               variant="grid"
             />
           ))}

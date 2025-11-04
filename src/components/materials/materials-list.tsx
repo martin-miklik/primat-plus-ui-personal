@@ -11,37 +11,37 @@ import { MaterialCardSkeleton } from "@/components/materials/material-card-skele
 import { UploadMaterialDialog } from "@/components/dialogs/upload-material-dialog";
 import { useDialog } from "@/hooks/use-dialog";
 import { useUpload } from "@/hooks/use-upload";
-import { useMaterials } from "@/lib/api/queries/materials";
+import { useSources } from "@/lib/api/queries/sources";
 import { useSubscription } from "@/hooks/use-centrifuge";
 import { useUploadStore } from "@/stores/upload-store";
 
 interface MaterialsListProps {
-  topicId: string | null;
+  topicId: number | null;
   topicName?: string;
 }
 
 interface CentrifugoUploadMessage {
   type: "upload_progress" | "upload_complete" | "upload_error";
-  materialId: string;
+  sourceId: number;
   progress: number;
   status: "uploading" | "processing" | "completed" | "error";
   error?: string;
 }
 
 export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
-  const t = useTranslations("materials");
+  const t = useTranslations("sources");
   const uploadDialog = useDialog("upload-material");
   const queryClient = useQueryClient();
 
-  // Fetch materials
+  // Fetch sources
   const {
-    data: materialsData,
+    data: sourcesData,
     isLoading,
     isError,
     refetch,
-  } = useMaterials(topicId || "");
+  } = useSources(topicId);
 
-  const materials = materialsData?.data || [];
+  const sources = sourcesData?.data || [];
 
   // Get uploading files from store
   const allUploadFiles = useUploadStore((state) => state.files);
@@ -56,20 +56,20 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
   const updateFileStatus = useUploadStore((state) => state.updateFileStatus);
 
   // Initialize upload hook
-  useUpload(topicId || "");
+  useUpload(topicId);
 
   // Subscribe to Centrifugo channel for real-time updates
-  useSubscription<CentrifugoUploadMessage>(`materials:${topicId}`, {
+  useSubscription<CentrifugoUploadMessage>(`sources:${topicId}`, {
     enabled: !!topicId,
     onPublication: (data) => {
       if (data.type === "upload_progress") {
-        updateFileProgress(data.materialId, data.progress);
+        updateFileProgress(String(data.sourceId), data.progress);
       } else if (data.type === "upload_complete") {
-        updateFileStatus(data.materialId, "completed");
-        // Refetch materials to show the new one
-        queryClient.invalidateQueries({ queryKey: ["materials", topicId] });
+        updateFileStatus(String(data.sourceId), "completed");
+        // Refetch sources to show the new one
+        queryClient.invalidateQueries({ queryKey: ["sources", topicId] });
       } else if (data.type === "upload_error") {
-        updateFileStatus(data.materialId, "error", data.error);
+        updateFileStatus(String(data.sourceId), "error", data.error);
       }
     },
   });
@@ -94,15 +94,15 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">
-                {topicName || t("materials")}
+                {topicName || t("sources")}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                {t("materialsForTopic")}
+                {t("sourcesForTopic")}
               </p>
             </div>
             <Button onClick={uploadDialog.open}>
               <Upload className="mr-2 h-4 w-4" />
-              {t("uploadMaterial")}
+              {t("uploadSource")}
             </Button>
           </div>
         </div>
@@ -130,10 +130,10 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
             </div>
           )}
 
-          {/* Empty State (no materials and no uploads) */}
+          {/* Empty State (no sources and no uploads) */}
           {!isLoading &&
             !isError &&
-            materials.length === 0 &&
+            sources.length === 0 &&
             uploadingFiles.length === 0 && (
               <div className="flex items-center justify-center py-12">
                 <EmptyState
@@ -149,10 +149,10 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
               </div>
             )}
 
-          {/* Materials Grid */}
+          {/* Sources Grid */}
           {!isLoading &&
             !isError &&
-            (materials.length > 0 || uploadingFiles.length > 0) && (
+            (sources.length > 0 || uploadingFiles.length > 0) && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Upload skeletons */}
                 {uploadingFiles.map((uploadFile) => (
@@ -163,9 +163,9 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
                   />
                 ))}
 
-                {/* Material cards */}
-                {materials.map((material) => (
-                  <MaterialCard key={material.id} material={material} />
+                {/* Source cards */}
+                {sources.map((source) => (
+                  <MaterialCard key={source.id} material={source} />
                 ))}
               </div>
             )}

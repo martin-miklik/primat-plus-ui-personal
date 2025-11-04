@@ -53,7 +53,7 @@
       "title": "Nedávné předměty",
       "viewAll": "Zobrazit vše",
       "topics": "témat",
-      "materials": "materiálů",
+      "sources": "zdrojů",
       "empty": "Zatím žádné předměty",
       "emptyDescription": "Začněte vytvořením prvního předmětu",
       "createSubject": "Vytvořit předmět"
@@ -186,7 +186,7 @@
       "deleteTitle": "Smazat předmět",
       "deleteDescription": "Tato akce je nevratná.",
       "deleteConfirmation": "Opravdu chcete smazat předmět \"{name}\"?",
-      "deleteWarning": "Všechna témata, materiály a kartičky spojené s tímto předmětem budou také smazány.",
+      "deleteWarning": "Všechna témata, zdroje a kartičky spojené s tímto předmětem budou také smazány.",
       "nameLabel": "Název",
       "namePlaceholder": "např. Matematika",
       "descriptionLabel": "Popis",
@@ -223,7 +223,7 @@
       "deleteTitle": "Smazat téma",
       "deleteDescription": "Tato akce je nevratná.",
       "deleteConfirmation": "Opravdu chcete smazat téma \"{name}\"?",
-      "deleteWarning": "Všechny materiály v tomto tématu budou také smazány.",
+      "deleteWarning": "Všechny zdroje v tomto tématu budou také smazány.",
       "nameLabel": "Název tématu",
       "namePlaceholder": "např. Kvadratické rovnice",
       "creating": "Vytváření...",
@@ -234,23 +234,23 @@
       "deleteButton": "Smazat téma"
     }
   },
-  "materials": {
-    "title": "Materiály",
-    "materials": "Materiály",
-    "uploadMaterial": "Nahrát materiál",
+  "sources": {
+    "title": "Zdroje",
+    "sources": "Zdroje",
+    "uploadSource": "Nahrát zdroj",
     "noTopicSelected": "Žádné téma není vybráno",
-    "selectTopicToView": "Vyberte téma pro zobrazení materiálů",
-    "materialsForTopic": "Studijní materiály pro toto téma",
+    "selectTopicToView": "Vyberte téma pro zobrazení zdrojů",
+    "sourcesForTopic": "Studijní zdroje pro toto téma",
     "comingSoon": "Již brzy",
-    "materialsWillBeAvailable": "Správa materiálů bude k dispozici v další verzi.",
+    "sourcesWillBeAvailable": "Správa zdrojů bude k dispozici v další verzi.",
     "empty": {
-      "title": "Zatím žádné materiály",
-      "description": "Začněte nahráním studijních materiálů pro toto téma.",
-      "action": "Nahrát materiál"
+      "title": "Zatím žádné zdroje",
+      "description": "Začněte nahráním studijních zdrojů pro toto téma.",
+      "action": "Nahrát zdroj"
     },
     "error": {
-      "title": "Nepodařilo se načíst materiály",
-      "description": "Došlo k chybě při načítání materiálů. Zkuste to prosím znovu.",
+      "title": "Nepodařilo se načíst zdroje",
+      "description": "Došlo k chybě při načítání zdrojů. Zkuste to prosím znovu.",
       "retry": "Zkusit znovu"
     },
     "card": {
@@ -260,10 +260,10 @@
       "flashcards": "{count} kartičky",
       "tests": "{count} testy",
       "status": {
-        "pending": "Čeká",
+        "uploaded": "Nahráno",
         "processing": "Zpracovává se",
         "completed": "Dokončeno",
-        "failed": "Selhalo"
+        "error": "Chyba"
       }
     }
   },

@@ -30,7 +30,7 @@ export function useSuspenseSubjects() {
 }
 
 // Query: Get single subject by ID
-export function useSubject(id: string) {
+export function useSubject(id: number) {
   return useQuery({
     queryKey: QUERY_KEYS.SUBJECT(id),
     queryFn: () => get<SubjectResponse>(`/subjects/${id}`),
@@ -39,7 +39,7 @@ export function useSubject(id: string) {
 }
 
 // Suspense Query: Get single subject by ID
-export function useSuspenseSubject(id: string) {
+export function useSuspenseSubject(id: number) {
   return useSuspenseQuery({
     queryKey: QUERY_KEYS.SUBJECT(id),
     queryFn: () => get<SubjectResponse>(`/subjects/${id}`),

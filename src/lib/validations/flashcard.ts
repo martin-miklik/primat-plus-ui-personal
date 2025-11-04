@@ -6,7 +6,7 @@ export const difficultySchema = z.enum(["easy", "medium", "hard"]);
 // Flashcard schema
 export const flashcardSchema = z.object({
   id: z.string().uuid(),
-  materialId: z.string().uuid(),
+  sourceId: z.number().int().positive(), // Changed from materialId
   question: z.string().min(1, "Question is required"),
   answer: z.string().min(1, "Answer is required"),
   difficulty: difficultySchema.default("medium"),
@@ -34,7 +34,7 @@ export const createFlashcardSchema = flashcardSchema.omit({
 // Update flashcard schema
 export const updateFlashcardSchema = createFlashcardSchema
   .partial()
-  .omit({ materialId: true });
+  .omit({ sourceId: true });
 
 // Review flashcard schema
 export const reviewFlashcardSchema = z.object({

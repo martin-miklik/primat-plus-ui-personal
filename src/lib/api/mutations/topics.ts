@@ -19,7 +19,7 @@ interface DeleteResponse {
 }
 
 // Mutation: Create topic
-export function useCreateTopic(subjectId: string) {
+export function useCreateTopic(subjectId: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -40,7 +40,7 @@ export function useCreateTopic(subjectId: string) {
 
       // Create optimistic topic with temporary ID
       const optimisticTopic: Topic = {
-        id: `temp-${Date.now()}`,
+        id: Date.now(), // Temporary numeric ID
         name: newTopic.name,
         description: newTopic.description,
         subjectId: subjectId,
@@ -94,7 +94,7 @@ export function useCreateTopic(subjectId: string) {
 }
 
 // Mutation: Update topic
-export function useUpdateTopic(topicId: string, subjectId: string) {
+export function useUpdateTopic(topicId: number, subjectId: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -155,11 +155,11 @@ export function useUpdateTopic(topicId: string, subjectId: string) {
 }
 
 // Mutation: Delete topic
-export function useDeleteTopic(subjectId: string) {
+export function useDeleteTopic(subjectId: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => del<DeleteResponse>(`/topics/${id}`),
+    mutationFn: (id: number) => del<DeleteResponse>(`/topics/${id}`),
 
     // Optimistic update
     onMutate: async (deletedId) => {
@@ -211,10 +211,3 @@ export function useDeleteTopic(subjectId: string) {
     },
   });
 }
-
-
-
-
-
-
-

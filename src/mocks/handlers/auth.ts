@@ -6,12 +6,13 @@ import {
   generateMockToken,
 } from "@/mocks/fixtures/auth";
 import { User } from "@/lib/validations/auth";
+import { apiPath } from "@/mocks/config";
 
 const users = [...mockUsers];
 
 export const authHandlers = [
-  // POST /api/auth/register - Register new user
-  http.post("/api/auth/register", async ({ request }) => {
+  // POST /api/v1/auth/register - Register new user
+  http.post(apiPath("/auth/register"), async ({ request }) => {
     await delay(500);
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -71,8 +72,8 @@ export const authHandlers = [
     );
   }),
 
-  // POST /api/auth/login - Login user
-  http.post("/api/auth/login", async ({ request }) => {
+  // POST /api/v1/auth/login - Login user
+  http.post(apiPath("/auth/login"), async ({ request }) => {
     await delay(400);
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -111,8 +112,8 @@ export const authHandlers = [
     });
   }),
 
-  // POST /api/auth/logout - Logout user
-  http.post("/api/auth/logout", async () => {
+  // POST /api/v1/auth/logout - Logout user
+  http.post(apiPath("/auth/logout"), async () => {
     await delay(200);
 
     return HttpResponse.json({
@@ -120,8 +121,8 @@ export const authHandlers = [
     });
   }),
 
-  // GET /api/auth/me - Get current user
-  http.get("/api/auth/me", async ({ request }) => {
+  // GET /api/v1/auth/me - Get current user
+  http.get(apiPath("/auth/me"), async ({ request }) => {
     await delay(200);
 
     const authHeader = request.headers.get("Authorization");
@@ -174,8 +175,8 @@ export const authHandlers = [
     });
   }),
 
-  // PATCH /api/auth/me - Update current user
-  http.patch("/api/auth/me", async ({ request }) => {
+  // PATCH /api/v1/auth/me - Update current user
+  http.patch(apiPath("/auth/me"), async ({ request }) => {
     await delay(300);
 
     const authHeader = request.headers.get("Authorization");

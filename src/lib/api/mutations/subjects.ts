@@ -36,7 +36,7 @@ export function useCreateSubject() {
 
       // Create optimistic subject with temporary ID
       const optimisticSubject: Subject = {
-        id: `temp-${Date.now()}`,
+        id: Date.now(), // Temporary numeric ID
         name: newSubject.name,
         description: newSubject.description,
         color: newSubject.color || "#6B7280",
@@ -44,7 +44,7 @@ export function useCreateSubject() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         topicsCount: 0,
-        materialsCount: 0,
+        sourcesCount: 0,
       };
 
       // Optimistically add to the list
@@ -84,7 +84,7 @@ export function useCreateSubject() {
 }
 
 // Mutation: Update subject
-export function useUpdateSubject(id: string) {
+export function useUpdateSubject(id: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -140,7 +140,7 @@ export function useDeleteSubject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => del<DeleteResponse>(`/subjects/${id}`),
+    mutationFn: (id: number) => del<DeleteResponse>(`/subjects/${id}`),
 
     // Optimistic update
     onMutate: async (deletedId) => {

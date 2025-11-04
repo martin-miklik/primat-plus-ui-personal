@@ -50,7 +50,7 @@ export function EditSubjectDialog({ subject }: EditSubjectDialogProps) {
   const t = useTranslations("subjects.dialog");
   const tCommon = useTranslations("common");
   const dialog = useDialog("edit-subject");
-  const updateSubject = useUpdateSubject(subject?.id || "");
+  const updateSubject = useUpdateSubject(subject?.id || 0);
 
   const form = useForm<UpdateSubjectInput>({
     resolver: zodResolver(updateSubjectSchema),

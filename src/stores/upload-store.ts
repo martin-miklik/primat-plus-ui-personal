@@ -7,8 +7,8 @@ export interface UploadFile {
   progress: number;
   status: "pending" | "uploading" | "processing" | "completed" | "error";
   error?: string;
-  materialId?: string; // ID of created material after upload
-  topicId: string;
+  sourceId?: number; // ID of created source after upload
+  topicId: number | null;
   sourceType: "file" | "youtube" | "website";
   sourceUrl?: string; // For YouTube/Website uploads
 }
@@ -19,7 +19,7 @@ interface UploadState {
   // Actions
   addFiles: (
     files: File[],
-    topicId: string,
+    topicId: number | null,
     sourceType: UploadFile["sourceType"],
     sourceUrl?: string
   ) => void;
@@ -29,7 +29,7 @@ interface UploadState {
     status: UploadFile["status"],
     error?: string
   ) => void;
-  setMaterialId: (id: string, materialId: string) => void;
+  setSourceId: (id: string, sourceId: number) => void;
   removeFile: (id: string) => void;
   clearCompleted: () => void;
   clearAll: () => void;
@@ -82,15 +82,15 @@ export const useUploadStore = create<UploadState>()(
           "upload/updateFileStatus"
         ),
 
-      setMaterialId: (id, materialId) =>
+      setSourceId: (id, sourceId) =>
         set(
           (state) => ({
             files: state.files.map((f) =>
-              f.id === id ? { ...f, materialId } : f
+              f.id === id ? { ...f, sourceId } : f
             ),
           }),
           false,
-          "upload/setMaterialId"
+          "upload/setSourceId"
         ),
 
       removeFile: (id) =>

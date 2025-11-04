@@ -35,31 +35,31 @@ export const SUBSCRIPTION_TIERS = {
 // Free tier limits
 export const FREE_TIER_LIMITS = {
   MAX_SUBJECTS: 3,
-  MAX_MATERIALS_PER_SUBJECT: 10,
-  MAX_FLASHCARDS_PER_MATERIAL: 50,
+  MAX_SOURCES_PER_SUBJECT: 10,
+  MAX_FLASHCARDS_PER_SOURCE: 50,
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
 } as const;
 
 // Premium tier limits (much higher or unlimited)
 export const PREMIUM_TIER_LIMITS = {
   MAX_SUBJECTS: 999,
-  MAX_MATERIALS_PER_SUBJECT: 999,
-  MAX_FLASHCARDS_PER_MATERIAL: 999,
+  MAX_SOURCES_PER_SUBJECT: 999,
+  MAX_FLASHCARDS_PER_SOURCE: 999,
   MAX_FILE_SIZE: MAX_FILE_SIZE,
 } as const;
 
 // Query keys (for TanStack Query)
 export const QUERY_KEYS = {
   SUBJECTS: ["subjects"] as const,
-  SUBJECT: (id: string) => ["subjects", id] as const,
-  TOPICS: (subjectId: string) => ["subjects", subjectId, "topics"] as const,
-  TOPIC: (subjectId: string, topicId: string) =>
+  SUBJECT: (id: number) => ["subjects", id] as const,
+  TOPICS: (subjectId: number) => ["subjects", subjectId, "topics"] as const,
+  TOPIC: (subjectId: number, topicId: number) =>
     ["subjects", subjectId, "topics", topicId] as const,
-  MATERIALS: (topicId: string) => ["topics", topicId, "materials"] as const,
-  MATERIAL: (materialId: string) => ["materials", materialId] as const,
-  FLASHCARDS: (materialId: string) =>
-    ["materials", materialId, "flashcards"] as const,
-  TESTS: (materialId: string) => ["materials", materialId, "tests"] as const,
+  SOURCES: (topicId: number) => ["topics", topicId, "sources"] as const,
+  SOURCE: (sourceId: number) => ["sources", sourceId] as const,
+  FLASHCARDS: (sourceId: number) =>
+    ["sources", sourceId, "flashcards"] as const,
+  TESTS: (sourceId: number) => ["sources", sourceId, "tests"] as const,
   USER: ["user"] as const,
   SUBSCRIPTION: ["subscription"] as const,
 } as const;

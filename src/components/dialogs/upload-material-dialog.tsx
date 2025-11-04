@@ -19,7 +19,7 @@ import { WebsiteUrlInput } from "@/components/upload/website-url-input";
 import { useDialog } from "@/hooks/use-dialog";
 
 interface UploadMaterialDialogProps {
-  topicId: string;
+  topicId: number | null;
   onUpload?: () => void;
 }
 

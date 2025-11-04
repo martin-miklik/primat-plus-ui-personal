@@ -3,14 +3,7 @@
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
-import {
-  FileText,
-  Youtube,
-  Globe,
-  MoreVertical,
-  Edit,
-  Trash2,
-} from "lucide-react";
+import { FileText, MoreVertical, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,13 +13,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Material } from "@/lib/validations/material";
+import { Source } from "@/lib/validations/source";
 
 interface MaterialCardProps {
-  material: Material;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-  onClick?: (id: string) => void;
+  material: Source;
+  onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
+  onClick?: (id: number) => void;
 }
 
 export function MaterialCard({
@@ -35,7 +28,7 @@ export function MaterialCard({
   onDelete,
   onClick,
 }: MaterialCardProps) {
-  const t = useTranslations("materials");
+  const t = useTranslations("sources");
 
   const getIcon = () => {
     if (material.type === "note") {
@@ -107,20 +100,20 @@ export function MaterialCard({
               </div>
 
               {/* Processing status */}
-              {material.processingStatus !== "completed" && (
+              {material.status !== "completed" && (
                 <div className="mt-2">
                   <span
                     className={cn(
                       "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                      material.processingStatus === "processing" &&
+                      material.status === "processing" &&
                         "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-                      material.processingStatus === "pending" &&
+                      material.status === "uploaded" &&
                         "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-                      material.processingStatus === "failed" &&
+                      material.status === "error" &&
                         "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                     )}
                   >
-                    {t(`card.status.${material.processingStatus}`)}
+                    {t(`card.status.${material.status}`)}
                   </span>
                 </div>
               )}

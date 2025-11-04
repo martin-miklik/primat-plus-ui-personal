@@ -1,40 +1,57 @@
 import { http, HttpResponse, delay } from "msw";
 import { mockSubjects, createMockSubject } from "@/mocks/fixtures/subjects";
 import { Subject } from "@/lib/validations/subject";
+import { apiPath } from "@/mocks/config";
 
 // In-memory store for subjects (resets on page reload)
 const subjects = [...mockSubjects];
 
 export const subjectsHandlers = [
-  // GET /api/subjects - List all subjects
-  http.get("/api/subjects", async () => {
+  // GET /api/v1/subjects - List all subjects
+  http.get(apiPath("/subjects"), async () => {
     await delay(300); // Simulate network delay
 
     return HttpResponse.json({
+      success: true,
       data: subjects,
-      total: subjects.length,
+      timestamp: new Date().toISOString(),
+      version: "v1",
     });
   }),
 
-  // GET /api/subjects/:id - Get single subject
-  http.get("/api/subjects/:id", async ({ params }) => {
+  // GET /api/v1/subjects/:id - Get single subject
+  http.get(apiPath("/subjects/:id"), async ({ params }) => {
     await delay(200);
 
-    const { id } = params;
+    const id = Number(params.id);
     const subject = subjects.find((s) => s.id === id);
 
     if (!subject) {
       return HttpResponse.json(
-        { error: "Předmět nenalezen", code: "NOT_FOUND" },
+        {
+          success: false,
+          error: {
+            code: "NOT_FOUND",
+            message: "Předmět nenalezen",
+            status: 404,
+          },
+          timestamp: new Date().toISOString(),
+          version: "v1",
+        },
         { status: 404 }
       );
     }
 
-    return HttpResponse.json({ data: subject });
+    return HttpResponse.json({
+      success: true,
+      data: subject,
+      timestamp: new Date().toISOString(),
+      version: "v1",
+    });
   }),
 
-  // POST /api/subjects - Create new subject
-  http.post("/api/subjects", async ({ request }) => {
+  // POST /api/v1/subjects - Create new subject
+  http.post(apiPath("/subjects"), async ({ request }) => {
     await delay(400);
 
     const body = (await request.json()) as Record<string, unknown>;
@@ -42,7 +59,16 @@ export const subjectsHandlers = [
     // Validate required fields
     if (!body.name || typeof body.name !== "string") {
       return HttpResponse.json(
-        { error: "Název předmětu je povinný", code: "VALIDATION_ERROR" },
+        {
+          success: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Název předmětu je povinný",
+            status: 400,
+          },
+          timestamp: new Date().toISOString(),
+          version: "v1",
+        },
         { status: 400 }
       );
     }
@@ -57,22 +83,36 @@ export const subjectsHandlers = [
     subjects.push(newSubject);
 
     return HttpResponse.json(
-      { data: newSubject, message: "Předmět byl úspěšně vytvořen" },
+      {
+        success: true,
+        data: newSubject,
+        timestamp: new Date().toISOString(),
+        version: "v1",
+      },
       { status: 201 }
     );
   }),
 
-  // PATCH /api/subjects/:id - Update subject
-  http.patch("/api/subjects/:id", async ({ params, request }) => {
+  // PATCH /api/v1/subjects/:id - Update subject (not used by backend, but keeping for compatibility)
+  http.patch(apiPath("/subjects/:id"), async ({ params, request }) => {
     await delay(300);
 
-    const { id } = params;
+    const id = Number(params.id);
     const body = (await request.json()) as Record<string, unknown>;
     const subjectIndex = subjects.findIndex((s) => s.id === id);
 
     if (subjectIndex === -1) {
       return HttpResponse.json(
-        { error: "Předmět nenalezen", code: "NOT_FOUND" },
+        {
+          success: false,
+          error: {
+            code: "NOT_FOUND",
+            message: "Předmět nenalezen",
+            status: 404,
+          },
+          timestamp: new Date().toISOString(),
+          version: "v1",
+        },
         { status: 404 }
       );
     }
@@ -86,21 +126,72 @@ export const subjectsHandlers = [
     subjects[subjectIndex] = updatedSubject;
 
     return HttpResponse.json({
+      success: true,
       data: updatedSubject,
-      message: "Předmět byl úspěšně aktualizován",
+      timestamp: new Date().toISOString(),
+      version: "v1",
     });
   }),
 
-  // DELETE /api/subjects/:id - Delete subject
-  http.delete("/api/subjects/:id", async ({ params }) => {
+  // PUT /api/v1/subjects/:id - Update/Rename subject (backend uses this)
+  http.put(apiPath("/subjects/:id"), async ({ params, request }) => {
     await delay(300);
 
-    const { id } = params;
+    const id = Number(params.id);
+    const body = (await request.json()) as Record<string, unknown>;
     const subjectIndex = subjects.findIndex((s) => s.id === id);
 
     if (subjectIndex === -1) {
       return HttpResponse.json(
-        { error: "Předmět nenalezen", code: "NOT_FOUND" },
+        {
+          success: false,
+          error: {
+            code: "NOT_FOUND",
+            message: "Předmět nenalezen",
+            status: 404,
+          },
+          timestamp: new Date().toISOString(),
+          version: "v1",
+        },
+        { status: 404 }
+      );
+    }
+
+    const updatedSubject: Subject = {
+      ...subjects[subjectIndex],
+      name: (body.name as string) || subjects[subjectIndex].name,
+      updatedAt: new Date().toISOString(),
+    };
+
+    subjects[subjectIndex] = updatedSubject;
+
+    return HttpResponse.json({
+      success: true,
+      data: updatedSubject,
+      timestamp: new Date().toISOString(),
+      version: "v1",
+    });
+  }),
+
+  // DELETE /api/v1/subjects/:id - Delete subject
+  http.delete(apiPath("/subjects/:id"), async ({ params }) => {
+    await delay(300);
+
+    const id = Number(params.id);
+    const subjectIndex = subjects.findIndex((s) => s.id === id);
+
+    if (subjectIndex === -1) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: {
+            code: "NOT_FOUND",
+            message: "Předmět nenalezen",
+            status: 404,
+          },
+          timestamp: new Date().toISOString(),
+          version: "v1",
+        },
         { status: 404 }
       );
     }
@@ -108,7 +199,10 @@ export const subjectsHandlers = [
     subjects.splice(subjectIndex, 1);
 
     return HttpResponse.json({
-      message: "Předmět byl úspěšně smazán",
+      success: true,
+      data: true,
+      timestamp: new Date().toISOString(),
+      version: "v1",
     });
   }),
 ];

@@ -14,7 +14,7 @@ import { cs } from "date-fns/locale";
 interface FlashcardPreviewProps {
   id: string;
   question: string;
-  subjectId: string;
+  subjectId: number;
   subjectName: string;
   subjectColor?: string;
   difficulty?: "easy" | "medium" | "hard" | "again";

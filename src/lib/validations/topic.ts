@@ -2,13 +2,13 @@ import { z } from "zod";
 
 // Topic schema
 export const topicSchema = z.object({
-  id: z.string().uuid(),
+  id: z.number().int().positive(),
   name: z
     .string()
     .min(1, "Topic name is required")
     .max(100, "Topic name is too long"),
   description: z.string().max(500, "Description is too long").optional(),
-  subjectId: z.string().uuid(),
+  subjectId: z.number().int().positive(),
   subjectName: z.string(),
   subjectColor: z
     .string()
@@ -33,7 +33,7 @@ export const createTopicSchema = topicSchema
     lastStudied: true,
   })
   .extend({
-    subjectId: z.string().optional(), // Optional since it's passed in the mutation
+    subjectId: z.number().int().positive().optional(), // Optional since it's passed in the mutation
     order: z.number().int().nonnegative().optional(), // Optional, defaults provided in forms
   });
 

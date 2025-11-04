@@ -38,6 +38,26 @@ export function useAuth() {
    * Returns true if session is valid, false otherwise
    */
   const validateSession = useCallback(async (): Promise<boolean> => {
+    const mswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === "true";
+
+    // When MSW is disabled (using real backend without auth), auto-authenticate
+    if (!mswEnabled) {
+      const mockUser: User = {
+        id: "local-dev-user",
+        email: "dev@primat-plus.local",
+        name: "Local Dev User",
+        subscription: "free",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      setAuth(mockUser, "local-dev-token");
+      setValidated(true);
+      setLoading(false);
+      return true;
+    }
+
+    // MSW mode - use normal token validation
     // No token, no validation needed
     if (!token) {
       setValidated(true);

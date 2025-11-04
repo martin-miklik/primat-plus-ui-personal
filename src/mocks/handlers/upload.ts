@@ -1,8 +1,9 @@
 import { http, HttpResponse, delay } from "msw";
+import { apiPath } from "@/mocks/config";
 
 export const uploadHandlers = [
-  // POST /api/upload - Upload file
-  http.post("/api/upload", async ({ request }) => {
+  // POST /api/v1/upload - Upload file
+  http.post(apiPath("/upload"), async ({ request }) => {
     // Simulate longer upload time
     await delay(2000);
 
@@ -63,16 +64,16 @@ export const uploadHandlers = [
     });
   }),
 
-  // POST /api/materials/:materialId/process - Trigger AI processing
-  http.post("/api/materials/:materialId/process", async ({ params }) => {
+  // POST /api/v1/sources/:sourceId/process - Trigger AI processing
+  http.post(apiPath("/sources/:sourceId/process"), async ({ params }) => {
     await delay(1000);
 
-    const { materialId } = params;
+    const { sourceId } = params;
 
     // Simulate processing start
     return HttpResponse.json({
       data: {
-        materialId,
+        sourceId,
         status: "processing",
         estimatedTime: 60, // seconds
       },
@@ -80,11 +81,11 @@ export const uploadHandlers = [
     });
   }),
 
-  // GET /api/materials/:materialId/process-status - Check processing status
-  http.get("/api/materials/:materialId/process-status", async ({ params }) => {
+  // GET /api/v1/sources/:sourceId/process-status - Check processing status
+  http.get(apiPath("/sources/:sourceId/process-status"), async ({ params }) => {
     await delay(200);
 
-    const { materialId } = params;
+    const { sourceId } = params;
 
     // Randomly return different statuses for demo
     const statuses = ["processing", "completed", "failed"];
@@ -92,7 +93,7 @@ export const uploadHandlers = [
 
     return HttpResponse.json({
       data: {
-        materialId,
+        sourceId,
         status: randomStatus,
         progress: randomStatus === "processing" ? 65 : 100,
         flashcardsGenerated: randomStatus === "completed" ? 15 : 0,

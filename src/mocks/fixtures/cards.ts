@@ -246,14 +246,15 @@ export function getMockCardById(id: string): Card | undefined {
 }
 
 // Helper to get cards by subject ID
-export function getMockCardsBySubjectId(subjectId: string): Card[] {
+export function getMockCardsBySubjectId(subjectId: number): Card[] {
   return mockCards.filter((card) => card.subjectId === subjectId);
 }
 
 // Helper to get cards by topic ID
-export function getMockCardsByTopicId(topicId: string): Card[] {
+export function getMockCardsByTopicId(topicId: number): Card[] {
   return mockCards.filter((card) => card.topicId === topicId);
 }
+
 
 
 

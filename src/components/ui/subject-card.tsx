@@ -8,6 +8,7 @@ import {
   Trash2,
   ArrowRight,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,16 +23,16 @@ import { cn } from "@/lib/utils";
 import { Typography } from "./Typography";
 
 export interface SubjectCardProps {
-  id: string;
+  id: number;
   name: string;
   description?: string;
   icon?: string;
   color?: string;
   topicsCount: number;
-  materialsCount: number;
+  sourcesCount: number;
   variant?: "carousel" | "grid";
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
 }
 
 export function SubjectCard({
@@ -41,11 +42,12 @@ export function SubjectCard({
   icon,
   color = "#6B7280",
   topicsCount,
-  materialsCount,
+  sourcesCount,
   variant = "carousel",
   onEdit,
   onDelete,
 }: SubjectCardProps) {
+  const t = useTranslations("dashboard.recentSubjects");
   const showActions = variant === "grid" && (onEdit || onDelete);
 
   return (
@@ -202,7 +204,7 @@ export function SubjectCard({
                 variant="body"
                 className="text-muted-foreground font-medium"
               >
-                {materialsCount} <span className="font-normal">materiálů</span>
+                {sourcesCount} <span className="font-normal">{t("sources")}</span>
               </Typography>
             </div>
           </div>

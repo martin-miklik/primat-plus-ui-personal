@@ -12,6 +12,27 @@ const nextConfig: NextConfig = {
     // Add any experimental features here
   },
 
+  // Proxy API requests to backend (only when MSW is disabled)
+  async rewrites() {
+    // Only proxy if MSW is disabled
+    const mswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === "true";
+    
+    if (mswEnabled) {
+      // When MSW is enabled, don't proxy (let MSW handle it)
+      return [];
+    }
+
+    // When MSW is disabled, proxy to real backend
+    const backendUrl = process.env.BACKEND_URL || "http://api.primat-plus";
+    
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${backendUrl}/api/v1/:path*`,
+      },
+    ];
+  },
+
   // Sentry webpack plugin options
   webpack: (config) => {
     return config;

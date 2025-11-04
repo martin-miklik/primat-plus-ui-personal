@@ -115,7 +115,7 @@ export function getMockTestResultById(id: string): TestResult | undefined {
 }
 
 // Helper to get test results by subject ID
-export function getMockTestResultsBySubjectId(subjectId: string): TestResult[] {
+export function getMockTestResultsBySubjectId(subjectId: number): TestResult[] {
   return mockTestResults.filter((test) => test.subjectId === subjectId);
 }
 
@@ -125,7 +125,7 @@ export const mockTests: Test[] = [
     id: "quiz-1-math",
     name: "Matematika - Základní test",
     description: "Základní test z matematiky",
-    materialId: "mat-1-math",
+    sourceId: 1, // Changed from materialId
     subjectId: mockSubjects[0].id,
     subjectName: mockSubjects[0].name,
     subjectColor: mockSubjects[0].color,
