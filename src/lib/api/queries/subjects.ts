@@ -17,7 +17,17 @@ interface SubjectResponse {
 export function useSubjects() {
   return useQuery({
     queryKey: QUERY_KEYS.SUBJECTS,
-    queryFn: () => get<SubjectsResponse>("/subjects"),
+    queryFn: async () => {
+      const response = await get<SubjectsResponse>("/subjects");
+      // Sort subjects alphabetically by name
+      const sortedData = response.data.sort((a, b) =>
+        a.name.localeCompare(b.name, "cs")
+      );
+      return {
+        ...response,
+        data: sortedData,
+      };
+    },
   });
 }
 
@@ -25,7 +35,17 @@ export function useSubjects() {
 export function useSuspenseSubjects() {
   return useSuspenseQuery({
     queryKey: QUERY_KEYS.SUBJECTS,
-    queryFn: () => get<SubjectsResponse>("/subjects"),
+    queryFn: async () => {
+      const response = await get<SubjectsResponse>("/subjects");
+      // Sort subjects alphabetically by name
+      const sortedData = response.data.sort((a, b) =>
+        a.name.localeCompare(b.name, "cs")
+      );
+      return {
+        ...response,
+        data: sortedData,
+      };
+    },
   });
 }
 

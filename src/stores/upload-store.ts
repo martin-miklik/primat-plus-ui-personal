@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import type { Source } from "@/lib/validations/source";
 
 export interface UploadFile {
   id: string;
@@ -13,6 +14,7 @@ export interface UploadFile {
   topicId: number | null;
   sourceType: "file" | "youtube" | "website";
   url?: string; // For YouTube/Website uploads
+  sourceData?: Partial<Source>; // Full source metadata from upload response
 }
 
 interface UploadState {
@@ -33,6 +35,7 @@ interface UploadState {
   ) => void;
   setSourceId: (id: string, sourceId: number) => void;
   setJobData: (id: string, jobId: string, channel: string) => void;
+  setSourceData: (id: string, sourceData: Partial<Source>) => void;
   removeFile: (id: string) => void;
   clearCompleted: () => void;
   clearAll: () => void;
@@ -105,6 +108,17 @@ export const useUploadStore = create<UploadState>()(
           }),
           false,
           "upload/setJobData"
+        ),
+
+      setSourceData: (id, sourceData) =>
+        set(
+          (state) => ({
+            files: state.files.map((f) =>
+              f.id === id ? { ...f, sourceData } : f
+            ),
+          }),
+          false,
+          "upload/setSourceData"
         ),
 
       removeFile: (id) =>

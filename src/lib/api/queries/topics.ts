@@ -17,7 +17,19 @@ interface TopicResponse {
 export function useTopics(subjectId: number) {
   return useQuery({
     queryKey: QUERY_KEYS.TOPICS(subjectId),
-    queryFn: () => get<TopicsResponse>(`/subjects/${subjectId}/topics`),
+    queryFn: async () => {
+      const response = await get<TopicsResponse>(
+        `/subjects/${subjectId}/topics`
+      );
+      // Sort topics alphabetically by name
+      const sortedData = response.data.sort((a, b) =>
+        a.name.localeCompare(b.name, "cs")
+      );
+      return {
+        ...response,
+        data: sortedData,
+      };
+    },
     enabled: !!subjectId,
   });
 }

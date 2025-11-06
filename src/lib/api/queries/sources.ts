@@ -20,12 +20,28 @@ export function useSources(topicId: number | null) {
       const response = await get<SourcesResponse>(`/sources`);
       // Filter by topicId on the frontend since backend returns all sources
       if (topicId) {
+        const filteredData = response.data.filter(
+          (source) => source.topicId === topicId
+        );
+        // Sort by createdAt (newest first)
+        const sortedData = filteredData.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         return {
           ...response,
-          data: response.data.filter((source) => source.topicId === topicId),
+          data: sortedData,
         };
       }
-      return response;
+      // Sort all sources by createdAt (newest first)
+      const sortedData = response.data.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      return {
+        ...response,
+        data: sortedData,
+      };
     },
     enabled: !!topicId,
   });

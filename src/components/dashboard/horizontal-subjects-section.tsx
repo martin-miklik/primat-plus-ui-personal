@@ -49,11 +49,9 @@ export function HorizontalSubjectsSection({
               key={subject.id}
               id={subject.id}
               name={subject.name}
+              description={subject.description}
               icon={subject.icon}
               color={subject.color}
-              topicsCount={subject.topicsCount}
-              sourcesCount={subject.sourcesCount}
-              variant="grid"
             />
           ))}
         </CarouselSection>

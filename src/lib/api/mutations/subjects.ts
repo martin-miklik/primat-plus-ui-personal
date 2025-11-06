@@ -47,15 +47,19 @@ export function useCreateSubject() {
         sourcesCount: 0,
       };
 
-      // Optimistically add to the list
+      // Optimistically add to the list in alphabetical order
       queryClient.setQueryData(
         QUERY_KEYS.SUBJECTS,
         (old: { data: Subject[]; total: number } | undefined) => {
           if (!old) {
             return { data: [optimisticSubject], total: 1 };
           }
+          // Insert in alphabetically correct position
+          const newData = [...old.data, optimisticSubject].sort((a, b) =>
+            a.name.localeCompare(b.name, "cs")
+          );
           return {
-            data: [optimisticSubject, ...old.data],
+            data: newData,
             total: old.total + 1,
           };
         }
@@ -108,6 +112,27 @@ export function useUpdateSubject(id: number) {
             data: { ...old?.data, ...newData },
           } as SubjectResponse)
       );
+
+      // Also update in the list (and re-sort if name changed)
+      if (newData.name) {
+        queryClient.setQueryData(
+          QUERY_KEYS.SUBJECTS,
+          (old: { data: Subject[]; total: number } | undefined) => {
+            if (!old) return old;
+            const updatedData = old.data.map((subject) =>
+              subject.id === id ? { ...subject, ...newData } : subject
+            );
+            // Re-sort alphabetically if name was changed
+            const sortedData = updatedData.sort((a, b) =>
+              a.name.localeCompare(b.name, "cs")
+            );
+            return {
+              ...old,
+              data: sortedData,
+            };
+          }
+        );
+      }
 
       return { previousSubject };
     },

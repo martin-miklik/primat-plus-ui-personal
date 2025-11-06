@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // Source type enum (matches backend SourceType)
 export const sourceTypeSchema = z.enum([
+  "document",
   "pdf",
   "docx",
   "doc",
@@ -15,7 +16,7 @@ export const sourceTypeSchema = z.enum([
 export const sourceStatusSchema = z.enum([
   "uploaded",
   "processing",
-  "completed",
+  "processed",
   "error",
 ]);
 

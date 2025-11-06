@@ -3,7 +3,7 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AppBreadcrumb } from "./app-breadcrumb";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { NavUserHeader } from "./nav-user-header";
 
 export function AppHeader() {
   return (
@@ -17,7 +17,7 @@ export function AppHeader() {
       </div>
       <AppBreadcrumb />
       <div className="ml-auto">
-        <ThemeToggle />
+        <NavUserHeader />
       </div>
     </header>
   );

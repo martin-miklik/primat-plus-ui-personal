@@ -3,17 +3,24 @@
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
-import { FileText, MoreVertical, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  FileText,
+  Video,
+  Globe,
+  Sparkles,
+  BookOpen,
+  MessageSquare,
+  FileBarChart,
+  Upload,
+  AlertCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Source } from "@/lib/validations/source";
+import { Badge } from "@/components/ui/badge";
+import { Typography } from "@/components/ui/Typography";
 
 interface MaterialCardProps {
   material: Source;
@@ -22,21 +29,52 @@ interface MaterialCardProps {
   onClick?: (id: number) => void;
 }
 
-export function MaterialCard({
-  material,
-  onEdit,
-  onDelete,
-  onClick,
-}: MaterialCardProps) {
+// Source type configuration
+const SOURCE_CONFIG = {
+  document: {
+    icon: FileText,
+    color: "#3B82F6", // Blue for documents
+    bgColor: "bg-blue-50 dark:bg-blue-950/20",
+    textColor: "text-blue-600 dark:text-blue-400",
+    borderColor: "border-blue-200 dark:border-blue-800",
+  },
+  youtube: {
+    icon: Video,
+    color: "#EF4444", // Red for YouTube
+    bgColor: "bg-red-50 dark:bg-red-950/20",
+    textColor: "text-red-600 dark:text-red-400",
+    borderColor: "border-red-200 dark:border-red-800",
+  },
+  webpage: {
+    icon: Globe,
+    color: "#10B981", // Green for web pages
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/20",
+    textColor: "text-emerald-600 dark:text-emerald-400",
+    borderColor: "border-emerald-200 dark:border-emerald-800",
+  },
+  website: {
+    icon: Globe,
+    color: "#10B981", // Green for websites
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/20",
+    textColor: "text-emerald-600 dark:text-emerald-400",
+    borderColor: "border-emerald-200 dark:border-emerald-800",
+  },
+};
+
+export function MaterialCard({ material }: MaterialCardProps) {
   const t = useTranslations("sources");
 
-  const getIcon = () => {
-    if (material.type === "note") {
-      return <FileText className="h-5 w-5" />;
+  // Get config based on type, fallback to document
+  const getSourceConfig = () => {
+    const type = material.type as keyof typeof SOURCE_CONFIG;
+    if (SOURCE_CONFIG[type]) {
+      return SOURCE_CONFIG[type];
     }
-    // In future, we can differentiate based on sourceType when available
-    return <FileText className="h-5 w-5" />;
+    return SOURCE_CONFIG.document;
   };
+
+  const config = getSourceConfig();
+  const Icon = config.icon;
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "";
@@ -45,139 +83,196 @@ export function MaterialCard({
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
-  const getFileTypeLabel = () => {
-    switch (material.type) {
-      case "pdf":
-        return "PDF";
-      case "docx":
-        return "DOCX";
-      case "doc":
-        return "DOC";
-      case "txt":
-        return "TXT";
-      case "note":
-        return t("card.note");
-      default:
-        // This case should never be reached due to exhaustive type checking
-        return "FILE";
+  const getStatusBadge = () => {
+    if (material.status === "processed") return null;
+
+    const statusConfig = {
+      uploaded: {
+        icon: Upload,
+        className:
+          "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+      },
+      processing: {
+        icon: Sparkles,
+        className:
+          "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+      },
+      error: {
+        icon: AlertCircle,
+        className:
+          "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+      },
+    };
+
+    const status = statusConfig[material.status as keyof typeof statusConfig];
+    if (!status) return null;
+
+    const StatusIcon = status.icon;
+
+    return (
+      <Badge
+        variant="secondary"
+        className={cn("absolute top-2 right-2 gap-1", status.className)}
+      >
+        <StatusIcon
+          className={cn(
+            "h-3 w-3",
+            material.status === "processing" && "animate-pulse"
+          )}
+        />
+        <span className="text-xs">{t(`card.status.${material.status}`)}</span>
+      </Badge>
+    );
+  };
+
+  const isProcessed = material.status === "processed";
+
+  const getTypeLabel = () => {
+    // For documents, check mimeType for specific format
+    if (material.type === "document" && material.mimeType) {
+      if (material.mimeType === "application/pdf") return t("card.types.pdf");
+      if (
+        material.mimeType.includes("word") ||
+        material.mimeType.includes("document")
+      )
+        return t("card.types.docx");
+      if (material.mimeType === "text/plain") return t("card.types.txt");
     }
+    // Fallback to type translation
+    return t(`card.types.${material.type}`);
   };
 
   return (
     <div
       className={cn(
-        "group relative rounded-lg border bg-card p-4 shadow-sm transition-all",
-        "hover:shadow-md hover:border-primary/50",
-        onClick && "cursor-pointer"
+        "group relative rounded-lg border bg-card shadow-sm transition-all p-0 h-full",
+        "hover:shadow-md hover:border-primary/50"
       )}
-      onClick={() => onClick?.(material.id)}
     >
-      <div className="flex items-start gap-4">
-        {/* Icon */}
-        <div className="flex-shrink-0 rounded-lg p-3 bg-primary/10">
-          <div className="text-primary">{getIcon()}</div>
+      {/* Status Badge */}
+      {getStatusBadge()}
+
+      {/* Card Content */}
+      <div className="flex flex-col gap-4 p-4 h-full">
+        {/* Top: Icon + Info */}
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          {/* Icon */}
+          <div
+            className={cn(
+              "flex-shrink-0 rounded-lg p-3 transition-colors",
+              config.bgColor
+            )}
+          >
+            <Icon className="h-5 w-5" style={{ color: config.color }} />
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <Typography variant="h4" className="truncate">
+              {material.name}
+            </Typography>
+            <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground">
+              <span className={cn("font-medium", config.textColor)}>
+                {getTypeLabel()}
+              </span>
+              {material.fileSize && (
+                <>
+                  <span>•</span>
+                  <span>{formatFileSize(material.fileSize)}</span>
+                </>
+              )}
+              <span>•</span>
+              <span>
+                {format(new Date(material.createdAt), "d. MMM yyyy", {
+                  locale: cs,
+                })}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm truncate">{material.name}</h3>
-              <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
-                <span className="font-medium">{getFileTypeLabel()}</span>
-                {material.fileSize && (
-                  <>
-                    <span>•</span>
-                    <span>{formatFileSize(material.fileSize)}</span>
-                  </>
-                )}
-                <span>•</span>
+        {/* Divider */}
+        <Separator className="my-1" />
+
+        {/* Bottom: Action Buttons - Always visible */}
+        <div className="w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs h-9 rounded-md border-1 border-blue-500 hover:bg-blue-50 dark:border-blue-600 dark:hover:bg-blue-950/20"
+              disabled={!isProcessed}
+            >
+              {isProcessed ? (
+                <Link href={`#`} onClick={(e) => e.stopPropagation()}>
+                  <FileBarChart className="h-3.5 w-3.5" />
+                  {t("card.tests")}
+                </Link>
+              ) : (
                 <span>
-                  {format(new Date(material.createdAt), "d. MMM yyyy", {
-                    locale: cs,
-                  })}
+                  <FileBarChart className="h-3.5 w-3.5" />
+                  {t("card.tests")}
                 </span>
-              </div>
-
-              {/* Processing status */}
-              {material.status !== "completed" && (
-                <div className="mt-2">
-                  <span
-                    className={cn(
-                      "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                      material.status === "processing" &&
-                        "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-                      material.status === "uploaded" &&
-                        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-                      material.status === "error" &&
-                        "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                    )}
-                  >
-                    {t(`card.status.${material.status}`)}
-                  </span>
-                </div>
               )}
-
-              {/* Stats */}
-              {(material.flashcardsCount > 0 || material.testsCount > 0) && (
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                  {material.flashcardsCount > 0 && (
-                    <span>
-                      {t("card.flashcards", {
-                        count: material.flashcardsCount,
-                      })}
-                    </span>
-                  )}
-                  {material.testsCount > 0 && (
-                    <span>
-                      {t("card.tests", { count: material.testsCount })}
-                    </span>
-                  )}
-                </div>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs h-9 rounded-md border-1 border-green-500  hover:bg-green-50 dark:border-green-600 dark:hover:bg-green-950/20"
+              disabled={!isProcessed}
+            >
+              {isProcessed ? (
+                <Link href={`#`} onClick={(e) => e.stopPropagation()}>
+                  <BookOpen className="h-3.5 w-3.5" />
+                  {t("card.flashcards")}
+                </Link>
+              ) : (
+                <span>
+                  <BookOpen className="h-3.5 w-3.5" />
+                  {t("card.flashcards")}
+                </span>
               )}
-            </div>
-
-            {/* Actions Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {onEdit && (
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(material.id);
-                    }}
-                  >
-                    <Edit className="mr-2 h-4 w-4" />
-                    {t("card.edit")}
-                  </DropdownMenuItem>
-                )}
-                {onDelete && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(material.id);
-                      }}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      {t("card.delete")}
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs h-9 rounded-md border-1 border-purple-500 hover:bg-purple-50 dark:border-purple-600 dark:hover:bg-purple-950/20"
+              disabled={!isProcessed}
+            >
+              {isProcessed ? (
+                <Link href={`#`} onClick={(e) => e.stopPropagation()}>
+                  <FileText className="h-3.5 w-3.5" />
+                  {t("card.summary")}
+                </Link>
+              ) : (
+                <span>
+                  <FileText className="h-3.5 w-3.5" />
+                  {t("card.summary")}
+                </span>
+              )}
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs h-9 rounded-md border-1 border-orange-500  hover:bg-orange-50 dark:border-orange-600  dark:hover:bg-orange-950/20"
+              disabled={!isProcessed}
+            >
+              {isProcessed ? (
+                <Link href={`#`} onClick={(e) => e.stopPropagation()}>
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  {t("card.aiChat")}
+                </Link>
+              ) : (
+                <span>
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  {t("card.aiChat")}
+                </span>
+              )}
+            </Button>
           </div>
         </div>
       </div>

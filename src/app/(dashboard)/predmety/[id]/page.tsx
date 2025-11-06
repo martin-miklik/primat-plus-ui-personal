@@ -1,19 +1,18 @@
 "use client";
 
-import { use, useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { use, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusIcon, ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TopicListItem, TopicListSkeleton } from "@/components/topics";
+import { TopicCardSkeleton } from "@/components/topics";
 import {
   CreateTopicDialog,
   EditTopicDialog,
   DeleteTopicDialog,
 } from "@/components/dialogs";
 import { EmptyState } from "@/components/states/empty-states";
-import { MaterialsList } from "@/components/materials/materials-list";
+import { TopicCard } from "@/components/ui/topic-card";
 import { useDialog } from "@/hooks/use-dialog";
 import { useTopics } from "@/lib/api/queries/topics";
 import { useSubject } from "@/lib/api/queries/subjects";
@@ -29,11 +28,7 @@ interface SubjectDetailPageProps {
 
 export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
   const { id: subjectIdParam } = use(params);
-  const subjectId = Number(subjectIdParam); // Parse string to number
-
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const subjectId = Number(subjectIdParam);
 
   const t = useTranslations("topics");
   const tError = useTranslations("topics.error");
@@ -55,31 +50,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
   } = useTopics(subjectId);
 
   const subject = subjectData?.data;
-  const topics = useMemo(() => topicsData?.data || [], [topicsData?.data]);
-
-  // Get selected topic ID from URL or default to first topic
-  const selectedTopicIdParam = searchParams.get("topic");
-  const selectedTopicId = selectedTopicIdParam
-    ? Number(selectedTopicIdParam)
-    : topics[0]?.id;
-  const selectedTopicData = topics.find((t) => t.id === selectedTopicId);
-
-  // Update URL when topic is selected
-  const handleTopicSelect = useCallback(
-    (topicId: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("topic", String(topicId)); // Convert number to string for URL
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [pathname, router, searchParams]
-  );
-
-  // Auto-select first topic when topics load
-  useEffect(() => {
-    if (topics.length > 0 && !selectedTopicId) {
-      handleTopicSelect(topics[0].id);
-    }
-  }, [topics, selectedTopicId, handleTopicSelect]);
+  const topics = topicsData?.data || [];
 
   const handleEdit = (id: number) => {
     const topic = topics.find((t) => t.id === id);
@@ -97,132 +68,111 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
     }
   };
 
-  // Handle topic deletion - select next/previous topic
-  const handleTopicDeleted = (deletedId: number) => {
-    if (selectedTopicId === deletedId) {
-      const currentIndex = topics.findIndex((t) => t.id === deletedId);
-      const nextTopic = topics[currentIndex + 1] || topics[currentIndex - 1];
-      if (nextTopic) {
-        handleTopicSelect(nextTopic.id);
-      }
-    }
-  };
-
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden">
-      {/* Left Panel - Topics List */}
-      <aside className="w-80 border-r flex flex-col bg-background">
-        {/* Header */}
-        <div className="border-b space-y-4 pr-4 pb-4">
-          <div className="flex items-center gap-2">
-            <Link href="/predmety">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <div className="flex justify-between items-center w-full">
-              <Typography variant="h3" className="truncate">
-                {subject?.name || "Předmět"}
-              </Typography>
+    <div className="space-y-6 pb-8">
+      {/* Page Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Link href="/predmety">
+            <Button variant="ghost" size="icon" className="h-9 w-9">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <div className="flex items-center gap-3">
+              <Typography variant="h1">{subject?.name || "Předmět"}</Typography>
               {subject?.icon && (
-                <span className="text-2xl">{subject.icon}</span>
+                <span className="text-3xl">{subject.icon}</span>
               )}
             </div>
+            {subject?.description && (
+              <Typography variant="muted" className="mt-2">
+                {subject.description}
+              </Typography>
+            )}
           </div>
-          <Button onClick={createDialog.open} className="w-full" size="sm">
-            <PlusIcon className="mr-2 h-4 w-4" />
-            {t("create")}
+        </div>
+        <Button onClick={createDialog.open}>
+          <PlusIcon className="mr-2 h-4 w-4" />
+          {t("create")}
+        </Button>
+      </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <TopicCardSkeleton key={i} />
+          ))}
+        </div>
+      )}
+
+      {/* Error State */}
+      {isError && (
+        <div className="flex flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-12">
+          <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+          <h3 className="text-lg font-semibold mb-2">{tError("title")}</h3>
+          <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">
+            {tError("description")}
+          </p>
+          <Button onClick={() => refetch()} variant="outline">
+            {tError("retry")}
           </Button>
         </div>
+      )}
 
-        {/* Topics List */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Loading State */}
-          {isLoading && (
-            <div className="space-y-1">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <TopicListSkeleton key={i} />
-              ))}
-            </div>
-          )}
-
-          {/* Error State */}
-          {isError && (
-            <div className="p-4">
-              <div className="flex flex-col items-center justify-center text-center py-8">
-                <AlertCircle className="h-10 w-10 text-destructive mb-3" />
-                <p className="text-sm font-medium mb-1">{tError("title")}</p>
-                <p className="text-xs text-muted-foreground mb-4">
-                  {tError("description")}
-                </p>
-                <Button onClick={() => refetch()} variant="outline" size="sm">
-                  {tError("retry")}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!isLoading && !isError && topics.length === 0 && (
-            <div className="p-4">
-              <EmptyState
-                icon={<PlusIcon className="h-10 w-10" />}
-                title={tEmpty("title")}
-                description={tEmpty("description")}
-                action={{
-                  label: tEmpty("action"),
-                  onClick: createDialog.open,
-                  variant: "default",
-                }}
-                className="py-8"
-              />
-            </div>
-          )}
-
-          {/* Topics List */}
-          {!isLoading && !isError && topics.length > 0 && (
-            <AnimatePresence mode="popLayout">
-              <div className="space-y-1">
-                {topics.map((topic, index) => (
-                  <motion.div
-                    key={topic.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{
-                      delay: index * 0.03,
-                      duration: 0.2,
-                    }}
-                  >
-                    <TopicListItem
-                      id={topic.id}
-                      name={topic.name}
-                      cardsCount={topic.cardsCount}
-                      isActive={topic.id === selectedTopicId}
-                      onSelect={handleTopicSelect}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </AnimatePresence>
-          )}
-        </div>
-      </aside>
-
-      {/* Right Panel - Materials */}
-      <main className="flex-1 overflow-hidden bg-muted/10">
-        <MaterialsList
-          topicId={selectedTopicId || null}
-          topicName={selectedTopicData?.name}
+      {/* Empty State */}
+      {!isLoading && !isError && topics.length === 0 && (
+        <EmptyState
+          icon={<PlusIcon className="h-12 w-12" />}
+          title={tEmpty("title")}
+          description={tEmpty("description")}
+          action={{
+            label: tEmpty("action"),
+            onClick: createDialog.open,
+          }}
+          className="py-12"
         />
-      </main>
+      )}
+
+      {/* Topics Grid */}
+      {!isLoading && !isError && topics.length > 0 && (
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            layout
+          >
+            {topics.map((topic, index) => (
+              <motion.div
+                key={topic.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{
+                  delay: index * 0.05,
+                  duration: 0.3,
+                  ease: "easeOut",
+                }}
+                layout
+              >
+                <TopicCard
+                  id={topic.id}
+                  subjectId={subjectId}
+                  name={topic.name}
+                  cardsCount={topic.cardsCount}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      )}
 
       {/* Dialogs */}
       <CreateTopicDialog subjectId={subjectId} />
       <EditTopicDialog topic={selectedTopic} />
-      <DeleteTopicDialog topic={selectedTopic} onDeleted={handleTopicDeleted} />
+      <DeleteTopicDialog topic={selectedTopic} />
     </div>
   );
 }

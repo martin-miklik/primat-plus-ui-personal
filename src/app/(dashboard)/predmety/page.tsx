@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/states/empty-states";
 import { useDialog } from "@/hooks/use-dialog";
 import { useSubjects } from "@/lib/api/queries/subjects";
 import { Subject } from "@/lib/validations/subject";
+import { Typography } from "@/components/ui/Typography";
 
 export default function SubjectsPage() {
   const t = useTranslations("subjects");
@@ -53,8 +54,10 @@ export default function SubjectsPage() {
       {/* Page Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t("title")}</h1>
-          <p className="text-muted-foreground mt-2">{t("subtitle")}</p>
+          <Typography variant="h1">{t("title")}</Typography>
+          <Typography variant="muted" className="mt-2">
+            {t("subtitle")}
+          </Typography>
         </div>
         <Button onClick={createDialog.open}>
           <PlusIcon className="mr-2 h-4 w-4" />
@@ -125,9 +128,6 @@ export default function SubjectsPage() {
                   description={subject.description}
                   icon={subject.icon}
                   color={subject.color}
-                  topicsCount={subject.topicsCount}
-                  sourcesCount={subject.sourcesCount}
-                  variant="grid"
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />

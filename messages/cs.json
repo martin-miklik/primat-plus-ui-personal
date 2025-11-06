@@ -167,6 +167,8 @@
     "title": "Předměty",
     "subtitle": "Spravovat vaše studijní předměty",
     "create": "Vytvořit předmět",
+    "edit": "Upravit",
+    "delete": "Smazat",
     "comingSoon": "Seznam předmětů se zde zobrazí...",
     "empty": {
       "title": "Zatím žádné předměty",
@@ -205,6 +207,8 @@
   "topics": {
     "title": "Témata",
     "create": "Nové téma",
+    "edit": "Upravit",
+    "delete": "Smazat",
     "empty": {
       "title": "Zatím žádná témata",
       "description": "Začněte vytvořením prvního tématu.",
@@ -257,13 +261,24 @@
       "note": "Poznámka",
       "edit": "Upravit",
       "delete": "Smazat",
-      "flashcards": "{count} kartičky",
-      "tests": "{count} testy",
+      "tests": "Testy",
+      "flashcards": "Kartičky",
+      "summary": "Souhrn",
+      "aiChat": "AI Chat",
       "status": {
-        "uploaded": "Nahráno",
+        "uploaded": "Nahrává se",
         "processing": "Zpracovává se",
-        "completed": "Dokončeno",
         "error": "Chyba"
+      },
+      "types": {
+        "document": "Dokument",
+        "pdf": "PDF",
+        "docx": "Word",
+        "doc": "Word",
+        "txt": "Text",
+        "youtube": "YouTube",
+        "website": "Web",
+        "webpage": "Web"
       }
     }
   },
@@ -336,7 +351,8 @@
     "light": "Světlý režim",
     "dark": "Tmavý režim",
     "system": "Systémový",
-    "toggle": "Výběr motivu"
+    "toggle": "Výběr motivu",
+    "displayMode": "Režim zobrazení"
   },
   "auth": {
     "login": {

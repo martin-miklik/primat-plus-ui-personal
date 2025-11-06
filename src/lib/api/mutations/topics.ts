@@ -52,15 +52,19 @@ export function useCreateTopic(subjectId: number) {
         updatedAt: new Date().toISOString(),
       };
 
-      // Optimistically add to the list
+      // Optimistically add to the list in alphabetical order
       queryClient.setQueryData(
         QUERY_KEYS.TOPICS(subjectId),
         (old: { data: Topic[]; total: number } | undefined) => {
           if (!old) {
             return { data: [optimisticTopic], total: 1 };
           }
+          // Insert in alphabetically correct position
+          const newData = [...old.data, optimisticTopic].sort((a, b) =>
+            a.name.localeCompare(b.name, "cs")
+          );
           return {
-            data: [...old.data, optimisticTopic],
+            data: newData,
             total: old.total + 1,
           };
         }
@@ -113,18 +117,23 @@ export function useUpdateTopic(topicId: number, subjectId: number) {
         QUERY_KEYS.TOPICS(subjectId)
       );
 
-      // Optimistically update the topic in the list
+      // Optimistically update the topic in the list (and re-sort if name changed)
       queryClient.setQueryData(
         QUERY_KEYS.TOPICS(subjectId),
         (old: { data: Topic[]; total: number } | undefined) => {
           if (!old) return old;
+          const updatedData = old.data.map((topic) =>
+            topic.id === topicId
+              ? { ...topic, ...newData, updatedAt: new Date().toISOString() }
+              : topic
+          );
+          // Re-sort alphabetically if name was changed
+          const sortedData = newData.name
+            ? updatedData.sort((a, b) => a.name.localeCompare(b.name, "cs"))
+            : updatedData;
           return {
             ...old,
-            data: old.data.map((topic) =>
-              topic.id === topicId
-                ? { ...topic, ...newData, updatedAt: new Date().toISOString() }
-                : topic
-            ),
+            data: sortedData,
           };
         }
       );

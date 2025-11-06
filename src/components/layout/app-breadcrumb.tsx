@@ -11,6 +11,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useSubject } from "@/lib/api/queries/subjects";
+import { useTopic } from "@/lib/api/queries/topics";
 
 // Custom page title overrides
 const pageTitleOverrides: Record<string, string> = {
@@ -20,18 +22,12 @@ const pageTitleOverrides: Record<string, string> = {
   settings: "Nastavení",
   flashcards: "Flashkarty",
   materials: "Materiály",
-  topics: "Témata",
 };
 
 function formatSegment(segment: string): string {
   // Check if we have a custom override
   if (pageTitleOverrides[segment]) {
     return pageTitleOverrides[segment];
-  }
-
-  // Check if it's a UUID (simple check)
-  if (segment.length === 36 && segment.split("-").length === 5) {
-    return "...";
   }
 
   // Capitalize first letter
@@ -41,6 +37,23 @@ function formatSegment(segment: string): string {
 export function AppBreadcrumb() {
   const pathname = usePathname();
   const segments = pathname.split("/").filter((segment) => segment !== "");
+
+  // Extract IDs from path for data fetching
+  const subjectIdIndex = segments.indexOf("predmety") + 1;
+  const subjectId =
+    subjectIdIndex > 0 && segments[subjectIdIndex]
+      ? Number(segments[subjectIdIndex])
+      : null;
+
+  const topicIdIndex = segments.indexOf("temata") + 1;
+  const topicId =
+    topicIdIndex > 0 && segments[topicIdIndex]
+      ? Number(segments[topicIdIndex])
+      : null;
+
+  // Fetch subject and topic data
+  const { data: subjectData } = useSubject(subjectId || 0);
+  const { data: topicData } = useTopic(topicId || 0);
 
   // Home only
   if (segments.length === 0) {
@@ -58,6 +71,53 @@ export function AppBreadcrumb() {
     );
   }
 
+  // Filter out "temata" from segments
+  const filteredSegments = segments.filter((segment) => segment !== "temata");
+
+  // Build breadcrumb path
+  const breadcrumbs: Array<{ title: string; href: string; isLast: boolean }> =
+    [];
+
+  filteredSegments.forEach((segment, index) => {
+    const isLast = index === filteredSegments.length - 1;
+
+    // Skip if this is a numeric ID that will be replaced by name
+    const isNumeric = /^\d+$/.test(segment);
+    if (isNumeric) {
+      // Check if this is a subject ID
+      if (
+        segments[segments.indexOf(segment) - 1] === "predmety" &&
+        subjectData?.data
+      ) {
+        breadcrumbs.push({
+          title: subjectData.data.name,
+          href: `/predmety/${segment}`,
+          isLast,
+        });
+      }
+      // Check if this is a topic ID
+      else if (
+        segments[segments.indexOf(segment) - 1] === "temata" &&
+        topicData?.data
+      ) {
+        breadcrumbs.push({
+          title: topicData.data.name,
+          href: `/predmety/${subjectId}/temata/${segment}`,
+          isLast,
+        });
+      }
+    } else {
+      // Regular segment (not an ID)
+      const originalIndex = segments.indexOf(segment);
+      const href = `/${segments.slice(0, originalIndex + 1).join("/")}`;
+      breadcrumbs.push({
+        title: formatSegment(segment),
+        href,
+        isLast,
+      });
+    }
+  });
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -72,26 +132,20 @@ export function AppBreadcrumb() {
         </BreadcrumbItem>
 
         {/* Path segments */}
-        {segments.map((segment, index) => {
-          const isLast = index === segments.length - 1;
-          const href = `/${segments.slice(0, index + 1).join("/")}`;
-          const title = formatSegment(segment);
-
-          return (
-            <BreadcrumbItem key={href}>
-              <BreadcrumbSeparator>
-                <ChevronRight className="size-4" />
-              </BreadcrumbSeparator>
-              {isLast ? (
-                <BreadcrumbPage>{title}</BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink asChild>
-                  <Link href={href}>{title}</Link>
-                </BreadcrumbLink>
-              )}
-            </BreadcrumbItem>
-          );
-        })}
+        {breadcrumbs.map((crumb, index) => (
+          <BreadcrumbItem key={`${crumb.href}-${index}`}>
+            <BreadcrumbSeparator>
+              <ChevronRight className="size-4" />
+            </BreadcrumbSeparator>
+            {crumb.isLast ? (
+              <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
+            ) : (
+              <BreadcrumbLink asChild>
+                <Link href={crumb.href}>{crumb.title}</Link>
+              </BreadcrumbLink>
+            )}
+          </BreadcrumbItem>
+        ))}
       </BreadcrumbList>
     </Breadcrumb>
   );
