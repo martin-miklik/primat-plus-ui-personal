@@ -16,15 +16,16 @@ const nextConfig: NextConfig = {
   async rewrites() {
     // Only proxy if MSW is disabled
     const mswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === "true";
-    
+
     if (mswEnabled) {
       // When MSW is enabled, don't proxy (let MSW handle it)
       return [];
     }
 
     // When MSW is disabled, proxy to real backend
-    const backendUrl = process.env.BACKEND_URL || "http://api.primat-plus.localhost";
-    
+    const backendUrl =
+      process.env.BACKEND_URL || "http://api.primat-plus.localhost";
+
     return [
       {
         source: "/api/v1/:path*",

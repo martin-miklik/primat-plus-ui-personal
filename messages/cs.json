@@ -280,6 +280,20 @@
         "website": "Web",
         "webpage": "Web"
       }
+    },
+    "summary": {
+      "title": "Souhrn",
+      "noContent": "Obsah není k dispozici",
+      "noContentDescription": "Tento materiál nemá dostupný souhrn pro export.",
+      "pdfDownloaded": "PDF úspěšně staženo",
+      "pdfDownloadedDescription": "Soubor {filename} byl stažen.",
+      "pdfError": "Chyba při generování PDF",
+      "pdfErrorDescription": "Nepodařilo se vygenerovat PDF dokument.",
+      "generating": "Generuje se PDF...",
+      "downloaded": "PDF staženo",
+      "exportPdf": "Exportovat jako PDF",
+      "emptyTitle": "Obsah není k dispozici",
+      "emptyDescription": "Tento materiál nemá dostupný souhrn. Zkuste to prosím později, když bude zpracování dokončeno."
     }
   },
   "upload": {
@@ -588,6 +602,43 @@
       "connecting": "Připojuji...",
       "disconnected": "Odpojeno",
       "reconnect": "Připojit znovu"
+    }
+  },
+  "flashcards": {
+    "page": {
+      "title": "Kartičky",
+      "description": "Procvičujte pomocí kartiček s automatickým opakováním.",
+      "generate": "Vygenerovat kartičky",
+      "practice": "Procvičovat",
+      "noDueCards": "Skvěle! Zatím nemáte žádné kartičky k procvičení."
+    },
+    "generate": {
+      "title": "Vygenerovat kartičky",
+      "description": "Nechte AI vytvořit kartičky z vašeho studijního materiálu.",
+      "count": "Počet kartiček",
+      "countDesc": "Vyberte kolik kartiček chcete vygenerovat (1-30)",
+      "cancel": "Zrušit",
+      "submit": "Vygenerovat",
+      "generating": "Generuje se..."
+    },
+    "practice": {
+      "title": "Procvičování",
+      "loading": "Načítám kartičky...",
+      "exit": "Ukončit",
+      "shortcuts": "Mezerník = Otočit kartičku, 1-4 = Ohodnotit",
+      "complete": "Skvělá práce!",
+      "completeDesc": "Dokončili jste procvičování kartiček.",
+      "returnToOverview": "Zpět na přehled"
+    },
+    "empty": {
+      "title": "Zatím žádné kartičky",
+      "description": "Začněte vygenerováním kartiček z tohoto studijního materiálu.",
+      "action": "Vygenerovat kartičky"
+    },
+    "error": {
+      "title": "Nepodařilo se načíst kartičky",
+      "description": "Došlo k chybě při načítání kartiček. Zkuste to prosím znovu.",
+      "retry": "Zkusit znovu"
     }
   }
 }

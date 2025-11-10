@@ -32,7 +32,12 @@ interface ChatInterfaceProps {
   topicId: number;
 }
 
-export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: ChatInterfaceProps) {
+export function ChatInterface({
+  sourceId,
+  sourceName,
+  subjectId,
+  topicId,
+}: ChatInterfaceProps) {
   const t = useTranslations("chat");
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -79,48 +84,61 @@ export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: Chat
   }, [messages]);
 
   // Handle events from either mock or real Centrifugo
-  const handleCentrifugoEvent = useCallback((event: {
-    type: "chat_started" | "gemini_chunk" | "gemini_complete" | "chat_error";
-    jobId: string;
-    content?: string;
-    error?: string;
-    timestamp: number;
-  }) => {
-    if (!activeJobId) return;
+  const handleCentrifugoEvent = useCallback(
+    (event: {
+      type: "chat_started" | "gemini_chunk" | "gemini_complete" | "chat_error";
+      jobId: string;
+      content?: string;
+      error?: string;
+      timestamp: number;
+    }) => {
+      if (!activeJobId) return;
 
-    switch (event.type) {
-      case "chat_started":
-        setStreaming(true);
-        break;
+      switch (event.type) {
+        case "chat_started":
+          setStreaming(true);
+          break;
 
-      case "gemini_chunk":
-        if (event.content) {
-          appendChunk(sourceId, `ai-${activeJobId}`, event.content);
-        }
-        break;
+        case "gemini_chunk":
+          if (event.content) {
+            appendChunk(sourceId, `ai-${activeJobId}`, event.content);
+          }
+          break;
 
-      case "gemini_complete":
-        completeMessage(sourceId, `ai-${activeJobId}`);
-        setStreaming(false);
-        setActiveChannel(null);
-        setActiveJobId(null);
-        break;
+        case "gemini_complete":
+          completeMessage(sourceId, `ai-${activeJobId}`);
+          setStreaming(false);
+          setActiveChannel(null);
+          setActiveJobId(null);
+          break;
 
-      case "chat_error":
-        setError(
-          sourceId,
-          `ai-${activeJobId}`,
-          event.error || t("errors.generic")
-        );
-        setStreaming(false);
-        setActiveChannel(null);
-        setActiveJobId(null);
-        toast.error(t("errors.sendFailed"), {
-          description: event.error || t("errors.generic"),
-        });
-        break;
-    }
-  }, [activeJobId, sourceId, appendChunk, completeMessage, setStreaming, setActiveChannel, setActiveJobId, setError, t]);
+        case "chat_error":
+          setError(
+            sourceId,
+            `ai-${activeJobId}`,
+            event.error || t("errors.generic")
+          );
+          setStreaming(false);
+          setActiveChannel(null);
+          setActiveJobId(null);
+          toast.error(t("errors.sendFailed"), {
+            description: event.error || t("errors.generic"),
+          });
+          break;
+      }
+    },
+    [
+      activeJobId,
+      sourceId,
+      appendChunk,
+      completeMessage,
+      setStreaming,
+      setActiveChannel,
+      setActiveJobId,
+      setError,
+      t,
+    ]
+  );
 
   // Phase 2: Real Centrifugo subscription
   useChatSubscription({
@@ -133,7 +151,10 @@ export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: Chat
   useEffect(() => {
     if (USE_REAL_CENTRIFUGO || !activeChannel) return;
 
-    const cleanup = listenToMockCentrifugo(activeChannel, handleCentrifugoEvent);
+    const cleanup = listenToMockCentrifugo(
+      activeChannel,
+      handleCentrifugoEvent
+    );
     return cleanup;
   }, [activeChannel, handleCentrifugoEvent]);
 
@@ -169,17 +190,25 @@ export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: Chat
           <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
             {/* Back button */}
             <Link href={`/predmety/${subjectId}/temata/${topicId}`}>
-              <Button variant="ghost" size="icon" className="h-8 w-8 md:h-9 md:w-9 flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 md:h-9 md:w-9 flex-shrink-0"
+              >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
-            
+
             {/* Source name and subtitle */}
             <div className="min-w-0 flex-1">
-              <h2 className="text-base md:text-lg font-semibold truncate">{sourceName}</h2>
-              <p className="text-xs md:text-sm text-muted-foreground hidden md:block">{t("subtitle")}</p>
+              <h2 className="text-base md:text-lg font-semibold truncate">
+                {sourceName}
+              </h2>
+              <p className="text-xs md:text-sm text-muted-foreground hidden md:block">
+                {t("subtitle")}
+              </p>
             </div>
-            
+
             {/* Show connection status only in Phase 2 */}
             {USE_REAL_CENTRIFUGO && (
               <ConnectionStatus
@@ -189,7 +218,7 @@ export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: Chat
               />
             )}
           </div>
-          
+
           {/* Model toggle */}
           <ModelToggle
             value={selectedModel}
@@ -231,4 +260,3 @@ export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: Chat
     </div>
   );
 }
-

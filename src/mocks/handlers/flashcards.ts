@@ -1,45 +1,14 @@
 import { http, HttpResponse, delay } from "msw";
-import {
-  mockFlashcards,
-  createMockFlashcard,
-} from "@/mocks/fixtures/flashcards";
+import { mockFlashcards } from "@/mocks/fixtures/flashcards";
 import { Flashcard } from "@/lib/validations/flashcard";
 import { apiPath } from "@/mocks/config";
 
-const flashcards = [...mockFlashcards];
-
-// SM-2 algorithm for spaced repetition
-function calculateNextReview(
-  quality: number,
-  easeFactor: number,
-  interval: number
-): { easeFactor: number; interval: number; nextReviewAt: string } {
-  let newEaseFactor =
-    easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-  if (newEaseFactor < 1.3) newEaseFactor = 1.3;
-
-  let newInterval: number;
-  if (quality < 3) {
-    newInterval = 1;
-  } else {
-    if (interval === 0) {
-      newInterval = 1;
-    } else if (interval === 1) {
-      newInterval = 6;
-    } else {
-      newInterval = Math.round(interval * newEaseFactor);
-    }
-  }
-
-  const nextReviewAt = new Date(
-    Date.now() + newInterval * 24 * 60 * 60 * 1000
-  ).toISOString();
-
-  return { easeFactor: newEaseFactor, interval: newInterval, nextReviewAt };
-}
+// In-memory store for flashcards (mutable for MSW)
+// eslint-disable-next-line prefer-const
+let flashcards = [...mockFlashcards];
 
 export const flashcardsHandlers = [
-  // GET /api/v1/sources/:sourceId/flashcards - List flashcards for a source
+  // GET /api/v1/sources/:sourceId/flashcards - Get all flashcards for a source
   http.get(apiPath("/sources/:sourceId/flashcards"), async ({ params }) => {
     await delay(250);
 
@@ -49,175 +18,138 @@ export const flashcardsHandlers = [
     );
 
     return HttpResponse.json({
-      data: sourceFlashcards,
-      total: sourceFlashcards.length,
+      data: {
+        sourceId: Number(sourceId),
+        count: sourceFlashcards.length,
+        flashcards: sourceFlashcards,
+      },
     });
   }),
 
-  // GET /api/v1/flashcards/:id - Get single flashcard
-  http.get(apiPath("/flashcards/:id"), async ({ params }) => {
-    await delay(200);
-
-    const { id } = params;
-    const flashcard = flashcards.find((f) => f.id === id);
-
-    if (!flashcard) {
-      return HttpResponse.json(
-        { error: "Kartička nenalezena", code: "NOT_FOUND" },
-        { status: 404 }
-      );
-    }
-
-    return HttpResponse.json({ data: flashcard });
-  }),
-
-  // POST /api/v1/sources/:sourceId/flashcards - Create flashcard
+  // POST /api/v1/sources/:sourceId/generate-flashcards - Generate flashcards
   http.post(
-    apiPath("/sources/:sourceId/flashcards"),
+    apiPath("/sources/:sourceId/generate-flashcards"),
     async ({ params, request }) => {
-      await delay(400);
+      await delay(2000); // Simulate AI generation time
 
       const { sourceId } = params;
       const body = (await request.json()) as Record<string, unknown>;
 
-      if (!body.question || typeof body.question !== "string") {
+      if (!body.count || typeof body.count !== "number") {
         return HttpResponse.json(
-          { error: "Otázka je povinná", code: "VALIDATION_ERROR" },
+          { error: "Počet kartiček je povinný", code: "VALIDATION_ERROR" },
           { status: 400 }
         );
       }
 
-      if (!body.answer || typeof body.answer !== "string") {
+      const count = body.count as number;
+      if (count < 1 || count > 30) {
         return HttpResponse.json(
-          { error: "Odpověď je povinná", code: "VALIDATION_ERROR" },
+          {
+            error: "Počet kartiček musí být mezi 1 a 30",
+            code: "VALIDATION_ERROR",
+          },
           { status: 400 }
         );
       }
 
-      const newFlashcard = createMockFlashcard({
-        sourceId: Number(sourceId),
-        question: body.question,
-        answer: body.answer,
-        difficulty: (body.difficulty as "easy" | "medium" | "hard") || "medium",
-        tags: (body.tags as string[]) || [],
+      // Generate mock flashcards
+      const newFlashcards: Flashcard[] = [];
+      for (let i = 0; i < count; i++) {
+        const newCard: Flashcard = {
+          id: `generated-${Date.now()}-${i}`,
+          sourceId: Number(sourceId),
+          frontSide: `Vygenerovaná otázka ${i + 1}`,
+          backSide: `Vygenerovaná odpověď pro otázku ${i + 1}`,
+          nextRepetitionDate: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: null,
+        };
+        newFlashcards.push(newCard);
+        flashcards.push(newCard);
+      }
+
+      return HttpResponse.json({
+        data: {
+          sourceId: Number(sourceId),
+          count: newFlashcards.length,
+          flashcards: newFlashcards,
+        },
       });
-
-      flashcards.push(newFlashcard);
-
-      return HttpResponse.json(
-        { data: newFlashcard, message: "Kartička byla úspěšně vytvořena" },
-        { status: 201 }
-      );
     }
   ),
 
-  // POST /api/v1/flashcards/:id/review - Review flashcard (spaced repetition)
-  http.post(apiPath("/flashcards/:id/review"), async ({ params, request }) => {
-    await delay(200);
+  // GET /api/v1/sources/:sourceId/flashcards/repeat - Get flashcards due for review
+  http.get(
+    apiPath("/sources/:sourceId/flashcards/repeat"),
+    async ({ params }) => {
+      await delay(250);
 
-    const { id } = params;
-    const body = (await request.json()) as Record<string, unknown>;
-    const flashcardIndex = flashcards.findIndex((f) => f.id === id);
-
-    if (flashcardIndex === -1) {
-      return HttpResponse.json(
-        { error: "Kartička nenalezena", code: "NOT_FOUND" },
-        { status: 404 }
+      const { sourceId } = params;
+      const now = new Date().toISOString();
+      const dueFlashcards = flashcards.filter(
+        (f) => f.sourceId === Number(sourceId) && f.nextRepetitionDate <= now
       );
-    }
 
-    const quality = body.quality as number;
-    if (typeof quality !== "number" || quality < 0 || quality > 5) {
-      return HttpResponse.json(
-        { error: "Kvalita musí být mezi 0 a 5", code: "VALIDATION_ERROR" },
-        { status: 400 }
+      return HttpResponse.json({
+        data: {
+          sourceId: Number(sourceId),
+          count: dueFlashcards.length,
+          flashcards: dueFlashcards,
+        },
+      });
+    }
+  ),
+
+  // PUT /api/v1/sources/:sourceId/flashcards/:flashcardId/next-repetition - Update next repetition
+  http.put(
+    apiPath("/sources/:sourceId/flashcards/:flashcardId/next-repetition"),
+    async ({ params, request }) => {
+      await delay(200);
+
+      const { sourceId, flashcardId } = params;
+      const body = (await request.json()) as Record<string, unknown>;
+
+      if (!body.minutesOffset || typeof body.minutesOffset !== "number") {
+        return HttpResponse.json(
+          {
+            error: "Počet minut je povinný",
+            code: "VALIDATION_ERROR",
+          },
+          { status: 400 }
+        );
+      }
+
+      const flashcardIndex = flashcards.findIndex(
+        (f) => f.id === flashcardId && f.sourceId === Number(sourceId)
       );
-    }
 
-    const flashcard = flashcards[flashcardIndex];
-    const nextReview = calculateNextReview(
-      quality,
-      flashcard.easeFactor,
-      flashcard.interval
-    );
+      if (flashcardIndex === -1) {
+        return HttpResponse.json(
+          { error: "Kartička nenalezena", code: "NOT_FOUND" },
+          { status: 404 }
+        );
+      }
 
-    const updatedFlashcard: Flashcard = {
-      ...flashcard,
-      ...nextReview,
-      reviewCount: flashcard.reviewCount + 1,
-      updatedAt: new Date().toISOString(),
-    };
-
-    flashcards[flashcardIndex] = updatedFlashcard;
-
-    return HttpResponse.json({
-      data: updatedFlashcard,
-      message: "Recenze byla úspěšně zaznamenána",
-    });
-  }),
-
-  // PATCH /api/v1/flashcards/:id - Update flashcard
-  http.patch(apiPath("/flashcards/:id"), async ({ params, request }) => {
-    await delay(300);
-
-    const { id } = params;
-    const body = (await request.json()) as Record<string, unknown>;
-    const flashcardIndex = flashcards.findIndex((f) => f.id === id);
-
-    if (flashcardIndex === -1) {
-      return HttpResponse.json(
-        { error: "Kartička nenalezena", code: "NOT_FOUND" },
-        { status: 404 }
+      const flashcard = flashcards[flashcardIndex];
+      const minutesOffset = body.minutesOffset as number;
+      const currentDate = new Date(flashcard.nextRepetitionDate);
+      const newDate = new Date(
+        currentDate.getTime() + minutesOffset * 60 * 1000
       );
+
+      const updatedFlashcard: Flashcard = {
+        ...flashcard,
+        nextRepetitionDate: newDate.toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      flashcards[flashcardIndex] = updatedFlashcard;
+
+      return HttpResponse.json({
+        data: updatedFlashcard,
+        message: "Datum dalšího opakování bylo aktualizováno",
+      });
     }
-
-    const updatedFlashcard: Flashcard = {
-      ...flashcards[flashcardIndex],
-      ...body,
-      updatedAt: new Date().toISOString(),
-    };
-
-    flashcards[flashcardIndex] = updatedFlashcard;
-
-    return HttpResponse.json({
-      data: updatedFlashcard,
-      message: "Kartička byla úspěšně aktualizována",
-    });
-  }),
-
-  // DELETE /api/v1/flashcards/:id - Delete flashcard
-  http.delete(apiPath("/flashcards/:id"), async ({ params }) => {
-    await delay(300);
-
-    const { id } = params;
-    const flashcardIndex = flashcards.findIndex((f) => f.id === id);
-
-    if (flashcardIndex === -1) {
-      return HttpResponse.json(
-        { error: "Kartička nenalezena", code: "NOT_FOUND" },
-        { status: 404 }
-      );
-    }
-
-    flashcards.splice(flashcardIndex, 1);
-
-    return HttpResponse.json({
-      message: "Kartička byla úspěšně smazána",
-    });
-  }),
-
-  // GET /api/v1/flashcards/due - Get due flashcards for review
-  http.get(apiPath("/flashcards/due"), async () => {
-    await delay(300);
-
-    const now = new Date().toISOString();
-    const dueFlashcards = flashcards.filter(
-      (f) => !f.nextReviewAt || f.nextReviewAt <= now
-    );
-
-    return HttpResponse.json({
-      data: dueFlashcards,
-      total: dueFlashcards.length,
-    });
-  }),
+  ),
 ];

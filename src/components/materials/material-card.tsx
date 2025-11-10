@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Source } from "@/lib/validations/source";
 import { Badge } from "@/components/ui/badge";
 import { Typography } from "@/components/ui/Typography";
+import { SummarySheet } from "@/components/materials/summary-sheet";
 
 interface MaterialCardProps {
   material: Source;
@@ -64,6 +66,7 @@ const SOURCE_CONFIG = {
 
 export function MaterialCard({ material, subjectId }: MaterialCardProps) {
   const t = useTranslations("sources");
+  const [summarySheetOpen, setSummarySheetOpen] = useState(false);
 
   // Get config based on type, fallback to document
   const getSourceConfig = () => {
@@ -206,8 +209,8 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
               disabled={!isProcessed || !subjectId}
             >
               {isProcessed && subjectId ? (
-                <Link 
-                  href={`/predmety/${subjectId}/temata/${material.topicId}/zdroje/${material.id}/testy`} 
+                <Link
+                  href={`/predmety/${subjectId}/temata/${material.topicId}/zdroje/${material.id}/testy`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <FileBarChart className="h-3.5 w-3.5" />
@@ -225,10 +228,13 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
               variant="outline"
               size="sm"
               className="gap-1.5 text-xs h-9 rounded-md border-1 border-green-500  hover:bg-green-50 dark:border-green-600 dark:hover:bg-green-950/20"
-              disabled={!isProcessed}
+              disabled={!isProcessed || !subjectId}
             >
-              {isProcessed ? (
-                <Link href={`#`} onClick={(e) => e.stopPropagation()}>
+              {isProcessed && subjectId ? (
+                <Link
+                  href={`/predmety/${subjectId}/temata/${material.topicId}/zdroje/${material.id}/karticky`}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <BookOpen className="h-3.5 w-3.5" />
                   {t("card.flashcards")}
                 </Link>
@@ -240,23 +246,17 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
               )}
             </Button>
             <Button
-              asChild
               variant="outline"
               size="sm"
               className="gap-1.5 text-xs h-9 rounded-md border-1 border-purple-500 hover:bg-purple-50 dark:border-purple-600 dark:hover:bg-purple-950/20"
               disabled={!isProcessed}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSummarySheetOpen(true);
+              }}
             >
-              {isProcessed ? (
-                <Link href={`#`} onClick={(e) => e.stopPropagation()}>
-                  <FileText className="h-3.5 w-3.5" />
-                  {t("card.summary")}
-                </Link>
-              ) : (
-                <span>
-                  <FileText className="h-3.5 w-3.5" />
-                  {t("card.summary")}
-                </span>
-              )}
+              <FileText className="h-3.5 w-3.5" />
+              {t("card.summary")}
             </Button>
             <Button
               asChild
@@ -266,8 +266,8 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
               disabled={!isProcessed || !subjectId}
             >
               {isProcessed && subjectId ? (
-                <Link 
-                  href={`/predmety/${subjectId}/temata/${material.topicId}/zdroje/${material.id}/chat`} 
+                <Link
+                  href={`/predmety/${subjectId}/temata/${material.topicId}/zdroje/${material.id}/chat`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
@@ -283,6 +283,13 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
           </div>
         </div>
       </div>
+
+      {/* Summary Sheet */}
+      <SummarySheet
+        source={material}
+        open={summarySheetOpen}
+        onOpenChange={setSummarySheetOpen}
+      />
     </div>
   );
 }

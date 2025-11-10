@@ -16,7 +16,61 @@ export const mockSources: Source[] = [
     jobId: "job-1234567890-abc123",
     startTime: null,
     endTime: null,
-    context: "Quadratic equations are polynomials of degree 2...",
+    context: `# Kvadratické rovnice
+
+## Úvod do kvadratických rovnic
+
+Kvadratická rovnice je algebraická rovnice druhého stupně, která má obecný tvar:
+
+\`ax² + bx + c = 0\`
+
+kde **a ≠ 0**, a koeficienty a, b, c jsou reálná čísla.
+
+### Základní pojmy
+
+- **Diskriminant**: Hodnota D = b² - 4ac určuje počet a typ řešení
+- **Kořeny rovnice**: Hodnoty x, které splňují rovnici
+- **Parabola**: Grafické znázornění kvadratické funkce
+
+## Metody řešení
+
+### 1. Rozklad na součin
+
+Pokud lze levou stranu rozložit na součin:
+
+\`\`\`
+(x - x₁)(x - x₂) = 0
+\`\`\`
+
+### 2. Kvadratický vzorec
+
+Univerzální vzorec pro řešení:
+
+\`x = (-b ± √(b² - 4ac)) / 2a\`
+
+### 3. Doplnění na čtverec
+
+Úprava rovnice do tvaru:
+
+\`(x + p)² = q\`
+
+## Typy řešení podle diskriminantu
+
+1. **D > 0**: Dva různé reálné kořeny
+2. **D = 0**: Jeden dvojnásobný reálný kořen
+3. **D < 0**: Dva komplexně sdružené kořeny
+
+> **Důležité**: Před použitím vzorce je třeba ověřit, že a ≠ 0.
+
+## Příklady použití
+
+- Fyzika: Rovnoměrně zrychlený pohyb
+- Geometrie: Výpočet obsahu a obvodu
+- Ekonomie: Optimalizační úlohy
+
+---
+
+*Tento materiál byl zpracován pro výukové účely.*`,
     contextLength: 5000,
     errorMessage: null,
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
@@ -130,7 +184,73 @@ export const mockSources: Source[] = [
     jobId: "job-1234567894-abc127",
     startTime: null,
     endTime: null,
-    context: "Common sorting algorithms include bubble sort, quick sort...",
+    context: `# Třídící algoritmy
+
+## Úvod
+
+Třídící algoritmy jsou fundamentální součástí informatiky a používají se k uspořádání dat podle určitého klíče.
+
+### Časová složitost
+
+Při hodnocení algoritmů rozlišujeme:
+
+- **Best case**: Nejlepší možný případ
+- **Average case**: Průměrný případ
+- **Worst case**: Nejhorší možný případ
+
+## Základní třídící algoritmy
+
+### 1. Bubble Sort
+
+Jednoduchý algoritmus, který opakovaně prochází seznam a porovnává *sousední* prvky.
+
+\`\`\`python
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(0, n-i-1):
+            if arr[j] > arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+\`\`\`
+
+**Složitost**: O(n²)
+
+### 2. Quick Sort
+
+Efektivní algoritmus založený na principu "rozděl a panuj".
+
+**Postup**:
+
+1. Vyber pivot
+2. Rozděl pole na dvě části
+3. Rekurzivně aplikuj na obě části
+
+**Složitost**: O(n log n) průměrně, O(n²) nejhůře
+
+### 3. Merge Sort
+
+Stabilní třídící algoritmus s garantovanou složitostí O(n log n).
+
+> Merge Sort je často preferován pro velké datové soubory, kde je důležitá stabilita.
+
+## Porovnání algoritmů
+
+| Algoritmus | Časová složitost | Paměťová složitost | Stabilní |
+|------------|------------------|-------------------|----------|
+| Bubble Sort | O(n²) | O(1) | Ano |
+| Quick Sort | O(n log n) | O(log n) | Ne |
+| Merge Sort | O(n log n) | O(n) | Ano |
+
+## Kdy použít který algoritmus?
+
+- **Malá data**: Insertion Sort
+- **Velká data**: Quick Sort nebo Merge Sort
+- **Potřeba stability**: Merge Sort
+- **Omezená paměť**: Heap Sort
+
+---
+
+*Poznámka: Výběr správného algoritmu závisí na konkrétním použití.*`,
     contextLength: 3200,
     errorMessage: null,
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
