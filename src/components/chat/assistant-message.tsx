@@ -29,7 +29,7 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
       setCopied(true);
       toast.success(t("actions.copied"));
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error("Nepodařilo se zkopírovat");
     }
   };

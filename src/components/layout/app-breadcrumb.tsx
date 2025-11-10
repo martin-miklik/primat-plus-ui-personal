@@ -91,7 +91,7 @@ export function AppBreadcrumb() {
     [];
 
   // Track which positions we've already processed to avoid duplicates
-  let processedOriginalIndices = new Set<number>();
+  const processedOriginalIndices = new Set<number>();
 
   filteredSegments.forEach((segment, index) => {
     const isLast = index === filteredSegments.length - 1;

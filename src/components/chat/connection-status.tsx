@@ -1,6 +1,6 @@
 "use client";
 
-import { Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { WifiOff, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";

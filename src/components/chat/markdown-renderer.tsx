@@ -76,7 +76,12 @@ export function MarkdownRenderer({
         remarkPlugins={[remarkGfm]}
         components={{
           // Code blocks
-          code({ node, inline, className, children, ...props }) {
+          code(props) {
+            const { inline, className, children, ...rest } = props as {
+              inline?: boolean;
+              className?: string;
+              children?: React.ReactNode;
+            };
             const match = /language-(\w+)/.exec(className || "");
             const codeContent = String(children).replace(/\n$/, "");
 
@@ -90,7 +95,7 @@ export function MarkdownRenderer({
                   "bg-muted px-1.5 py-0.5 rounded text-sm font-mono",
                   className
                 )}
-                {...props}
+                {...rest}
               >
                 {children}
               </code>

@@ -14,6 +14,7 @@ interface ChatPageProps {
 }
 
 export default function ChatPage({ params }: ChatPageProps) {
+  const t = useTranslations();
   const {
     id: subjectIdParam,
     topicId: topicIdParam,
@@ -30,7 +31,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-muted-foreground">Načítání...</div>
+        <div className="text-muted-foreground">{t("common.loading")}</div>
       </div>
     );
   }
@@ -39,7 +40,7 @@ export default function ChatPage({ params }: ChatPageProps) {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-4 p-4">
         <div className="text-destructive text-center">
-          Nepodařilo se načíst zdroj
+          {t("sources.error.title")}
         </div>
       </div>
     );

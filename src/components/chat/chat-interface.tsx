@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
@@ -79,7 +79,7 @@ export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: Chat
   }, [messages]);
 
   // Handle events from either mock or real Centrifugo
-  const handleCentrifugoEvent = (event: {
+  const handleCentrifugoEvent = useCallback((event: {
     type: "chat_started" | "gemini_chunk" | "gemini_complete" | "chat_error";
     jobId: string;
     content?: string;
@@ -120,7 +120,7 @@ export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: Chat
         });
         break;
     }
-  };
+  }, [activeJobId, sourceId, appendChunk, completeMessage, setStreaming, setActiveChannel, setActiveJobId, setError, t]);
 
   // Phase 2: Real Centrifugo subscription
   useChatSubscription({
@@ -135,11 +135,7 @@ export function ChatInterface({ sourceId, sourceName, subjectId, topicId }: Chat
 
     const cleanup = listenToMockCentrifugo(activeChannel, handleCentrifugoEvent);
     return cleanup;
-  }, [
-    activeChannel,
-    USE_REAL_CENTRIFUGO,
-    // handleCentrifugoEvent is defined above and uses these dependencies
-  ]);
+  }, [activeChannel, handleCentrifugoEvent]);
 
   const handleSend = async (message: string) => {
     // Add user message to store
