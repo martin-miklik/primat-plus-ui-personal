@@ -213,7 +213,7 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
                     }}
                     layout
                   >
-                    <MaterialCard material={source} />
+                    <MaterialCard material={source} subjectId={subjectId} />
                   </motion.div>
                 ))}
               </motion.div>

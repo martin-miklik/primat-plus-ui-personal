@@ -24,6 +24,7 @@ import { Typography } from "@/components/ui/Typography";
 
 interface MaterialCardProps {
   material: Source;
+  subjectId?: number;
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
   onClick?: (id: number) => void;
@@ -61,7 +62,7 @@ const SOURCE_CONFIG = {
   },
 };
 
-export function MaterialCard({ material }: MaterialCardProps) {
+export function MaterialCard({ material, subjectId }: MaterialCardProps) {
   const t = useTranslations("sources");
 
   // Get config based on type, fallback to document
@@ -202,10 +203,13 @@ export function MaterialCard({ material }: MaterialCardProps) {
               variant="outline"
               size="sm"
               className="gap-1.5 text-xs h-9 rounded-md border-1 border-blue-500 hover:bg-blue-50 dark:border-blue-600 dark:hover:bg-blue-950/20"
-              disabled={!isProcessed}
+              disabled={!isProcessed || !subjectId}
             >
-              {isProcessed ? (
-                <Link href={`#`} onClick={(e) => e.stopPropagation()}>
+              {isProcessed && subjectId ? (
+                <Link 
+                  href={`/predmety/${subjectId}/temata/${material.topicId}/zdroje/${material.id}/testy`} 
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <FileBarChart className="h-3.5 w-3.5" />
                   {t("card.tests")}
                 </Link>
@@ -259,10 +263,13 @@ export function MaterialCard({ material }: MaterialCardProps) {
               variant="outline"
               size="sm"
               className="gap-1.5 text-xs h-9 rounded-md border-1 border-orange-500  hover:bg-orange-50 dark:border-orange-600  dark:hover:bg-orange-950/20"
-              disabled={!isProcessed}
+              disabled={!isProcessed || !subjectId}
             >
-              {isProcessed ? (
-                <Link href={`#`} onClick={(e) => e.stopPropagation()}>
+              {isProcessed && subjectId ? (
+                <Link 
+                  href={`/predmety/${subjectId}/temata/${material.topicId}/zdroje/${material.id}/chat`} 
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MessageSquare className="h-3.5 w-3.5" />
                   {t("card.aiChat")}
                 </Link>

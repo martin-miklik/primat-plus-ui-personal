@@ -7,6 +7,7 @@ import { testsHandlers } from "./tests";
 import { authHandlers } from "./auth";
 import { uploadHandlers } from "./upload";
 import { dashboardHandlers } from "./dashboard";
+import { chatHandlers } from "./chat";
 import { apiPath } from "@/mocks/config";
 
 // Export all MSW request handlers
@@ -19,6 +20,7 @@ export const handlers = [
   ...testsHandlers,
   ...authHandlers,
   ...uploadHandlers,
+  ...chatHandlers,
 
   // Health check endpoint (using v1)
   http.get(apiPath("/health"), () => {

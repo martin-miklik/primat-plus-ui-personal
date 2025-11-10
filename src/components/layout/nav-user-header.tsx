@@ -4,7 +4,7 @@ import { LogOut, Settings, User, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/stores/auth-store";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,26 +27,13 @@ export function NavUserHeader() {
     router.push("/login");
   };
 
-  const userInitials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "U";
-
   if (!user) return null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="gap-2 px-2">
-          <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarFallback className="rounded-lg text-xs">
-              {userInitials}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar />
           <div className="hidden md:flex flex-col items-start text-sm leading-tight">
             <span className="font-semibold">{user.name}</span>
             <span className="text-muted-foreground text-xs">
@@ -56,18 +43,10 @@ export function NavUserHeader() {
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56"
-        align="end"
-        sideOffset={8}
-      >
+      <DropdownMenuContent className="w-56" align="end" sideOffset={8}>
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg">
-                {userInitials}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar />
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">{user.name}</span>
               <span className="text-muted-foreground truncate text-xs">
@@ -82,9 +61,7 @@ export function NavUserHeader() {
             <Settings className="mr-2 size-4" />
             {tNav("settings")}
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => router.push("/nastaveni/profile")}
-          >
+          <DropdownMenuItem onClick={() => router.push("/nastaveni/profile")}>
             <User className="mr-2 size-4" />
             {t("profile")}
           </DropdownMenuItem>
@@ -98,4 +75,3 @@ export function NavUserHeader() {
     </DropdownMenu>
   );
 }
-

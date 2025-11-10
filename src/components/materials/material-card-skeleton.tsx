@@ -11,9 +11,7 @@ import {
   BookOpen,
   MessageSquare,
   FileBarChart,
-  Upload,
   AlertCircle,
-  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +23,7 @@ import { Typography } from "@/components/ui/Typography";
 
 interface MaterialCardSkeletonProps {
   uploadFile?: UploadFile;
-  onCancel: (id: string) => void;
+  onCancel?: (id: string) => void;
 }
 
 // Source type configuration matching MaterialCard
@@ -62,7 +60,6 @@ const SOURCE_CONFIG = {
 
 export function MaterialCardSkeleton({
   uploadFile,
-  onCancel,
 }: MaterialCardSkeletonProps) {
   const t = useTranslations("sources");
   const tUpload = useTranslations("upload");
@@ -87,7 +84,6 @@ export function MaterialCardSkeleton({
 
   const isError = uploadFile.status === "error";
   const isUploading = uploadFile.status === "uploading";
-  const isProcessing = uploadFile.status === "processing";
 
   // Only show badge for processing and error states (not during upload)
   const getStatusBadge = () => {

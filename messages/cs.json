@@ -417,5 +417,177 @@
     "defaultMessage": "Došlo k neočekávané chybě",
     "tryAgain": "Zkusit znovu",
     "reloadPage": "Obnovit stránku"
+  },
+  "tests": {
+    "page": {
+      "title": "Testy",
+      "description": "Generujte a absolvujte testy ze studijních materiálů.",
+      "generateTest": "Vygenerovat test"
+    },
+    "status": {
+      "ready": "Připraven",
+      "generating": "Generuje se",
+      "failed": "Chyba"
+    },
+    "difficulty": {
+      "easy": "Lehké",
+      "medium": "Střední",
+      "hard": "Těžké"
+    },
+    "questionType": {
+      "multiple_choice_single": "Výběr jedné odpovědi",
+      "multiple_choice_multiple": "Výběr více odpovědí",
+      "true_false": "Pravda/Nepravda",
+      "open_ended": "Otevřená otázka"
+    },
+    "reviewMode": {
+      "during": "Zobrazit ihned",
+      "duringDesc": "Zobrazí správnou odpověď a vysvětlení ihned po zodpovězení každé otázky.",
+      "after": "Zobrazit po dokončení",
+      "afterDesc": "Zobrazí správné odpovědi a vysvětlení až po dokončení celého testu."
+    },
+    "card": {
+      "title": "Test ({count} otázek)",
+      "noAttempts": "Žádné pokusy",
+      "attempts": "{count} pokusů",
+      "start": "Spustit test"
+    },
+    "generate": {
+      "title": "Vygenerovat nový test",
+      "description": "Nastavte parametry testu a nechte AI vygenerovat otázky z vašich studijních materiálů.",
+      "questionCount": "Počet otázek",
+      "questionCountDesc": "Vyberte počet otázek v testu (5-50)",
+      "difficulty": "Obtížnost",
+      "difficultyDesc": "Vyberte úrovně obtížnosti, které chcete zahrnout",
+      "questionTypes": "Typy otázek",
+      "questionTypesDesc": "Vyberte typy otázek, které chcete zahrnout",
+      "reviewMode": "Režim zobrazení odpovědí",
+      "cancel": "Zrušit",
+      "submit": "Vygenerovat test",
+      "generating": "Generuje se..."
+    },
+    "progress": {
+      "generating": "Generuje se test",
+      "generatingDesc": "AI vytváří otázky z vašich studijních materiálů...",
+      "ready": "Test je připraven!",
+      "readyDesc": "Váš test byl úspěšně vygenerován a je připraven k absolvování.",
+      "failed": "Generování selhalo",
+      "failedDesc": "Při generování testu došlo k chybě.",
+      "stage1": "Analyzuji studijní materiály...",
+      "stage2": "Vytvářím otázky...",
+      "stage3": "Optimalizuji obtížnost...",
+      "stage4": "Dokončuji test..."
+    },
+    "taking": {
+      "title": "Absolvování testu",
+      "loading": "Načítám test...",
+      "progress": "Postup",
+      "answered": "zodpovězeno",
+      "previous": "Předchozí",
+      "next": "Další",
+      "complete": "Dokončit test",
+      "goToQuestion": "Přejít na otázku",
+      "notAllAnswered": "Nezodpověděli jste všechny otázky. Dokončit test můžete i s prázdnými odpověďmi."
+    },
+    "question": {
+      "selectMultiple": "Vyberte všechny správné odpovědi",
+      "submit": "Odeslat odpověď",
+      "true": "Pravda",
+      "false": "Nepravda",
+      "openEndedHint": "Napište podrobnou odpověď vlastními slovy.",
+      "openEndedPlaceholder": "Začněte psát svou odpověď...",
+      "characterCount": "{count} znaků",
+      "minCharactersHint": "Snažte se napsat alespoň 50 znaků pro komplexní odpověď"
+    },
+    "feedback": {
+      "correct": "Správně!",
+      "incorrect": "Nesprávně",
+      "correctAnswer": "Správná odpověď",
+      "explanation": "Vysvětlení",
+      "aiFeedback": "AI hodnocení",
+      "score": "Hodnocení",
+      "evaluating": "Vyhodnocuje se...",
+      "evaluatingDesc": "AI vyhodnocuje vaši odpověď...",
+      "saved": "Odpověď uložena",
+      "savedDesc": "Vaše odpověď byla uložena. Výsledky uvidíte po dokončení testu."
+    },
+    "results": {
+      "title": "Výsledky testu",
+      "description": "Zde je přehled vašeho výkonu v testu.",
+      "loading": "Načítám výsledky...",
+      "gradeExcellent": "Výborně!",
+      "gradeGood": "Velmi dobře",
+      "gradeFair": "Dobře",
+      "gradeNeedsWork": "Potřebujete procvičit",
+      "correct": "{count} správných",
+      "incorrect": "{count} nesprávných",
+      "evaluating": "Některé odpovědi se stále vyhodnocují",
+      "evaluatingDesc": "{count} otevřených otázek je stále vyhodnocováno pomocí AI. Vraťte se později pro kompletní výsledky.",
+      "detailedResults": "Podrobné výsledky",
+      "question": "Otázka",
+      "yourAnswer": "Vaše odpověď",
+      "correctAnswer": "Správná odpověď",
+      "explanation": "Vysvětlení",
+      "aiFeedback": "AI hodnocení",
+      "score": "Hodnocení",
+      "noAnswer": "Nezodpovězeno",
+      "stillEvaluating": "Tato otázka se stále vyhodnocuje...",
+      "backHome": "Zpět na hlavní stránku",
+      "reviewAnswers": "Přehled odpovědí"
+    },
+    "empty": {
+      "title": "Zatím žádné testy",
+      "description": "Začněte vygenerováním prvního testu z tohoto studijního materiálu.",
+      "action": "Vygenerovat test"
+    },
+    "error": {
+      "title": "Nepodařilo se načíst testy",
+      "description": "Došlo k chybě při načítání testů. Zkuste to prosím znovu.",
+      "retry": "Zkusit znovu"
+    }
+  },
+  "chat": {
+    "title": "AI Chat",
+    "subtitle": "AI Asistent",
+    "backToSources": "Zpět na zdroje",
+    "models": {
+      "fast": "Rychlý",
+      "accurate": "Přesný",
+      "fastTooltip": "Rychlé odpovědi s gemini-flash",
+      "accurateTooltip": "Detailní analýza s gemini-pro"
+    },
+    "input": {
+      "placeholder": "Zeptejte se na cokoli o tomto materiálu...",
+      "send": "Odeslat",
+      "hint": "Enter = odeslat, Shift+Enter = nový řádek",
+      "disabled": "Počkejte na dokončení odpovědi..."
+    },
+    "welcome": {
+      "message": "Ahoj! Jsem tvůj AI asistent pro materiál **{sourceName}**. Mohu ti pomoci s otázkami, vysvětlením pojmů nebo shrnutím obsahu. Na co se chceš zeptat?"
+    },
+    "status": {
+      "thinking": "Přemýšlím...",
+      "streaming": "Píši odpověď...",
+      "error": "Chyba při zpracování",
+      "sending": "Odesílám..."
+    },
+    "actions": {
+      "copy": "Kopírovat",
+      "copied": "Zkopírováno!",
+      "retry": "Zkusit znovu"
+    },
+    "errors": {
+      "network": "Chyba připojení. Zkuste to znovu.",
+      "timeout": "Odpověď trvá příliš dlouho. Zkuste to znovu.",
+      "generic": "Něco se pokazilo. Zkuste to znovu.",
+      "disconnected": "Připojení ztraceno. Připojuji znovu...",
+      "sendFailed": "Nepodařilo se odeslat zprávu"
+    },
+    "connection": {
+      "connected": "Připojeno",
+      "connecting": "Připojuji...",
+      "disconnected": "Odpojeno",
+      "reconnect": "Připojit znovu"
+    }
   }
 }

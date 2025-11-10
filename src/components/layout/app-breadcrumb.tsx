@@ -13,15 +13,18 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useSubject } from "@/lib/api/queries/subjects";
 import { useTopic } from "@/lib/api/queries/topics";
+import { useSource } from "@/lib/api/queries/sources";
 
 // Custom page title overrides
 const pageTitleOverrides: Record<string, string> = {
   predmety: "Předměty",
   learn: "Učit se",
   tests: "Testy",
+  testy: "Testy",
   settings: "Nastavení",
   flashcards: "Flashkarty",
   materials: "Materiály",
+  chat: "AI Chat",
 };
 
 function formatSegment(segment: string): string {
@@ -51,9 +54,16 @@ export function AppBreadcrumb() {
       ? Number(segments[topicIdIndex])
       : null;
 
-  // Fetch subject and topic data
+  const sourceIdIndex = segments.indexOf("zdroje") + 1;
+  const sourceId =
+    sourceIdIndex > 0 && segments[sourceIdIndex]
+      ? Number(segments[sourceIdIndex])
+      : null;
+
+  // Fetch subject, topic, and source data
   const { data: subjectData } = useSubject(subjectId || 0);
   const { data: topicData } = useTopic(topicId || 0);
+  const { data: sourceData } = useSource(sourceId || 0);
 
   // Home only
   if (segments.length === 0) {
@@ -71,12 +81,17 @@ export function AppBreadcrumb() {
     );
   }
 
-  // Filter out "temata" from segments
-  const filteredSegments = segments.filter((segment) => segment !== "temata");
+  // Filter out "temata" and "zdroje" from segments
+  const filteredSegments = segments.filter(
+    (segment) => segment !== "temata" && segment !== "zdroje"
+  );
 
-  // Build breadcrumb path
+  // Build breadcrumb path - track position in original segments array
   const breadcrumbs: Array<{ title: string; href: string; isLast: boolean }> =
     [];
+
+  // Track which positions we've already processed to avoid duplicates
+  let processedOriginalIndices = new Set<number>();
 
   filteredSegments.forEach((segment, index) => {
     const isLast = index === filteredSegments.length - 1;
@@ -84,27 +99,42 @@ export function AppBreadcrumb() {
     // Skip if this is a numeric ID that will be replaced by name
     const isNumeric = /^\d+$/.test(segment);
     if (isNumeric) {
+      // Find all occurrences of this segment in original array
+      const allIndices: number[] = [];
+      segments.forEach((seg, idx) => {
+        if (seg === segment && !processedOriginalIndices.has(idx)) {
+          allIndices.push(idx);
+        }
+      });
+      
+      // Use the first unprocessed occurrence
+      const originalIndex = allIndices[0];
+      if (originalIndex === undefined) return;
+      
+      processedOriginalIndices.add(originalIndex);
+      const previousSegment = segments[originalIndex - 1];
+      
       // Check if this is a subject ID
-      if (
-        segments[segments.indexOf(segment) - 1] === "predmety" &&
-        subjectData?.data
-      ) {
+      if (previousSegment === "predmety" && subjectData?.data) {
         breadcrumbs.push({
           title: subjectData.data.name,
           href: `/predmety/${segment}`,
           isLast,
         });
       }
-      // Check if this is a topic ID
-      else if (
-        segments[segments.indexOf(segment) - 1] === "temata" &&
-        topicData?.data
-      ) {
+      // Check if this is a topic ID - always show it
+      else if (previousSegment === "temata" && topicData?.data) {
         breadcrumbs.push({
           title: topicData.data.name,
           href: `/predmety/${subjectId}/temata/${segment}`,
           isLast,
         });
+      }
+      // Check if this is a source ID - SKIP IT (sources don't have their own page)
+      // The chat/testy page will be shown as the last breadcrumb instead
+      else if (previousSegment === "zdroje" && sourceData?.data) {
+        // Don't add source to breadcrumbs - it doesn't have a page
+        // Just skip it
       }
     } else {
       // Regular segment (not an ID)

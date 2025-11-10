@@ -19,7 +19,10 @@ export interface TopicCardProps {
   id: number;
   subjectId: number;
   name: string;
+  subjectName?: string; // For dashboard display
+  subjectColor?: string; // For dashboard display
   cardsCount?: number; // Keep for compatibility but not displayed
+  lastStudied?: string; // For dashboard display
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
 }

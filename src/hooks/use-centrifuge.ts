@@ -101,7 +101,7 @@ export function useSubscription<T = unknown>(
       setIsSubscribed(existingSub.state === "subscribed");
       
       // Add our handlers to the existing subscription
-      const publicationHandler = (ctx: any) => {
+      const publicationHandler = (ctx: { data: T }) => {
         const pubData = ctx.data as T;
         setData(pubData);
         onPublicationRef.current?.(pubData);
@@ -117,7 +117,7 @@ export function useSubscription<T = unknown>(
         onUnsubscribedRef.current?.();
       };
 
-      const errorHandler = (ctx: any) => {
+      const errorHandler = (ctx: { error?: { message?: string } }) => {
         const error = new Error(ctx.error?.message || "Subscription error");
         onErrorRef.current?.(error);
       };
