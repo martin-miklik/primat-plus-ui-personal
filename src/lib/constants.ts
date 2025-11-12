@@ -21,9 +21,12 @@ export const API_TIMEOUT = 30000; // 30 seconds
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // Centrifuge configuration
+// WebSocket connection through Traefik proxy (same domain as backend API)
+// Production: wss://primat.bepositive.cz/connection/websocket
+// Local: ws://api.primat-plus/connection/websocket
 export const CENTRIFUGE_URL =
   process.env.NEXT_PUBLIC_CENTRIFUGE_URL ||
-  "ws://ws.api.primat-plus.localhost/connection/websocket";
+  "ws://api.primat-plus/connection/websocket";
 export const CENTRIFUGE_RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 16000]; // Exponential backoff in ms
 
 // Subscription tiers

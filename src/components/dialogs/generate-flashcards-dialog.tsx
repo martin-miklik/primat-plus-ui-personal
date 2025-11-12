@@ -31,7 +31,7 @@ import {
 
 interface GenerateFlashcardsDialogProps {
   sourceId: number;
-  onGenerated?: () => void;
+  onGenerated?: (jobData: { jobId: string; channel: string; count: number }) => void;
 }
 
 export function GenerateFlashcardsDialog({
@@ -51,8 +51,16 @@ export function GenerateFlashcardsDialog({
 
   const onSubmit = async (data: GenerateFlashcardsInput) => {
     try {
-      await generateFlashcards.mutateAsync(data);
-      onGenerated?.();
+      const response = await generateFlashcards.mutateAsync(data);
+      
+      // Pass job data to parent for WebSocket subscription
+      onGenerated?.({
+        jobId: response.data.jobId,
+        channel: response.data.channel,
+        count: data.count,
+      });
+      
+      // Close dialog immediately (don't wait for generation)
       dialog.close();
       form.reset();
     } catch {
@@ -135,6 +143,3 @@ export function GenerateFlashcardsDialog({
     </Dialog>
   );
 }
-
-
-

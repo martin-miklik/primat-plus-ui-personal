@@ -11,7 +11,7 @@ import { MaterialCard } from "@/components/materials/material-card";
 import { MaterialCardSkeleton } from "@/components/materials/material-card-skeleton";
 import { UploadMaterialDialog } from "@/components/dialogs/upload-material-dialog";
 import { useDialog } from "@/hooks/use-dialog";
-import { useUpload, useUploadSubscription } from "@/hooks/use-upload";
+import { useUpload } from "@/hooks/use-upload";
 import { useSources } from "@/lib/api/queries/sources";
 import { useUploadStore } from "@/stores/upload-store";
 import { Typography } from "@/components/ui/Typography";
@@ -22,22 +22,6 @@ interface TopicDetailPageProps {
     id: string;
     topicId: string;
   }>;
-}
-
-/**
- * Component that handles Centrifugo subscription for a single upload
- */
-function UploadSubscriptionHandler({ fileId }: { fileId: string }) {
-  const uploadFile = useUploadStore((state) =>
-    state.files.find((f) => f.id === fileId)
-  );
-
-  const isActive =
-    uploadFile?.status === "uploading" || uploadFile?.status === "processing";
-
-  useUploadSubscription(fileId, uploadFile?.channel, isActive && !!uploadFile);
-
-  return null;
 }
 
 export default function TopicDetailPage({ params }: TopicDetailPageProps) {
@@ -60,34 +44,65 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
   const topic = topicData?.data;
   const sources = sourcesData?.data || [];
 
-  // Get uploading files from store and sort them (newest first)
+  // Get uploading files from store
   const allUploadFiles = useUploadStore((state) => state.files);
-  const uploadingFiles = useMemo(() => {
-    const filtered = allUploadFiles.filter((f) => f.topicId === topicId);
-    // Sort by createdAt if available, otherwise reverse to show newest first
-    return filtered.sort((a, b) => {
-      if (a.sourceData?.createdAt && b.sourceData?.createdAt) {
-        return (
-          new Date(b.sourceData.createdAt).getTime() -
-          new Date(a.sourceData.createdAt).getTime()
-        );
-      }
-      // If no createdAt, newer uploads are at the end of the array, so reverse
-      return filtered.indexOf(b) - filtered.indexOf(a);
-    });
-  }, [allUploadFiles, topicId]);
-  const removeFile = useUploadStore((state) => state.removeFile);
+  const uploadingFiles = useMemo(
+    () => allUploadFiles.filter((f) => f.topicId === topicId),
+    [allUploadFiles, topicId]
+  );
 
   // Initialize upload hook
   useUpload(topicId);
 
+  // Map upload files to sources and prepare upload state
+  const sourcesWithUploadState = useMemo(() => {
+    const sourceMap = new Map(sources.map((s) => [s.id, s]));
+    const uploadStateMap = new Map(
+      uploadingFiles
+        .filter((f) => f.sourceId && f.channel && f.jobId)
+        .map((f) => [
+          f.sourceId!,
+          {
+            jobId: f.jobId!,
+            channel: f.channel!,
+            fileId: f.id,
+          },
+        ])
+    );
+
+    // Combine sources with their upload state
+    const combined = sources.map((source) => ({
+      source,
+      uploadState: uploadStateMap.get(source.id),
+    }));
+
+    // Add sources that are being uploaded but not yet in the sources list
+    // (This happens immediately after upload starts, before the source appears in the API response)
+    uploadingFiles.forEach((file) => {
+      if (file.sourceData && !sourceMap.has(file.sourceData.id)) {
+        combined.push({
+          source: file.sourceData,
+          uploadState: file.channel && file.jobId
+            ? {
+                jobId: file.jobId,
+                channel: file.channel,
+                fileId: file.id,
+              }
+            : undefined,
+        });
+      }
+    });
+
+    // Sort by createdAt (newest first)
+    return combined.sort((a, b) => {
+      const dateA = new Date(a.source.createdAt).getTime();
+      const dateB = new Date(b.source.createdAt).getTime();
+      return dateB - dateA;
+    });
+  }, [sources, uploadingFiles]);
+
   return (
     <>
-      {/* Render subscription handlers for active uploads */}
-      {uploadingFiles.map((uploadFile) => (
-        <UploadSubscriptionHandler key={uploadFile.id} fileId={uploadFile.id} />
-      ))}
-
       <div className="space-y-6 pb-8">
         {/* Page Header */}
         <div className="flex items-start justify-between gap-4">
@@ -110,30 +125,11 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
           </Button>
         </div>
 
-        {/* Loading State */}
+        {/* Loading State (fetching sources from API) */}
         {isLoading && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="rounded-lg border bg-card p-4 shadow-sm animate-pulse h-full"
-              >
-                <div className="flex flex-col gap-4 h-full">
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className="flex-shrink-0 rounded-lg bg-muted h-14 w-14" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-5 bg-muted rounded w-3/4" />
-                      <div className="h-3 bg-muted rounded w-1/2" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div className="h-9 bg-muted rounded" />
-                    <div className="h-9 bg-muted rounded" />
-                    <div className="h-9 bg-muted rounded" />
-                    <div className="h-9 bg-muted rounded" />
-                  </div>
-                </div>
-              </div>
+              <MaterialCardSkeleton key={i} />
             ))}
           </div>
         )}
@@ -155,8 +151,7 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
         {/* Empty State (no sources and no uploads) */}
         {!isLoading &&
           !isError &&
-          sources.length === 0 &&
-          uploadingFiles.length === 0 && (
+          sourcesWithUploadState.length === 0 && (
             <EmptyState
               icon={<FolderOpen className="h-12 w-12" />}
               title={t("empty.title")}
@@ -170,55 +165,35 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
           )}
 
         {/* Sources Grid */}
-        {!isLoading &&
-          !isError &&
-          (sources.length > 0 || uploadingFiles.length > 0) && (
-            <AnimatePresence mode="popLayout">
-              <motion.div
-                className="grid grid-cols-1 gap-4 lg:grid-cols-2 auto-rows-fr"
-                layout
-              >
-                {/* Upload skeletons */}
-                {uploadingFiles.map((uploadFile, index) => (
-                  <motion.div
-                    key={uploadFile.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{
-                      delay: index * 0.05,
-                      duration: 0.3,
-                      ease: "easeOut",
-                    }}
-                    layout
-                  >
-                    <MaterialCardSkeleton
-                      uploadFile={uploadFile}
-                      onCancel={removeFile}
-                    />
-                  </motion.div>
-                ))}
-
-                {/* Source cards */}
-                {sources.map((source, index) => (
-                  <motion.div
-                    key={source.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{
-                      delay: (uploadingFiles.length + index) * 0.05,
-                      duration: 0.3,
-                      ease: "easeOut",
-                    }}
-                    layout
-                  >
-                    <MaterialCard material={source} subjectId={subjectId} />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          )}
+        {!isLoading && !isError && sourcesWithUploadState.length > 0 && (
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              className="grid grid-cols-1 gap-4 lg:grid-cols-2 auto-rows-fr"
+              layout
+            >
+              {sourcesWithUploadState.map(({ source, uploadState }, index) => (
+                <motion.div
+                  key={source.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{
+                    delay: index * 0.05,
+                    duration: 0.3,
+                    ease: "easeOut",
+                  }}
+                  layout
+                >
+                  <MaterialCard
+                    material={source}
+                    subjectId={subjectId}
+                    uploadState={uploadState}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
 
       {/* Upload Dialog */}

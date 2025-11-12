@@ -4,15 +4,27 @@ import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Sparkles, BookOpen, AlertCircle, GraduationCap } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  Sparkles,
+  BookOpen,
+  AlertCircle,
+  GraduationCap,
+} from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/states/empty-states";
 import { FlashcardGrid } from "@/components/flashcards/flashcard-grid";
 import { GenerateFlashcardsDialog } from "@/components/dialogs/generate-flashcards-dialog";
-import { GenerationProgress } from "@/components/flashcards/generation-progress";
+import { JobStatusIndicator } from "@/components/job-status/job-status-indicator";
 import { Typography } from "@/components/ui/Typography";
 import { useDialog } from "@/hooks/use-dialog";
-import { useFlashcards, useFlashcardsForRepeat } from "@/lib/api/queries/flashcards";
+import { useJobSubscription } from "@/hooks/use-job-subscription";
+import {
+  useFlashcards,
+  useFlashcardsForRepeat,
+} from "@/lib/api/queries/flashcards";
 import { useSource } from "@/lib/api/queries/sources";
 
 interface FlashcardsPageProps {
@@ -35,9 +47,15 @@ export default function FlashcardsPage({ params }: FlashcardsPageProps) {
 
   const t = useTranslations("flashcards");
   const router = useRouter();
+  const queryClient = useQueryClient();
   const generateDialog = useDialog("generate-flashcards");
 
-  const [isGenerating, setIsGenerating] = useState(false);
+  // Job state for flashcard generation
+  const [generationJob, setGenerationJob] = useState<{
+    jobId: string;
+    channel: string;
+    count: number;
+  } | null>(null);
 
   // Fetch source and flashcards
   const { data: sourceData } = useSource(sourceId);
@@ -53,13 +71,37 @@ export default function FlashcardsPage({ params }: FlashcardsPageProps) {
   const flashcards = flashcardsData?.data || [];
   const dueFlashcards = dueFlashcardsData?.data || [];
 
-  const handleGenerated = () => {
-    setIsGenerating(true);
-    // Simulate generation time
-    setTimeout(() => {
-      setIsGenerating(false);
+  // WebSocket subscription for flashcard generation
+  const {
+    status,
+    progress,
+    error: wsError,
+  } = useJobSubscription<"flashcards">({
+    channel: generationJob?.channel,
+    process: "flashcards",
+    enabled: !!generationJob,
+    onComplete: () => {
+      // Refetch flashcards when generation completes
       refetch();
-    }, 2000);
+      toast.success(t("generate.success"));
+      // Clear job state after a delay (to show success state)
+      setTimeout(() => {
+        setGenerationJob(null);
+      }, 2000);
+    },
+    onError: (event, errorMessage) => {
+      toast.error(errorMessage);
+      // Clear job state
+      setGenerationJob(null);
+    },
+  });
+
+  const handleGenerated = (jobData: {
+    jobId: string;
+    channel: string;
+    count: number;
+  }) => {
+    setGenerationJob(jobData);
   };
 
   const handleStartPractice = () => {
@@ -67,6 +109,9 @@ export default function FlashcardsPage({ params }: FlashcardsPageProps) {
       `/predmety/${subjectId}/temata/${topicId}/zdroje/${sourceId}/karticky/procvicovat`
     );
   };
+
+  // Check if we're currently generating
+  const isGenerating = !!generationJob && status !== "complete";
 
   return (
     <>
@@ -98,13 +143,11 @@ export default function FlashcardsPage({ params }: FlashcardsPageProps) {
                 <GraduationCap className="mr-2 h-4 w-4" />
                 {t("page.practice")}
                 {dueFlashcards.length > 0 && (
-                  <span className="ml-2 text-xs">
-                    ({dueFlashcards.length})
-                  </span>
+                  <span className="ml-2 text-xs">({dueFlashcards.length})</span>
                 )}
               </Button>
             )}
-            <Button onClick={generateDialog.open}>
+            <Button onClick={generateDialog.open} disabled={isGenerating}>
               <Sparkles className="mr-2 h-4 w-4" />
               {t("page.generate")}
             </Button>
@@ -112,7 +155,16 @@ export default function FlashcardsPage({ params }: FlashcardsPageProps) {
         </div>
 
         {/* Generation Progress */}
-        {isGenerating && <GenerationProgress />}
+        {isGenerating && (
+          <JobStatusIndicator
+            process="flashcards"
+            status={status}
+            progress={progress}
+            error={wsError}
+            showProgress={true}
+            size="lg"
+          />
+        )}
 
         {/* Loading State */}
         {isLoading && (
@@ -147,7 +199,7 @@ export default function FlashcardsPage({ params }: FlashcardsPageProps) {
         )}
 
         {/* Empty State */}
-        {!isLoading && !isError && flashcards.length === 0 && (
+        {!isLoading && !isError && flashcards.length === 0 && !isGenerating && (
           <EmptyState
             icon={<BookOpen className="h-12 w-12" />}
             title={t("empty.title")}
@@ -183,6 +235,3 @@ export default function FlashcardsPage({ params }: FlashcardsPageProps) {
     </>
   );
 }
-
-
-

@@ -91,7 +91,8 @@ export function useSubscription<T = unknown>(
   });
 
   useEffect(() => {
-    if (!enabled || !client || !isConnected || !channel) return;
+    // Don't check isConnected - Centrifuge queues subscriptions until connected
+    if (!enabled || !client || !channel) return;
 
     // Check if subscription already exists
     const existingSub = client.getSubscription(channel);
@@ -171,7 +172,7 @@ export function useSubscription<T = unknown>(
       sub.removeAllListeners();
       subscriptionRef.current = null;
     };
-  }, [enabled, client, isConnected, channel]);
+  }, [enabled, client, channel]); // Removed isConnected - subscriptions queue automatically
 
   return {
     subscription: subscriptionRef.current,

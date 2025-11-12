@@ -38,8 +38,8 @@ export const sourceSchema = z.object({
   jobId: z.string().optional().nullable(),
   startTime: z.number().int().nonnegative().optional().nullable(), // For YouTube
   endTime: z.number().int().nonnegative().optional().nullable(), // For YouTube
-  context: z.string().optional().nullable(), // Extracted text content
-  contextLength: z.number().int().nonnegative().optional().nullable(),
+  summary: z.string().optional().nullable(), // Extracted text content
+  summaryLength: z.number().int().nonnegative().optional().nullable(),
   errorMessage: z.string().optional().nullable(),
   flashcardsCount: z.number().int().nonnegative().optional().default(0), // Frontend feature
   testsCount: z.number().int().nonnegative().optional().default(0), // Frontend feature

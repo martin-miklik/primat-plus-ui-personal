@@ -9,29 +9,13 @@ import { MaterialCard } from "@/components/materials/material-card";
 import { MaterialCardSkeleton } from "@/components/materials/material-card-skeleton";
 import { UploadMaterialDialog } from "@/components/dialogs/upload-material-dialog";
 import { useDialog } from "@/hooks/use-dialog";
-import { useUpload, useUploadSubscription } from "@/hooks/use-upload";
+import { useUpload } from "@/hooks/use-upload";
 import { useSources } from "@/lib/api/queries/sources";
 import { useUploadStore } from "@/stores/upload-store";
 
 interface MaterialsListProps {
   topicId: number | null;
   topicName?: string;
-}
-
-/**
- * Component that handles Centrifugo subscription for a single upload
- */
-function UploadSubscriptionHandler({ fileId }: { fileId: string }) {
-  const uploadFile = useUploadStore((state) =>
-    state.files.find((f) => f.id === fileId)
-  );
-
-  const isActive =
-    uploadFile?.status === "uploading" || uploadFile?.status === "processing";
-
-  useUploadSubscription(fileId, uploadFile?.channel, isActive);
-
-  return null;
 }
 
 export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
@@ -54,10 +38,51 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
     () => allUploadFiles.filter((f) => f.topicId === topicId),
     [allUploadFiles, topicId]
   );
-  const removeFile = useUploadStore((state) => state.removeFile);
 
   // Initialize upload hook
   useUpload(topicId);
+
+  // Map upload files to sources and prepare upload state
+  const sourcesWithUploadState = useMemo(() => {
+    const sourceMap = new Map(sources.map((s) => [s.id, s]));
+    const uploadStateMap = new Map(
+      uploadingFiles
+        .filter((f) => f.sourceId && f.channel && f.jobId)
+        .map((f) => [
+          f.sourceId!,
+          {
+            jobId: f.jobId!,
+            channel: f.channel!,
+            fileId: f.id,
+          },
+        ])
+    );
+
+    // Combine sources with their upload state
+    const combined = sources.map((source) => ({
+      source,
+      uploadState: uploadStateMap.get(source.id),
+    }));
+
+    // Add sources that are being uploaded but not yet in the sources list
+    // (This happens immediately after upload starts, before the source appears in the API response)
+    uploadingFiles.forEach((file) => {
+      if (file.sourceData && !sourceMap.has(file.sourceData.id)) {
+        combined.push({
+          source: file.sourceData,
+          uploadState: file.channel && file.jobId
+            ? {
+                jobId: file.jobId,
+                channel: file.channel,
+                fileId: file.id,
+              }
+            : undefined,
+        });
+      }
+    });
+
+    return combined;
+  }, [sources, uploadingFiles]);
 
   if (!topicId) {
     return (
@@ -73,11 +98,6 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
 
   return (
     <>
-      {/* Render subscription handlers for active uploads */}
-      {uploadingFiles.map((uploadFile) => (
-        <UploadSubscriptionHandler key={uploadFile.id} fileId={uploadFile.id} />
-      ))}
-
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="border-b p-6">
@@ -99,10 +119,12 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Loading State */}
+          {/* Loading State (fetching sources from API) */}
           {isLoading && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <MaterialCardSkeleton key={i} />
+              ))}
             </div>
           )}
 
@@ -123,8 +145,7 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
           {/* Empty State (no sources and no uploads) */}
           {!isLoading &&
             !isError &&
-            sources.length === 0 &&
-            uploadingFiles.length === 0 && (
+            sourcesWithUploadState.length === 0 && (
               <div className="flex items-center justify-center py-12">
                 <EmptyState
                   icon={<FolderOpen className="h-12 w-12" />}
@@ -140,25 +161,17 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
             )}
 
           {/* Sources Grid */}
-          {!isLoading &&
-            !isError &&
-            (sources.length > 0 || uploadingFiles.length > 0) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Upload skeletons */}
-                {uploadingFiles.map((uploadFile) => (
-                  <MaterialCardSkeleton
-                    key={uploadFile.id}
-                    uploadFile={uploadFile}
-                    onCancel={removeFile}
-                  />
-                ))}
-
-                {/* Source cards */}
-                {sources.map((source) => (
-                  <MaterialCard key={source.id} material={source} />
-                ))}
-              </div>
-            )}
+          {!isLoading && !isError && sourcesWithUploadState.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {sourcesWithUploadState.map(({ source, uploadState }) => (
+                <MaterialCard
+                  key={source.id}
+                  material={source}
+                  uploadState={uploadState}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

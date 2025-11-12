@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   FileText,
   Video,
@@ -23,6 +25,9 @@ import { Source } from "@/lib/validations/source";
 import { Badge } from "@/components/ui/badge";
 import { Typography } from "@/components/ui/Typography";
 import { SummarySheet } from "@/components/materials/summary-sheet";
+import { JobStatusIndicator } from "@/components/job-status/job-status-indicator";
+import { useJobSubscription } from "@/hooks/use-job-subscription";
+import type { UploadEvent } from "@/types/websocket-events";
 
 interface MaterialCardProps {
   material: Source;
@@ -30,6 +35,13 @@ interface MaterialCardProps {
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
   onClick?: (id: number) => void;
+  
+  /** Optional upload state for sources being processed */
+  uploadState?: {
+    jobId: string;
+    channel: string;
+    fileId: string;
+  };
 }
 
 // Source type configuration
@@ -64,9 +76,29 @@ const SOURCE_CONFIG = {
   },
 };
 
-export function MaterialCard({ material, subjectId }: MaterialCardProps) {
+export function MaterialCard({ 
+  material, 
+  subjectId,
+  uploadState,
+}: MaterialCardProps) {
   const t = useTranslations("sources");
+  const queryClient = useQueryClient();
   const [summarySheetOpen, setSummarySheetOpen] = useState(false);
+
+  // WebSocket subscription for upload progress (if uploadState is provided)
+  const { status, progress, error } = useJobSubscription<"upload">({
+    channel: uploadState?.channel,
+    process: "upload",
+    enabled: !!uploadState,
+    onComplete: () => {
+      // Refetch sources when upload completes
+      queryClient.invalidateQueries({ queryKey: ["sources", material.topicId] });
+      toast.success(t("upload.success"));
+    },
+    onError: (event, errorMessage) => {
+      toast.error(errorMessage);
+    },
+  });
 
   // Get config based on type, fallback to document
   const getSourceConfig = () => {
@@ -108,15 +140,15 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
       },
     };
 
-    const status = statusConfig[material.status as keyof typeof statusConfig];
-    if (!status) return null;
+    const statusItem = statusConfig[material.status as keyof typeof statusConfig];
+    if (!statusItem) return null;
 
-    const StatusIcon = status.icon;
+    const StatusIcon = statusItem.icon;
 
     return (
       <Badge
         variant="secondary"
-        className={cn("absolute top-2 right-2 gap-1", status.className)}
+        className={cn("absolute top-2 right-2 gap-1 z-10", statusItem.className)}
       >
         <StatusIcon
           className={cn(
@@ -130,6 +162,7 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
   };
 
   const isProcessed = material.status === "processed";
+  const isProcessing = uploadState || material.status === "processing" || material.status === "uploaded";
 
   const getTypeLabel = () => {
     // For documents, check mimeType for specific format
@@ -150,11 +183,26 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
     <div
       className={cn(
         "group relative rounded-lg border bg-card shadow-sm transition-all p-0 h-full",
-        "hover:shadow-md hover:border-primary/50"
+        "hover:shadow-md hover:border-primary/50",
+        isProcessing && "opacity-90"
       )}
     >
       {/* Status Badge */}
       {getStatusBadge()}
+
+      {/* Processing Overlay */}
+      {uploadState && status !== "complete" && (
+        <div className="absolute inset-0 z-20 bg-background/95 rounded-lg p-4 flex items-center justify-center">
+          <JobStatusIndicator
+            process="upload"
+            status={status}
+            progress={progress}
+            error={error}
+            showProgress={true}
+            size="md"
+          />
+        </div>
+      )}
 
       {/* Card Content */}
       <div className="flex flex-col gap-4 p-4 h-full">
@@ -185,12 +233,24 @@ export function MaterialCard({ material, subjectId }: MaterialCardProps) {
                   <span>{formatFileSize(material.fileSize)}</span>
                 </>
               )}
-              <span>•</span>
-              <span>
-                {format(new Date(material.createdAt), "d. MMM yyyy", {
-                  locale: cs,
-                })}
-              </span>
+              {material.createdAt && (() => {
+                try {
+                  const date = new Date(material.createdAt);
+                  if (isNaN(date.getTime())) return null;
+                  return (
+                    <>
+                      <span>•</span>
+                      <span>
+                        {format(date, "d. MMM yyyy", {
+                          locale: cs,
+                        })}
+                      </span>
+                    </>
+                  );
+                } catch {
+                  return null;
+                }
+              })()}
             </div>
           </div>
         </div>

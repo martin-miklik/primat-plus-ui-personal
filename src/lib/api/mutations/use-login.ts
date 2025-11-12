@@ -50,14 +50,14 @@ export function useLogin() {
 
         if (isMSW) {
           // MSW returns { data: { user, token } }
-          const response = await post<MSWLoginResponse>("/auth/login", payload);
+          const response = await post<MSWLoginResponse>("/auth/login", payload, { skipAuth: true });
           return {
             user: response.data.user,
             token: response.data.token,
           };
         } else {
           // Real backend returns { data: { accessToken, user } }
-          const response = await post<BackendLoginResponse>("/auth/login", payload);
+          const response = await post<BackendLoginResponse>("/auth/login", payload, { skipAuth: true });
           return {
             user: response.data.user,
             token: response.data.accessToken,

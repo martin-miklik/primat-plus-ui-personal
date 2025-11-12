@@ -94,7 +94,7 @@ Emitted when extracting content from the uploaded file (before AI processing).
 ---
 
 #### `generating_context`
-Emitted when AI starts generating the context/summary.
+Emitted when AI starts generating the internal context (first AI pass).
 
 ```json
 {
@@ -106,30 +106,29 @@ Emitted when AI starts generating the context/summary.
 ```
 
 **Frontend Action:**
-- Show status: "AI přemýšlí..." (AI is thinking...)
+- Show status: "AI vytváří kontext..." (AI is creating context...)
 - Progress: ~30%
 
 ---
 
-#### `chunk`
-Emitted during AI streaming (context generation). Multiple chunks sent progressively.
+#### `generating_summary`
+Emitted when AI starts generating the user-facing summary (second AI pass).
 
 ```json
 {
-  "type": "chunk",
+  "type": "generating_summary",
   "jobId": "550e8400-e29b-41d4-a716-446655440000",
-  "timestamp": 1736520025,
+  "timestamp": 1736520040,
   "process": "upload",
-  "content": "...partial text..."
+  "message": "Začínám generovat finální souhrn..."
 }
 ```
 
 **Frontend Action:**
-- Show status: "Vytváříme shrnutí..." (Creating summary...)
-- Progress: Increment gradually from 30% → 90%
-- Optional: Preview chunk count in UI
+- Show status: "Vytváříme souhrn..." (Creating summary...)
+- Progress: ~60%
 
-**Note:** Content is not shown to user (it's the internal context), but chunk events indicate progress.
+**Note:** This is the second AI generation phase, creating the final summary for the user. The AI processes run to completion without streaming chunks.
 
 ---
 
@@ -559,14 +558,13 @@ Quick reference of all event types per process:
 
 | Process | Event Types |
 |---------|-------------|
-| **Upload** | `job_started`, `extracting`, `generating_context`, `chunk`, `complete`, `error` |
+| **Upload** | `job_started`, `extracting`, `generating_context`, `generating_summary`, `complete`, `error` |
 | **Chat** | `job_started`, `chunk`, `complete`, `error` |
 | **Flashcards** | `job_started`, `generating`, `complete`, `error` |
 | **Test** | `job_started`, `generating`, `complete`, `error` |
 
 **Common events:** `job_started`, `complete`, `error` (all processes)  
-**Progress events:** `chunk` (upload, chat), `generating` (flashcards, test)  
-**Upload-only:** `extracting`, `generating_context`
+**Progress events:** `chunk` (chat only), `generating` (flashcards, test), `extracting`, `generating_context`, `generating_summary` (upload only)
 
 ---
 

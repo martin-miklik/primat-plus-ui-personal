@@ -10,13 +10,15 @@ interface RequestOptions extends RequestInit {
  * Get auth token from localStorage
  * Note: This is safe to call on client-side only
  */
-function getAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-  
+export function getAuthToken(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   try {
     const authStorage = localStorage.getItem("auth-storage");
     if (!authStorage) return null;
-    
+
     const parsed = JSON.parse(authStorage);
     return parsed?.state?.token || null;
   } catch {
@@ -29,7 +31,12 @@ export async function apiClient<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { timeout = API_TIMEOUT, headers = {}, skipAuth = false, ...restOptions } = options;
+  const {
+    timeout = API_TIMEOUT,
+    headers = {},
+    skipAuth = false,
+    ...restOptions
+  } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -52,8 +59,8 @@ export async function apiClient<T>(
       ...restOptions,
       headers: {
         "Content-Type": "application/json",
-        ...authHeaders,
-        ...headers,
+        ...headers, // User headers first
+        ...authHeaders, // Auth header last (highest priority, cannot be overridden)
       },
       credentials: "include",
       signal: controller.signal,

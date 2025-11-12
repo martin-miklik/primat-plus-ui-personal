@@ -346,7 +346,51 @@
     "success": {
       "fileUploaded": "Soubor {name} byl úspěšně nahrán",
       "youtubeAdded": "YouTube video bylo úspěšně přidáno",
-      "websiteAdded": "Webová stránka byla úspěšně přidána"
+      "websiteAdded": "Webová stránka byla úspěšně přidána",
+      "processingComplete": "Zpracování dokončeno!"
+    }
+  },
+  "jobStatus": {
+    "upload": {
+      "pending": "Připravujeme nahrání...",
+      "started": "Začínáme...",
+      "extracting": "Čteme obsah...",
+      "generatingContext": "AI přemýšlí...",
+      "streaming": "Vytváříme shrnutí...",
+      "processing": "Zpracováváme soubor...",
+      "complete": "Hotovo! 🎉",
+      "error": "Něco se pokazilo"
+    },
+    "flashcards": {
+      "pending": "Připravujeme kartičky...",
+      "started": "Připravujeme kartičky...",
+      "generating": "AI tvoří otázky...",
+      "processing": "AI tvoří otázky...",
+      "complete": "Kartičky jsou ready! 🎴",
+      "error": "Nepodařilo se vytvořit kartičky"
+    },
+    "test": {
+      "pending": "Připravujeme test...",
+      "started": "Připravujeme test...",
+      "generating": "AI píše otázky...",
+      "processing": "AI píše otázky...",
+      "complete": "Test je připraven! 📝",
+      "error": "Nepodařilo se vytvořit test"
+    },
+    "chat": {
+      "pending": "Připravujeme odpověď...",
+      "started": "AI přemýšlí...",
+      "processing": "AI přemýšlí...",
+      "complete": "Odpověď hotova",
+      "error": "Omlouváme se, zkuste to znovu"
+    },
+    "errorCodes": {
+      "AI_TIMEOUT": "AI nereaguje, zkuste to prosím znovu",
+      "AI_ERROR": "Něco se pokazilo, zkuste to znovu",
+      "CONTEXT_MISSING": "Zdroj ještě není zpracovaný",
+      "INVALID_REQUEST": "Neplatné zadání",
+      "RATE_LIMIT": "Příliš mnoho požadavků, zkuste to za chvíli",
+      "INTERNAL_ERROR": "Chyba serveru, omlouváme se"
     }
   },
   "learn": {
@@ -619,7 +663,8 @@
       "countDesc": "Vyberte kolik kartiček chcete vygenerovat (1-30)",
       "cancel": "Zrušit",
       "submit": "Vygenerovat",
-      "generating": "Generuje se..."
+      "generating": "Generuje se...",
+      "success": "Kartičky byly úspěšně vygenerovány!"
     },
     "practice": {
       "title": "Procvičování",

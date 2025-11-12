@@ -10,9 +10,14 @@ import { toast } from "sonner";
 // API Response types
 interface GenerateFlashcardsApiResponse {
   data: {
+    success: boolean;
+    message: string;
+    channel: string;
+    jobId: string;
+    process: "flashcards";
+    status: "queued";
     sourceId: number;
     count: number;
-    flashcards: Flashcard[];
   };
 }
 
@@ -22,6 +27,7 @@ interface UpdateNextRepetitionApiResponse {
 
 /**
  * Mutation: Generate flashcards
+ * Returns job info for WebSocket subscription (doesn't wait for completion)
  */
 export function useGenerateFlashcards(sourceId: number) {
   const queryClient = useQueryClient();
@@ -33,13 +39,14 @@ export function useGenerateFlashcards(sourceId: number) {
         input
       ),
 
-    onSuccess: () => {
-      // Invalidate flashcards list to show new cards
-      queryClient.invalidateQueries({ queryKey: ["flashcards", sourceId] });
-      queryClient.invalidateQueries({
-        queryKey: ["flashcards", sourceId, "repeat"],
-      });
-      toast.success("Kartičky byly úspěšně vygenerovány");
+    onSuccess: (response) => {
+      // Don't invalidate queries here - wait for WebSocket complete event
+      // The parent component will handle invalidation when the job completes
+      console.log(
+        "[Flashcards] Generation queued:",
+        response.data.jobId,
+        response.data.channel
+      );
     },
 
     onError: (error: Error) => {

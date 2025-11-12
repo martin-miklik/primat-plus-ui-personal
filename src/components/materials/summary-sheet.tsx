@@ -48,7 +48,7 @@ export function SummarySheet({
     useState<GenerationState>("idle");
 
   const handleExportPDF = async () => {
-    if (!source.context) {
+    if (!source.summary) {
       toast.error(t("summary.noContent"), {
         description: t("summary.noContentDescription"),
       });
@@ -62,7 +62,7 @@ export function SummarySheet({
       const doc = (
         <SummaryPDFDocument
           sourceName={source.name}
-          content={source.context}
+          content={source.summary}
           createdAt={source.createdAt}
         />
       );
@@ -113,13 +113,20 @@ export function SummarySheet({
     }
   };
 
-  const formattedDate = format(new Date(source.createdAt), "d. MMMM yyyy", {
-    locale: cs,
-  });
+  const formattedDate = (() => {
+    try {
+      if (!source.createdAt) return "Datum není k dispozici";
+      const date = new Date(source.createdAt);
+      if (isNaN(date.getTime())) return "Datum není k dispozici";
+      return format(date, "d. MMMM yyyy", { locale: cs });
+    } catch {
+      return "Datum není k dispozici";
+    }
+  })();
 
   const isGenerating = generationState === "generating";
   const isSuccess = generationState === "success";
-  const hasContent = !!source.context && source.context.trim().length > 0;
+  const hasContent = !!source.summary && source.summary.trim().length > 0;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -174,7 +181,7 @@ export function SummarySheet({
           <ScrollArea className="h-full px-6 py-4">
             {hasContent ? (
               <div className="prose prose-sm dark:prose-invert max-w-none pb-8">
-                <MarkdownRenderer content={source.context!} />
+                <MarkdownRenderer content={source.summary!} />
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-center">
