@@ -35,7 +35,7 @@ interface MaterialCardProps {
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
   onClick?: (id: number) => void;
-  
+
   /** Optional upload state for sources being processed */
   uploadState?: {
     jobId: string;
@@ -76,8 +76,8 @@ const SOURCE_CONFIG = {
   },
 };
 
-export function MaterialCard({ 
-  material, 
+export function MaterialCard({
+  material,
   subjectId,
   uploadState,
 }: MaterialCardProps) {
@@ -92,7 +92,9 @@ export function MaterialCard({
     enabled: !!uploadState,
     onComplete: () => {
       // Refetch sources when upload completes
-      queryClient.invalidateQueries({ queryKey: ["sources", material.topicId] });
+      queryClient.invalidateQueries({
+        queryKey: ["sources", material.topicId],
+      });
       toast.success(t("upload.success"));
     },
     onError: (event, errorMessage) => {
@@ -140,7 +142,8 @@ export function MaterialCard({
       },
     };
 
-    const statusItem = statusConfig[material.status as keyof typeof statusConfig];
+    const statusItem =
+      statusConfig[material.status as keyof typeof statusConfig];
     if (!statusItem) return null;
 
     const StatusIcon = statusItem.icon;
@@ -148,7 +151,10 @@ export function MaterialCard({
     return (
       <Badge
         variant="secondary"
-        className={cn("absolute top-2 right-2 gap-1 z-10", statusItem.className)}
+        className={cn(
+          "absolute top-2 right-2 gap-1 z-10",
+          statusItem.className
+        )}
       >
         <StatusIcon
           className={cn(
@@ -162,7 +168,10 @@ export function MaterialCard({
   };
 
   const isProcessed = material.status === "processed";
-  const isProcessing = uploadState || material.status === "processing" || material.status === "uploaded";
+  const isProcessing =
+    uploadState ||
+    material.status === "processing" ||
+    material.status === "uploaded";
 
   const getTypeLabel = () => {
     // For documents, check mimeType for specific format
@@ -233,24 +242,25 @@ export function MaterialCard({
                   <span>{formatFileSize(material.fileSize)}</span>
                 </>
               )}
-              {material.createdAt && (() => {
-                try {
-                  const date = new Date(material.createdAt);
-                  if (isNaN(date.getTime())) return null;
-                  return (
-                    <>
-                      <span>•</span>
-                      <span>
-                        {format(date, "d. MMM yyyy", {
-                          locale: cs,
-                        })}
-                      </span>
-                    </>
-                  );
-                } catch {
-                  return null;
-                }
-              })()}
+              {material.createdAt &&
+                (() => {
+                  try {
+                    const date = new Date(material.createdAt);
+                    if (isNaN(date.getTime())) return null;
+                    return (
+                      <>
+                        <span>•</span>
+                        <span>
+                          {format(date, "d. MMM yyyy", {
+                            locale: cs,
+                          })}
+                        </span>
+                      </>
+                    );
+                  } catch {
+                    return null;
+                  }
+                })()}
             </div>
           </div>
         </div>
