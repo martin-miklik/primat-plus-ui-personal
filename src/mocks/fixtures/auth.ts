@@ -2,26 +2,38 @@ import { User } from "@/lib/validations/auth";
 
 export const mockUsers: User[] = [
   {
-    id: "u1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c",
+    id: 1,
     email: "john@example.com",
     name: "John Doe",
-    subscription: "premium",
+    nickname: "johnny",
+    externalId: "ext_john_123",
+    subscriptionType: "premium",
+    subscriptionExpiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    hasActiveSubscription: true,
     createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "u2b3c4d5-e6f7-8a9b-0c1d-2e3f4a5b6c7d",
+    id: 2,
     email: "jane@example.com",
     name: "Jane Smith",
-    subscription: "free",
+    nickname: "janesmith",
+    externalId: "ext_jane_456",
+    subscriptionType: "free",
+    subscriptionExpiresAt: null,
+    hasActiveSubscription: false,
     createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
-    id: "u3c4d5e6-f7a8-9b0c-1d2e-3f4a5b6c7d8e",
+    id: 3,
     email: "test@example.com",
     name: "Test User",
-    subscription: "free",
+    nickname: "testuser",
+    externalId: "ext_test_789",
+    subscriptionType: "free",
+    subscriptionExpiresAt: null,
+    hasActiveSubscription: false,
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   },
@@ -45,7 +57,7 @@ export function validateMockCredentials(
   return mockCredentials[email as keyof typeof mockCredentials] === password;
 }
 
-export function generateMockToken(userId: string): string {
+export function generateMockToken(userId: number): string {
   // Simple mock token (in real app, use JWT)
   return `mock_token_${userId}_${Date.now()}`;
 }

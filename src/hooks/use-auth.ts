@@ -38,26 +38,6 @@ export function useAuth() {
    * Returns true if session is valid, false otherwise
    */
   const validateSession = useCallback(async (): Promise<boolean> => {
-    const mswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === "true";
-
-    // When MSW is disabled (using real backend without auth), auto-authenticate
-    if (!mswEnabled) {
-      const mockUser: User = {
-        id: "local-dev-user",
-        email: "dev@primat-plus.local",
-        name: "Local Dev User",
-        subscription: "free",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      
-      setAuth(mockUser, "local-dev-token");
-      setValidated(true);
-      setLoading(false);
-      return true;
-    }
-
-    // MSW mode - use normal token validation
     // No token, no validation needed
     if (!token) {
       setValidated(true);
@@ -67,13 +47,8 @@ export function useAuth() {
     setLoading(true);
 
     try {
-      const response = await get<SessionResponse>("/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Session valid, update user data
+      // Both MSW and real backend return { data: user }
+      const response = await get<SessionResponse>("/auth/me");
       setAuth(response.data, token);
       setValidated(true);
       return true;
@@ -101,6 +76,20 @@ export function useAuth() {
     clearAuth();
   }, [clearAuth]);
 
+  /**
+   * Check and refresh session if token is expiring soon
+   * Should be called periodically in the app
+   */
+  const refreshSessionIfNeeded = useCallback(async (): Promise<void> => {
+    const store = useAuthStore.getState();
+    
+    // Check if token is expiring within 1 hour
+    if (store.isTokenExpiringSoon()) {
+      console.log("Token expiring soon, refreshing session...");
+      await validateSession();
+    }
+  }, [validateSession]);
+
   return {
     user,
     token,
@@ -108,6 +97,7 @@ export function useAuth() {
     isLoading,
     isValidated,
     validateSession,
+    refreshSessionIfNeeded,
     logout,
   };
 }

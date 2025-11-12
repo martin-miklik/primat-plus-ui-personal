@@ -35,9 +35,9 @@ export function NavUserHeader() {
         <Button variant="ghost" className="gap-2 px-2">
           <UserAvatar />
           <div className="hidden md:flex flex-col items-start text-sm leading-tight">
-            <span className="font-semibold">{user.name}</span>
+            <span className="font-semibold">{user.name || user.nickname}</span>
             <span className="text-muted-foreground text-xs">
-              {user.subscription === "premium" ? t("premium") : t("free")}
+              {user.subscriptionType === "premium" ? t("premium") : t("free")}
             </span>
           </div>
           <ChevronDown className="h-4 w-4 opacity-50" />

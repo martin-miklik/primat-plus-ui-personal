@@ -12,14 +12,13 @@ interface UserAvatarProps {
 export function UserAvatar({ className, fallbackClassName }: UserAvatarProps) {
   const { user } = useAuthStore();
 
-  const userInitials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "U";
+  const displayName = user?.name || user?.nickname || "User";
+  const userInitials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <Avatar className={cn("h-8 w-8 rounded-lg", className)}>

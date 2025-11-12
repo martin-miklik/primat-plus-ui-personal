@@ -49,7 +49,7 @@ export default function DashboardPage() {
     <div className="w-full space-y-8">
       {/* Hero Section */}
       <DashboardHero
-        userName={user?.name}
+        userName={user?.name || user?.nickname || undefined}
         streak={data?.data.studyStreak}
         dueToday={data?.data.dueCardsCount}
         reviewedToday={12} // TODO: Add to API

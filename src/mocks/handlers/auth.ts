@@ -48,10 +48,14 @@ export const authHandlers = [
     }
 
     const newUser: User = {
-      id: crypto.randomUUID(),
+      id: users.length + 1,
       email: body.email,
       name: body.name,
-      subscription: "free",
+      nickname: body.name,
+      externalId: `ext_${crypto.randomUUID()}`,
+      subscriptionType: "free",
+      subscriptionExpiresAt: null,
+      hasActiveSubscription: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -78,23 +82,27 @@ export const authHandlers = [
 
     const body = (await request.json()) as Record<string, unknown>;
 
-    if (!body.email || typeof body.email !== "string") {
+    // Support both 'email' and 'login' fields
+    const login = (body.login || body.email) as string;
+    const password = body.password as string;
+
+    if (!login || typeof login !== "string") {
       return HttpResponse.json(
-        { error: "E-mail je povinný", code: "VALIDATION_ERROR" },
+        { error: "E-mail/login je povinný", code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
 
-    if (!body.password || typeof body.password !== "string") {
+    if (!password || typeof password !== "string") {
       return HttpResponse.json(
         { error: "Heslo je povinné", code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
 
-    const user = getMockUserByEmail(body.email);
+    const user = getMockUserByEmail(login);
 
-    if (!user || !validateMockCredentials(body.email, body.password)) {
+    if (!user || !validateMockCredentials(login, password)) {
       return HttpResponse.json(
         { error: "Neplatný e-mail nebo heslo", code: "INVALID_CREDENTIALS" },
         { status: 401 }
@@ -103,6 +111,7 @@ export const authHandlers = [
 
     const token = generateMockToken(user.id);
 
+    // Return in MSW format with data wrapper (for compatibility)
     return HttpResponse.json({
       data: {
         user,
@@ -160,8 +169,8 @@ export const authHandlers = [
       );
     }
 
-    // Find user by ID from token
-    const user = users.find((u) => u.id === userId);
+    // Find user by ID from token (convert userId string to number)
+    const user = users.find((u) => u.id === parseInt(userId, 10));
 
     if (!user) {
       return HttpResponse.json(

@@ -33,14 +33,13 @@ export function NavUser() {
     router.push("/login");
   };
 
-  const userInitials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "U";
+  const displayName = user?.name || user?.nickname || "User";
+  const userInitials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   if (!user) return null;
 
@@ -59,9 +58,9 @@ export function NavUser() {
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
+                <span className="truncate font-semibold">{displayName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.subscription === "premium" ? t("premium") : t("free")}
+                  {user.subscriptionType === "premium" ? t("premium") : t("free")}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -81,7 +80,7 @@ export function NavUser() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate font-semibold">{displayName}</span>
                   <span className="text-muted-foreground truncate text-xs">
                     {user.email}
                   </span>

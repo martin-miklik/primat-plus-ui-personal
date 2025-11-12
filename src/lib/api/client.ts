@@ -3,6 +3,25 @@ import { API_TIMEOUT, API_BASE_URL } from "@/lib/constants";
 
 interface RequestOptions extends RequestInit {
   timeout?: number;
+  skipAuth?: boolean; // Skip adding Authorization header
+}
+
+/**
+ * Get auth token from localStorage
+ * Note: This is safe to call on client-side only
+ */
+function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  
+  try {
+    const authStorage = localStorage.getItem("auth-storage");
+    if (!authStorage) return null;
+    
+    const parsed = JSON.parse(authStorage);
+    return parsed?.state?.token || null;
+  } catch {
+    return null;
+  }
 }
 
 // Fetch wrapper with retry logic and error handling
@@ -10,7 +29,7 @@ export async function apiClient<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { timeout = API_TIMEOUT, headers = {}, ...restOptions } = options;
+  const { timeout = API_TIMEOUT, headers = {}, skipAuth = false, ...restOptions } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -20,10 +39,20 @@ export async function apiClient<T>(
       ? endpoint
       : `${API_BASE_URL}${endpoint}`;
 
+    // Add Authorization header if token exists and not skipped
+    const authHeaders: Record<string, string> = {};
+    if (!skipAuth) {
+      const token = getAuthToken();
+      if (token) {
+        authHeaders.Authorization = `Bearer ${token}`;
+      }
+    }
+
     const response = await fetch(url, {
       ...restOptions,
       headers: {
         "Content-Type": "application/json",
+        ...authHeaders,
         ...headers,
       },
       credentials: "include",

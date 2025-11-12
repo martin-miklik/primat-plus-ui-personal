@@ -1,16 +1,20 @@
 import { z } from "zod";
 
-// User schema
+// User schema (matches backend structure)
 export const userSchema = z.object({
-  id: z.string().uuid(),
+  id: z.number(),
   email: z.string().email("Invalid email address"),
-  name: z.string().min(1, "Name is required"),
-  subscription: z.enum(["free", "premium"]),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  name: z.string().nullable(),
+  nickname: z.string().nullable(),
+  externalId: z.string().nullable(),
+  subscriptionType: z.enum(["free", "premium", "trial"]),
+  subscriptionExpiresAt: z.string().nullable(),
+  hasActiveSubscription: z.boolean().optional(),
+  createdAt: z.string().datetime().nullable(),
+  updatedAt: z.string().datetime().nullable(),
 });
 
-// Login schema
+// Login schema (frontend uses 'email', transformed to 'login' for backend)
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -34,11 +38,10 @@ export const registerSchema = z
     path: ["confirmPassword"],
   });
 
-// Auth response schema
+// Auth response schema (matches backend: { accessToken, user })
 export const authResponseSchema = z.object({
+  accessToken: z.string(),
   user: userSchema,
-  token: z.string(),
-  refreshToken: z.string().optional(),
 });
 
 // Types

@@ -75,3 +75,5 @@ export function getRatingShortcut(rating: Rating): string {
   return rating.toString();
 }
 
+
+
