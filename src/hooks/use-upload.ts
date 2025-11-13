@@ -113,17 +113,18 @@ export function useUpload(topicId: number | null) {
         updateFileStatus(fileId, "uploading");
 
         // Create source from URL (YouTube or Website)
+        const token = getAuthToken();
         const response = await fetch(`${API_BASE_URL}/sources`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
           body: JSON.stringify({
             topicId: topicId,
             url: url,
             name: name,
           }),
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
         });
 
         if (!response.ok) {
