@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Upload, FolderOpen, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, FolderOpen, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/states/empty-states";
 import { MaterialCard } from "@/components/materials/material-card";
@@ -30,8 +30,6 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
     refetch,
   } = useSources(topicId);
 
-  const sources = sourcesData?.data || [];
-
   // Get uploading files from store
   const allUploadFiles = useUploadStore((state) => state.files);
   const uploadingFiles = useMemo(
@@ -44,6 +42,7 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
 
   // Map upload files to sources and prepare upload state
   const sourcesWithUploadState = useMemo(() => {
+    const sources = sourcesData?.data || [];
     const sourceMap = new Map(sources.map((s) => [s.id, s]));
     const uploadStateMap = new Map(
       uploadingFiles
@@ -67,9 +66,9 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
     // Add sources that are being uploaded but not yet in the sources list
     // (This happens immediately after upload starts, before the source appears in the API response)
     uploadingFiles.forEach((file) => {
-      if (file.sourceData && !sourceMap.has(file.sourceData.id)) {
+      if (file.sourceData?.id !== undefined && !sourceMap.has(file.sourceData.id)) {
         combined.push({
-          source: file.sourceData,
+          source: file.sourceData as typeof sources[number],
           uploadState: file.channel && file.jobId
             ? {
                 jobId: file.jobId,
@@ -82,7 +81,7 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
     });
 
     return combined;
-  }, [sources, uploadingFiles]);
+  }, [sourcesData?.data, uploadingFiles]);
 
   if (!topicId) {
     return (

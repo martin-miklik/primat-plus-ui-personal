@@ -42,7 +42,6 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
   } = useSources(topicId);
 
   const topic = topicData?.data;
-  const sources = sourcesData?.data || [];
 
   // Get uploading files from store
   const allUploadFiles = useUploadStore((state) => state.files);
@@ -56,6 +55,7 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
 
   // Map upload files to sources and prepare upload state
   const sourcesWithUploadState = useMemo(() => {
+    const sources = sourcesData?.data || [];
     const sourceMap = new Map(sources.map((s) => [s.id, s]));
     const uploadStateMap = new Map(
       uploadingFiles
@@ -79,9 +79,9 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
     // Add sources that are being uploaded but not yet in the sources list
     // (This happens immediately after upload starts, before the source appears in the API response)
     uploadingFiles.forEach((file) => {
-      if (file.sourceData && !sourceMap.has(file.sourceData.id)) {
+      if (file.sourceData?.id !== undefined && !sourceMap.has(file.sourceData.id)) {
         combined.push({
-          source: file.sourceData,
+          source: file.sourceData as typeof sources[number],
           uploadState: file.channel && file.jobId
             ? {
                 jobId: file.jobId,
@@ -99,7 +99,7 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
       const dateB = new Date(b.source.createdAt).getTime();
       return dateB - dateA;
     });
-  }, [sources, uploadingFiles]);
+  }, [sourcesData?.data, uploadingFiles]);
 
   return (
     <>
@@ -151,6 +151,7 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
         {/* Empty State (no sources and no uploads) */}
         {!isLoading &&
           !isError &&
+          (sourcesData?.data || []).length === 0 &&
           sourcesWithUploadState.length === 0 && (
             <EmptyState
               icon={<FolderOpen className="h-12 w-12" />}

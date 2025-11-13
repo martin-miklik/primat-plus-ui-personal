@@ -16,7 +16,7 @@ export const mockSources: Source[] = [
     jobId: "job-1234567890-abc123",
     startTime: null,
     endTime: null,
-    context: `# Kvadratické rovnice
+    summary: `# Kvadratické rovnice
 
 ## Úvod do kvadratických rovnic
 
@@ -71,7 +71,7 @@ Univerzální vzorec pro řešení:
 ---
 
 *Tento materiál byl zpracován pro výukové účely.*`,
-    contextLength: 5000,
+    summaryLength: 5000,
     errorMessage: null,
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -93,8 +93,8 @@ Univerzální vzorec pro řešení:
     jobId: "job-1234567891-abc124",
     startTime: null,
     endTime: null,
-    context: "Methods for solving quadratic equations include...",
-    contextLength: 4200,
+    summary: "Methods for solving quadratic equations include...",
+    summaryLength: 4200,
     errorMessage: null,
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -116,8 +116,8 @@ Univerzální vzorec pro řešení:
     jobId: "job-1234567892-abc125",
     startTime: null,
     endTime: null,
-    context: "A derivative measures how a function changes...",
-    contextLength: 6800,
+    summary: "A derivative measures how a function changes...",
+    summaryLength: 6800,
     errorMessage: null,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -139,8 +139,8 @@ Univerzální vzorec pro řešení:
     jobId: null,
     startTime: null,
     endTime: null,
-    context: "Newton's three laws of motion describe the relationship...",
-    contextLength: 2500,
+    summary: "Newton's three laws of motion describe the relationship...",
+    summaryLength: 2500,
     errorMessage: null,
     createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -161,8 +161,8 @@ Univerzální vzorec pro řešení:
     jobId: "job-1234567893-abc126",
     startTime: null,
     endTime: null,
-    context: "Understanding force and motion through practical examples...",
-    contextLength: 5500,
+    summary: "Understanding force and motion through practical examples...",
+    summaryLength: 5500,
     errorMessage: null,
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -184,7 +184,7 @@ Univerzální vzorec pro řešení:
     jobId: "job-1234567894-abc127",
     startTime: null,
     endTime: null,
-    context: `# Třídící algoritmy
+    summary: `# Třídící algoritmy
 
 ## Úvod
 
@@ -251,7 +251,7 @@ Stabilní třídící algoritmus s garantovanou složitostí O(n log n).
 ---
 
 *Poznámka: Výběr správného algoritmu závisí na konkrétním použití.*`,
-    contextLength: 3200,
+    summaryLength: 3200,
     errorMessage: null,
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
@@ -273,8 +273,8 @@ Stabilní třídící algoritmus s garantovanou složitostí O(n log n).
     jobId: "job-1234567895-abc128",
     startTime: null,
     endTime: null,
-    context: null,
-    contextLength: null,
+    summary: null,
+    summaryLength: null,
     errorMessage: null,
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
@@ -296,8 +296,8 @@ Stabilní třídící algoritmus s garantovanou složitostí O(n log n).
     jobId: "job-1234567896-abc129",
     startTime: 0,
     endTime: 600,
-    context: "Video transcript: Introduction to sorting algorithms...",
-    contextLength: 8500,
+    summary: "Video transcript: Introduction to sorting algorithms...",
+    summaryLength: 8500,
     errorMessage: null,
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -328,8 +328,8 @@ export function createMockSource(
     | "updatedAt"
     | "status"
     | "jobId"
-    | "context"
-    | "contextLength"
+    | "summary"
+    | "summaryLength"
     | "errorMessage"
     | "flashcardsCount"
     | "testsCount"
@@ -340,8 +340,8 @@ export function createMockSource(
     ...data,
     status: "uploaded",
     jobId: `job-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-    context: null,
-    contextLength: null,
+    summary: null,
+    summaryLength: null,
     errorMessage: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

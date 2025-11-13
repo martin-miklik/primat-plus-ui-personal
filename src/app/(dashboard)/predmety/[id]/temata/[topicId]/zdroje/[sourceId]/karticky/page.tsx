@@ -4,7 +4,6 @@ import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Sparkles,
@@ -47,7 +46,6 @@ export default function FlashcardsPage({ params }: FlashcardsPageProps) {
 
   const t = useTranslations("flashcards");
   const router = useRouter();
-  const queryClient = useQueryClient();
   const generateDialog = useDialog("generate-flashcards");
 
   // Job state for flashcard generation

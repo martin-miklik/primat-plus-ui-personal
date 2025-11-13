@@ -27,7 +27,6 @@ import { Typography } from "@/components/ui/Typography";
 import { SummarySheet } from "@/components/materials/summary-sheet";
 import { JobStatusIndicator } from "@/components/job-status/job-status-indicator";
 import { useJobSubscription } from "@/hooks/use-job-subscription";
-import type { UploadEvent } from "@/types/websocket-events";
 
 interface MaterialCardProps {
   material: Source;

@@ -30,8 +30,6 @@ interface UpdateNextRepetitionApiResponse {
  * Returns job info for WebSocket subscription (doesn't wait for completion)
  */
 export function useGenerateFlashcards(sourceId: number) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (input: GenerateFlashcardsInput) =>
       post<GenerateFlashcardsApiResponse>(

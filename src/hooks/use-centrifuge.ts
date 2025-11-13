@@ -74,7 +74,7 @@ export function useSubscription<T = unknown>(
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [data, setData] = useState<T | null>(null);
   const subscriptionRef = useRef<Subscription | null>(null);
-  const { client, isConnected } = useCentrifuge({ enabled });
+  const { client } = useCentrifuge({ enabled });
 
   // Use refs for callbacks to avoid effect re-runs
   const onPublicationRef = useRef(onPublication);
