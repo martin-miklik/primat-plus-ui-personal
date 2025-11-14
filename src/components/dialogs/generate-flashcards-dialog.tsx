@@ -34,7 +34,11 @@ import { FREE_TIER_LIMITS } from "@/lib/constants";
 
 interface GenerateFlashcardsDialogProps {
   sourceId: number;
-  onGenerated?: (jobData: { jobId: string; channel: string; count: number }) => void;
+  onGenerated?: (jobData: {
+    jobId: string;
+    channel: string;
+    count: number;
+  }) => void;
 }
 
 export function GenerateFlashcardsDialog({
@@ -43,7 +47,7 @@ export function GenerateFlashcardsDialog({
 }: GenerateFlashcardsDialogProps) {
   const t = useTranslations("flashcards");
   const dialog = useDialog("generate-flashcards");
-  const { checkLimit, showPaywall, isPremiumUser } = usePaywall();
+  const { showPaywall, isPremiumUser } = usePaywall();
   const generateFlashcards = useGenerateFlashcards(sourceId);
 
   const form = useForm<GenerateFlashcardsInput>({
@@ -55,21 +59,24 @@ export function GenerateFlashcardsDialog({
 
   const onSubmit = async (data: GenerateFlashcardsInput) => {
     // Check if free user is trying to generate more than allowed
-    if (!isPremiumUser && data.count > FREE_TIER_LIMITS.MAX_FLASHCARDS_PER_GENERATION) {
+    if (
+      !isPremiumUser &&
+      data.count > FREE_TIER_LIMITS.MAX_FLASHCARDS_PER_GENERATION
+    ) {
       showPaywall("flashcard_limit");
       return;
     }
 
     try {
       const response = await generateFlashcards.mutateAsync(data);
-      
+
       // Pass job data to parent for WebSocket subscription
       onGenerated?.({
         jobId: response.data.jobId,
         channel: response.data.channel,
         count: data.count,
       });
-      
+
       // Close dialog immediately (don't wait for generation)
       dialog.close();
       form.reset();
@@ -116,9 +123,7 @@ export function GenerateFlashcardsDialog({
                       }
                     />
                   </FormControl>
-                  <FormDescription>
-                    {t("generate.countDesc")}
-                  </FormDescription>
+                  <FormDescription>{t("generate.countDesc")}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

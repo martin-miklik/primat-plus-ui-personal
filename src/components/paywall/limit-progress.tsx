@@ -1,4 +1,4 @@
-import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface LimitProgressProps {
   label: string;
@@ -25,17 +25,19 @@ export function LimitProgress({ label, used, max }: LimitProgressProps) {
           {used} / {max}
         </span>
       </div>
-      <Progress
-        value={percentage}
-        className="h-2"
-        indicatorClassName={
-          isAtLimit
-            ? "bg-destructive"
-            : isNearLimit
-              ? "bg-yellow-500"
-              : undefined
-        }
-      />
+      <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+        <div
+          className={cn(
+            "h-full transition-all",
+            isAtLimit
+              ? "bg-destructive"
+              : isNearLimit
+                ? "bg-yellow-500"
+                : "bg-primary"
+          )}
+          style={{ width: `${Math.min(percentage, 100)}%` }}
+        />
+      </div>
     </div>
   );
 }
