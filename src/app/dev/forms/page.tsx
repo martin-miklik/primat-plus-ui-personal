@@ -8,11 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LoginForm } from "@/components/forms/login-form";
 import { CreateSubjectDialog } from "@/components/dialogs";
 import { useDialog } from "@/hooks/use-dialog";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 
@@ -25,17 +23,7 @@ import { ArrowLeftIcon } from "lucide-react";
 export default function FormsShowcasePage() {
   const dialog = useDialog("showcase-subject");
 
-  const handleLogin = async (data: {
-    email: string;
-    password: string;
-    remember?: boolean;
-  }) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    console.log("Login submitted:", data);
-    toast.success(`Logged in as ${data.email}`);
-  };
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -67,11 +55,11 @@ export default function FormsShowcasePage() {
               <CardHeader>
                 <CardTitle>Login Form Example</CardTitle>
                 <CardDescription>
-                  Standalone form with email, password, and remember me checkbox
+                  Standalone form with name, password, and remember me checkbox
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LoginForm onSubmit={handleLogin} />
+                
               </CardContent>
             </Card>
 
@@ -83,7 +71,7 @@ export default function FormsShowcasePage() {
               <CardContent className="space-y-2 text-sm">
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>
-                  <span>Email validation (must be valid email format)</span>
+                  <span>Name validation (required field)</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-600">✓</span>

@@ -28,13 +28,13 @@ interface MSWLoginResponse {
 /**
  * Login mutation hook
  *
- * Authenticates user with email and password.
+ * Authenticates user with name and password.
  * Returns user data and auth token on success.
  * Handles both MSW (mock) and real backend responses.
  *
  * @example
  * const loginMutation = useLogin();
- * await loginMutation.mutateAsync({ email: "user@example.com", password: "password123" });
+ * await loginMutation.mutateAsync({ name: "John Doe", password: "password123" });
  */
 export function useLogin() {
   const isMSW = process.env.NEXT_PUBLIC_ENABLE_MSW === "true";
@@ -42,9 +42,9 @@ export function useLogin() {
   return useMutation({
     mutationFn: async (data: LoginInput) => {
       try {
-        // Transform email -> login for backend
+        // Transform name -> login for backend
         const payload = {
-          login: data.email,
+          login: data.name,
           password: data.password,
         };
 

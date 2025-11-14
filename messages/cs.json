@@ -416,15 +416,15 @@
     "login": {
       "title": "Přihlášení",
       "subtitle": "Přihlaste se ke svému účtu",
-      "email": "E-mail",
+      "name": "Jméno",
       "password": "Heslo",
       "rememberMe": "Zapamatovat si mě",
       "signingIn": "Přihlašování...",
       "signIn": "Přihlásit se",
-      "emailPlaceholder": "vas@email.cz",
+      "namePlaceholder": "Vaše jméno",
       "success": "Přihlášení úspěšné",
       "errors": {
-        "invalidCredentials": "Neplatný e-mail nebo heslo",
+        "invalidCredentials": "Neplatné jméno nebo heslo",
         "networkError": "Chyba sítě. Zkuste to prosím znovu.",
         "unknownError": "Došlo k neočekávané chybě"
       }
@@ -467,6 +467,7 @@
     "passwordNumber": "Heslo musí obsahovat alespoň jedno číslo",
     "passwordsNoMatch": "Hesla se neshodují",
     "nameMinLength": "Jméno musí mít alespoň 2 znaky",
+    "nameRequired": "Jméno je povinné",
     "topicNameRequired": "Název tématu je povinný",
     "topicNameTooLong": "Název tématu je příliš dlouhý"
   },

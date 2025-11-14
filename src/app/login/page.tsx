@@ -21,7 +21,7 @@ import {
  * Login Page
  *
  * Public authentication page with:
- * - Email/password login form
+ * - Name/password login form
  * - Form validation with Zod
  * - MSW mock authentication
  * - Session persistence to auth store

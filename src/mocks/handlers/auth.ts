@@ -1,7 +1,7 @@
 import { http, HttpResponse, delay } from "msw";
 import {
   mockUsers,
-  getMockUserByEmail,
+  getMockUserByName,
   validateMockCredentials,
   generateMockToken,
 } from "@/mocks/fixtures/auth";
@@ -11,84 +11,19 @@ import { apiPath } from "@/mocks/config";
 const users = [...mockUsers];
 
 export const authHandlers = [
-  // POST /api/v1/auth/register - Register new user
-  http.post(apiPath("/auth/register"), async ({ request }) => {
-    await delay(500);
-
-    const body = (await request.json()) as Record<string, unknown>;
-
-    if (!body.email || typeof body.email !== "string") {
-      return HttpResponse.json(
-        { error: "E-mail je povinný", code: "VALIDATION_ERROR" },
-        { status: 400 }
-      );
-    }
-
-    if (!body.password || typeof body.password !== "string") {
-      return HttpResponse.json(
-        { error: "Heslo je povinné", code: "VALIDATION_ERROR" },
-        { status: 400 }
-      );
-    }
-
-    if (!body.name || typeof body.name !== "string") {
-      return HttpResponse.json(
-        { error: "Jméno je povinné", code: "VALIDATION_ERROR" },
-        { status: 400 }
-      );
-    }
-
-    // Check if email already exists
-    const existingUser = users.find((u) => u.email === body.email);
-    if (existingUser) {
-      return HttpResponse.json(
-        { error: "E-mail je již registrován", code: "EMAIL_EXISTS" },
-        { status: 409 }
-      );
-    }
-
-    const newUser: User = {
-      id: users.length + 1,
-      email: body.email,
-      name: body.name,
-      nickname: body.name,
-      externalId: `ext_${crypto.randomUUID()}`,
-      subscriptionType: "free",
-      subscriptionExpiresAt: null,
-      hasActiveSubscription: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    users.push(newUser);
-
-    const token = generateMockToken(newUser.id);
-
-    return HttpResponse.json(
-      {
-        data: {
-          user: newUser,
-          token,
-        },
-        message: "Registrace byla úspěšná",
-      },
-      { status: 201 }
-    );
-  }),
-
-  // POST /api/v1/auth/login - Login user
+  // POST /api/v1/auth/login - Login user with name
   http.post(apiPath("/auth/login"), async ({ request }) => {
     await delay(400);
 
     const body = (await request.json()) as Record<string, unknown>;
 
-    // Support both 'email' and 'login' fields
-    const login = (body.login || body.email) as string;
+    // Get name from 'login' field (which is transformed from 'name' field in frontend)
+    const name = body.login as string;
     const password = body.password as string;
 
-    if (!login || typeof login !== "string") {
+    if (!name || typeof name !== "string") {
       return HttpResponse.json(
-        { error: "E-mail/login je povinný", code: "VALIDATION_ERROR" },
+        { error: "Jméno je povinné", code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
@@ -100,11 +35,11 @@ export const authHandlers = [
       );
     }
 
-    const user = getMockUserByEmail(login);
+    const user = getMockUserByName(name);
 
-    if (!user || !validateMockCredentials(login, password)) {
+    if (!user || !validateMockCredentials(name, password)) {
       return HttpResponse.json(
-        { error: "Neplatný e-mail nebo heslo", code: "INVALID_CREDENTIALS" },
+        { error: "Neplatné jméno nebo heslo", code: "INVALID_CREDENTIALS" },
         { status: 401 }
       );
     }

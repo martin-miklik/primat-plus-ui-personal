@@ -23,7 +23,7 @@ interface LoginFormProps {
  * Login Form Component
  *
  * Features:
- * - Email and password validation with Zod
+ * - Name and password validation with Zod
  * - Remember me checkbox
  * - Inline error messages via Field API
  * - Loading state during submission
@@ -37,12 +37,13 @@ interface LoginFormProps {
  */
 export function LoginForm({ onSubmit }: LoginFormProps) {
   const t = useTranslations("auth.login");
+  const tv = useTranslations("validation");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      name: "",
       password: "",
       remember: false,
     },
@@ -60,20 +61,22 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
       <FieldGroup>
-        <Field data-invalid={!!form.formState.errors.email}>
-          <FieldLabel htmlFor="email">
-            {t("email")} <span className="text-destructive">*</span>
+        <Field data-invalid={!!form.formState.errors.name}>
+          <FieldLabel htmlFor="name">
+            {t("name")} <span className="text-destructive">*</span>
           </FieldLabel>
           <Input
-            id="email"
-            type="email"
-            placeholder={t("emailPlaceholder")}
-            aria-invalid={!!form.formState.errors.email}
+            id="name"
+            type="text"
+            placeholder={t("namePlaceholder")}
+            aria-invalid={!!form.formState.errors.name}
             disabled={isSubmitting}
-            {...form.register("email")}
+            {...form.register("name")}
           />
-          {form.formState.errors.email && (
-            <FieldError>{form.formState.errors.email.message}</FieldError>
+          {form.formState.errors.name && (
+            <FieldError>
+              {tv(form.formState.errors.name.message ?? "nameRequired")}
+            </FieldError>
           )}
         </Field>
 
@@ -90,7 +93,9 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
             {...form.register("password")}
           />
           {form.formState.errors.password && (
-            <FieldError>{form.formState.errors.password.message}</FieldError>
+            <FieldError>
+              {tv(form.formState.errors.password.message ?? "passwordMin")}
+            </FieldError>
           )}
         </Field>
 

@@ -3,7 +3,7 @@ import { z } from "zod";
 // User schema (matches backend structure)
 export const userSchema = z.object({
   id: z.number(),
-  email: z.string().email("Invalid email address"),
+  email: z.string().email().nullable(),
   name: z.string().nullable(),
   nickname: z.string().nullable(),
   externalId: z.string().nullable(),
@@ -14,29 +14,12 @@ export const userSchema = z.object({
   updatedAt: z.string().datetime().nullable(),
 });
 
-// Login schema (frontend uses 'email', transformed to 'login' for backend)
+// Login schema (name-based authentication)
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(1, "validation.nameRequired"),
+  password: z.string().min(8, "validation.passwordMin"),
   remember: z.boolean().default(false).optional(),
 });
-
-// Register schema
-export const registerSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
 
 // Auth response schema (matches backend: { accessToken, user })
 export const authResponseSchema = z.object({
@@ -47,5 +30,4 @@ export const authResponseSchema = z.object({
 // Types
 export type User = z.infer<typeof userSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
-export type RegisterInput = z.infer<typeof registerSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;

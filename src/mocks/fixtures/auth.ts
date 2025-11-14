@@ -3,7 +3,7 @@ import { User } from "@/lib/validations/auth";
 export const mockUsers: User[] = [
   {
     id: 1,
-    email: "john@example.com",
+    email: null,
     name: "John Doe",
     nickname: "johnny",
     externalId: "ext_john_123",
@@ -15,7 +15,7 @@ export const mockUsers: User[] = [
   },
   {
     id: 2,
-    email: "jane@example.com",
+    email: null,
     name: "Jane Smith",
     nickname: "janesmith",
     externalId: "ext_jane_456",
@@ -27,7 +27,7 @@ export const mockUsers: User[] = [
   },
   {
     id: 3,
-    email: "test@example.com",
+    email: null,
     name: "Test User",
     nickname: "testuser",
     externalId: "ext_test_789",
@@ -39,22 +39,22 @@ export const mockUsers: User[] = [
   },
 ];
 
-// Mock credentials (for testing purposes)
+// Mock credentials (for testing purposes) - now using names instead of emails
 export const mockCredentials = {
-  "john@example.com": "Password123",
-  "jane@example.com": "Password123",
-  "test@example.com": "Password123",
+  "John Doe": "Password123",
+  "Jane Smith": "Password123",
+  "Test User": "Password123",
 };
 
-export function getMockUserByEmail(email: string): User | undefined {
-  return mockUsers.find((user) => user.email === email);
+export function getMockUserByName(name: string): User | undefined {
+  return mockUsers.find((user) => user.name === name);
 }
 
 export function validateMockCredentials(
-  email: string,
+  name: string,
   password: string
 ): boolean {
-  return mockCredentials[email as keyof typeof mockCredentials] === password;
+  return mockCredentials[name as keyof typeof mockCredentials] === password;
 }
 
 export function generateMockToken(userId: number): string {

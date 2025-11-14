@@ -36,11 +36,6 @@ export function AppSidebar() {
       url: "/predmety",
       icon: BookOpen,
     },
-    {
-      title: tNav("learn"),
-      url: "/ucit-se",
-      icon: GraduationCap,
-    },
   ];
 
   const settingsNavigation = [
