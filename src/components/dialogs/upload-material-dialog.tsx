@@ -17,6 +17,7 @@ import { FileDropzone } from "@/components/upload/file-dropzone";
 import { YoutubeUrlInput } from "@/components/upload/youtube-url-input";
 import { WebsiteUrlInput } from "@/components/upload/website-url-input";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePaywall } from "@/hooks/use-paywall";
 
 interface UploadMaterialDialogProps {
   topicId: number | null;
@@ -31,6 +32,7 @@ export function UploadMaterialDialog({
 }: UploadMaterialDialogProps) {
   const t = useTranslations("upload");
   const dialog = useDialog("upload-material");
+  const { checkLimit, showPaywall } = usePaywall();
 
   const [activeTab, setActiveTab] = useState<SourceType>("file");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -52,6 +54,12 @@ export function UploadMaterialDialog({
   }, [dialog.isOpen]);
 
   const handleUpload = () => {
+    // Check limit before attempting to upload/create source
+    if (!checkLimit("create_source")) {
+      showPaywall("source_limit");
+      return;
+    }
+
     // Pass data to parent
     if (onUpload) {
       onUpload();

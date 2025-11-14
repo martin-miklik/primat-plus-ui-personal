@@ -19,6 +19,8 @@ import { ConnectionStatus } from "./connection-status";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { usePaywall } from "@/hooks/use-paywall";
+import { ApiError } from "@/lib/errors";
 
 // Check if we should use real Centrifugo or MSW mock
 const USE_REAL_CENTRIFUGO =
@@ -40,6 +42,7 @@ export function ChatInterface({
 }: ChatInterfaceProps) {
   const t = useTranslations("chat");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { checkLimit, showPaywall, isAtLimit } = usePaywall();
 
   // Chat store
   const messages = useChatStore((state) => state.getMessages(sourceId));
@@ -158,7 +161,20 @@ export function ChatInterface({
     return cleanup;
   }, [activeChannel, handleCentrifugoEvent]);
 
+  const handleInputFocus = () => {
+    // Soft paywall check - show warning when approaching limit
+    if (!checkLimit("chat_input")) {
+      showPaywall("chat_limit_soft");
+    }
+  };
+
   const handleSend = async (message: string) => {
+    // Hard paywall check - block sending if at limit
+    if (!checkLimit("chat_send")) {
+      showPaywall("chat_limit_hard");
+      return;
+    }
+
     // Add user message to store
     addUserMessage(sourceId, message);
 
@@ -177,7 +193,11 @@ export function ChatInterface({
       // Create placeholder for AI response
       startAssistantMessage(sourceId, `ai-${response.jobId}`, selectedModel);
     } catch (error) {
-      // Error handling is done by the mutation hook (toast)
+      // Check if backend returned chat limit error
+      if (error instanceof ApiError && error.code === "CHAT_LIMIT_REACHED") {
+        showPaywall("chat_limit_hard");
+      }
+      // Other error handling is done by the mutation hook (toast)
       console.error("Failed to send message:", error);
     }
   };
@@ -256,7 +276,12 @@ export function ChatInterface({
       <Separator />
 
       {/* Input */}
-      <ChatInput onSend={handleSend} disabled={isStreaming} />
+      <ChatInput 
+        onSend={handleSend} 
+        onFocus={handleInputFocus}
+        disabled={isStreaming || isAtLimit("chat")} 
+        placeholder={isAtLimit("chat") ? t("limitReached") : undefined}
+      />
     </div>
   );
 }

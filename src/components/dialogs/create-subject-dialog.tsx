@@ -23,11 +23,13 @@ import { Button } from "@/components/ui/button";
 import { ColorPicker } from "@/components/forms/color-picker";
 import { EmojiPicker } from "@/components/forms/emoji-picker";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePaywall } from "@/hooks/use-paywall";
 import { useCreateSubject } from "@/lib/api/mutations/subjects";
 import {
   createSubjectSchema,
   CreateSubjectInput,
 } from "@/lib/validations/subject";
+import { ApiError } from "@/lib/errors";
 
 /**
  * Create Subject Dialog Component
@@ -44,6 +46,7 @@ export function CreateSubjectDialog() {
   const t = useTranslations("subjects.dialog");
   const tCommon = useTranslations("common");
   const dialog = useDialog("create-subject");
+  const { checkLimit, showPaywall } = usePaywall();
   const createSubject = useCreateSubject();
 
   const form = useForm<CreateSubjectInput>({
@@ -57,12 +60,22 @@ export function CreateSubjectDialog() {
   });
 
   const onSubmit = async (data: CreateSubjectInput) => {
+    // Check limit before attempting to create
+    if (!checkLimit("create_subject")) {
+      showPaywall("subject_limit");
+      return;
+    }
+
     try {
       await createSubject.mutateAsync(data);
       dialog.close();
       form.reset();
-    } catch {
-      // Error handled by mutation (toast shown automatically)
+    } catch (error) {
+      // Check if backend returned limit error
+      if (error instanceof ApiError && error.code === "SUBJECT_LIMIT_REACHED") {
+        showPaywall("subject_limit");
+      }
+      // Other errors handled by mutation (toast shown automatically)
     }
   };
 

@@ -18,12 +18,18 @@ import {
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Typography } from "@/components/ui/Typography";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Crown } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
   const tNav = useTranslations("nav");
   const tBrand = useTranslations("brand");
   const tTheme = useTranslations("theme");
+  const { user } = useAuth();
+
+  const isFreeUser = user?.subscriptionType === "free";
 
   const mainNavigation = [
     {
@@ -90,6 +96,28 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        {/* Upgrade CTA for free users */}
+        {isFreeUser && (
+          <div className="px-4 py-3">
+            <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+              <div className="flex items-start gap-2 mb-2">
+                <Crown className="h-4 w-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-yellow-900 dark:text-yellow-100">
+                    Vyzkoušejte Premium
+                  </p>
+                  <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-0.5">
+                    14 dní zdarma, pak 199 Kč/měsíc
+                  </p>
+                </div>
+              </div>
+              <Button asChild size="sm" className="w-full h-8 text-xs">
+                <Link href="/predplatne">Upgrade</Link>
+              </Button>
+            </div>
+          </div>
+        )}
+
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs text-muted-foreground">
             {tNav("settings")}

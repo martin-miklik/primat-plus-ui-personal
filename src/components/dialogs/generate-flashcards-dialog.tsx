@@ -23,11 +23,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePaywall } from "@/hooks/use-paywall";
 import { useGenerateFlashcards } from "@/lib/api/mutations/flashcards";
 import {
   GenerateFlashcardsInput,
   generateFlashcardsSchema,
 } from "@/lib/validations/flashcard";
+import { ApiError } from "@/lib/errors";
+import { FREE_TIER_LIMITS } from "@/lib/constants";
 
 interface GenerateFlashcardsDialogProps {
   sourceId: number;
@@ -40,6 +43,7 @@ export function GenerateFlashcardsDialog({
 }: GenerateFlashcardsDialogProps) {
   const t = useTranslations("flashcards");
   const dialog = useDialog("generate-flashcards");
+  const { checkLimit, showPaywall, isPremiumUser } = usePaywall();
   const generateFlashcards = useGenerateFlashcards(sourceId);
 
   const form = useForm<GenerateFlashcardsInput>({
@@ -50,6 +54,12 @@ export function GenerateFlashcardsDialog({
   });
 
   const onSubmit = async (data: GenerateFlashcardsInput) => {
+    // Check if free user is trying to generate more than allowed
+    if (!isPremiumUser && data.count > FREE_TIER_LIMITS.MAX_FLASHCARDS_PER_GENERATION) {
+      showPaywall("flashcard_limit");
+      return;
+    }
+
     try {
       const response = await generateFlashcards.mutateAsync(data);
       
@@ -63,8 +73,12 @@ export function GenerateFlashcardsDialog({
       // Close dialog immediately (don't wait for generation)
       dialog.close();
       form.reset();
-    } catch {
-      // Error is handled by the mutation
+    } catch (error) {
+      // Check if backend returned limit error
+      if (error instanceof ApiError && error.code === "FLASHCARD_LIMIT") {
+        showPaywall("flashcard_limit");
+      }
+      // Other errors handled by mutation
     }
   };
 
@@ -95,7 +109,7 @@ export function GenerateFlashcardsDialog({
                     <Input
                       type="number"
                       min={1}
-                      max={30}
+                      max={isPremiumUser ? 100 : 30}
                       {...field}
                       onChange={(e) =>
                         field.onChange(parseInt(e.target.value) || 1)

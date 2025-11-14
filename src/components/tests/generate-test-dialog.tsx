@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePaywall } from "@/hooks/use-paywall";
 import { useGenerateTest } from "@/lib/api/mutations/tests";
 import {
   TestConfiguration,
@@ -34,6 +35,8 @@ import {
   QuestionType,
   ReviewMode,
 } from "@/lib/validations/test";
+import { ApiError } from "@/lib/errors";
+import { FREE_TIER_LIMITS } from "@/lib/constants";
 
 interface GenerateTestDialogProps {
   sourceId: number;
@@ -46,6 +49,7 @@ export function GenerateTestDialog({
 }: GenerateTestDialogProps) {
   const t = useTranslations("tests");
   const dialog = useDialog("generate-test");
+  const { showPaywall, isPremiumUser } = usePaywall();
   const generateTest = useGenerateTest(sourceId);
 
   const form = useForm<TestConfiguration>({
@@ -68,13 +72,23 @@ export function GenerateTestDialog({
   const reviewModes: ReviewMode[] = ["during", "after"];
 
   const onSubmit = async (data: TestConfiguration) => {
+    // Check if free user is trying to generate more questions than allowed
+    if (!isPremiumUser && data.questionCount > FREE_TIER_LIMITS.MAX_TEST_QUESTIONS) {
+      showPaywall("test_question_limit");
+      return;
+    }
+
     try {
       const response = await generateTest.mutateAsync(data);
       onTestGenerated?.(response.data.testId);
       dialog.close();
       form.reset();
-    } catch {
-      // Error is handled by the mutation
+    } catch (error) {
+      // Check if backend returned limit error
+      if (error instanceof ApiError && error.code === "TEST_QUESTION_LIMIT") {
+        showPaywall("test_question_limit");
+      }
+      // Other errors handled by mutation
     }
   };
 
@@ -102,7 +116,7 @@ export function GenerateTestDialog({
                     <Input
                       type="number"
                       min={5}
-                      max={50}
+                      max={isPremiumUser ? 100 : 15}
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
                     />

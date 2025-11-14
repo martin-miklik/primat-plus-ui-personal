@@ -35,11 +35,13 @@ export const SUBSCRIPTION_TIERS = {
   PREMIUM: "premium",
 } as const;
 
-// Free tier limits
+// Free tier limits (aligned with BE spec)
 export const FREE_TIER_LIMITS = {
-  MAX_SUBJECTS: 3,
-  MAX_SOURCES_PER_SUBJECT: 10,
-  MAX_FLASHCARDS_PER_SOURCE: 50,
+  MAX_SUBJECTS: 1,
+  MAX_SOURCES_PER_SUBJECT: 1,
+  MAX_TEST_QUESTIONS: 15,
+  MAX_FLASHCARDS_PER_GENERATION: 30,
+  MAX_CHAT_CONVERSATIONS: 3,
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
 } as const;
 
@@ -47,8 +49,10 @@ export const FREE_TIER_LIMITS = {
 export const PREMIUM_TIER_LIMITS = {
   MAX_SUBJECTS: 999,
   MAX_SOURCES_PER_SUBJECT: 999,
-  MAX_FLASHCARDS_PER_SOURCE: 999,
-  MAX_FILE_SIZE: MAX_FILE_SIZE,
+  MAX_TEST_QUESTIONS: 100,
+  MAX_FLASHCARDS_PER_GENERATION: 100,
+  MAX_CHAT_CONVERSATIONS: 999,
+  MAX_FILE_SIZE: MAX_FILE_SIZE, // 50MB
 } as const;
 
 // Query keys (for TanStack Query)
@@ -65,4 +69,7 @@ export const QUERY_KEYS = {
   TESTS: (sourceId: number) => ["sources", sourceId, "tests"] as const,
   USER: ["user"] as const,
   SUBSCRIPTION: ["subscription"] as const,
+  BILLING_LIMITS: ["billing", "limits"] as const,
+  BILLING_PLANS: ["billing", "plans"] as const,
+  BILLING_SUBSCRIPTION: ["billing", "subscription"] as const,
 } as const;

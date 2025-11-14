@@ -9,11 +9,12 @@ import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
+  onFocus?: () => void;
   disabled?: boolean;
   placeholder?: string;
 }
 
-export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
+export function ChatInput({ onSend, onFocus, disabled, placeholder }: ChatInputProps) {
   const t = useTranslations("chat.input");
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -63,6 +64,7 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={onFocus}
             placeholder={placeholder || t("placeholder")}
             disabled={disabled}
             className={cn(
