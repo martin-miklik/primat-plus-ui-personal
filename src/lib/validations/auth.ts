@@ -16,8 +16,8 @@ export const userSchema = z.object({
 
 // Login schema (name-based authentication)
 export const loginSchema = z.object({
-  name: z.string().min(1, "validation.nameRequired"),
-  password: z.string().min(8, "validation.passwordMin"),
+  name: z.string().min(1, "nameRequired"),
+  password: z.string().min(8, "passwordMin"),
   remember: z.boolean().default(false).optional(),
 });
 
