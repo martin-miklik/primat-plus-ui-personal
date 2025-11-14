@@ -23,8 +23,6 @@ import { ArrowLeftIcon } from "lucide-react";
 export default function FormsShowcasePage() {
   const dialog = useDialog("showcase-subject");
 
-
-
   return (
     <div className="container mx-auto py-8 space-y-8">
       <div className="flex items-center gap-4">
@@ -58,9 +56,7 @@ export default function FormsShowcasePage() {
                   Standalone form with name, password, and remember me checkbox
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                
-              </CardContent>
+              <CardContent></CardContent>
             </Card>
 
             <Card>
