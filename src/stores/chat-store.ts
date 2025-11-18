@@ -43,6 +43,13 @@ interface ChatActions {
   // Utility
   clearMessages: (sourceId: number) => void;
   initializeWelcomeMessage: (sourceId: number, sourceName: string) => void;
+  loadHistoryFromServer: (sourceId: number, chats: Array<{
+    id: number;
+    question: string;
+    answer: string | null;
+    errorMessage: string | null;
+    createdAt: string;
+  }>) => void;
 
   // Selectors
   getMessages: (sourceId: number) => ChatMessage[];
@@ -222,6 +229,49 @@ export const useChatStore = create<ChatStore>()(
             },
           }));
         }
+      },
+
+      loadHistoryFromServer: (sourceId, chats) => {
+        const messages: ChatMessage[] = [];
+        
+        // Convert backend chat history to frontend message format
+        chats.forEach((chat) => {
+          // Add user question
+          messages.push({
+            id: `server-${chat.id}-q`,
+            role: "user",
+            content: chat.question,
+            timestamp: new Date(chat.createdAt).getTime(),
+            status: "complete",
+          });
+
+          // Add assistant answer if it exists
+          if (chat.answer) {
+            messages.push({
+              id: `server-${chat.id}-a`,
+              role: "assistant",
+              content: chat.answer,
+              timestamp: new Date(chat.createdAt).getTime(),
+              status: "complete",
+            });
+          } else if (chat.errorMessage) {
+            // If there was an error, show it
+            messages.push({
+              id: `server-${chat.id}-a`,
+              role: "assistant",
+              content: `Error: ${chat.errorMessage}`,
+              timestamp: new Date(chat.createdAt).getTime(),
+              status: "error",
+            });
+          }
+        });
+
+        set((state) => ({
+          messagesBySource: {
+            ...state.messagesBySource,
+            [sourceId]: messages,
+          },
+        }));
       },
 
       // Selectors

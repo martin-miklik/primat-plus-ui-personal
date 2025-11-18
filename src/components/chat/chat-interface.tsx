@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useChatStore } from "@/stores/chat-store";
 import { useSendMessage } from "@/lib/api/mutations/chat";
+import { useGetChatHistory } from "@/lib/api/queries/chat";
 import { listenToMockCentrifugo } from "@/mocks/utils/mock-centrifugo";
 import { useJobSubscription } from "@/hooks/use-job-subscription";
 import { useCentrifuge } from "@/hooks/use-centrifuge";
@@ -54,6 +55,9 @@ export function ChatInterface({
   const initializeWelcomeMessage = useChatStore(
     (state) => state.initializeWelcomeMessage
   );
+  const loadHistoryFromServer = useChatStore(
+    (state) => state.loadHistoryFromServer
+  );
   const setModel = useChatStore((state) => state.setModel);
   const addUserMessage = useChatStore((state) => state.addUserMessage);
   const startAssistantMessage = useChatStore(
@@ -66,6 +70,12 @@ export function ChatInterface({
   const setActiveChannel = useChatStore((state) => state.setActiveChannel);
   const setActiveJobId = useChatStore((state) => state.setActiveJobId);
 
+  // Fetch chat history from backend
+  const { data: chatHistory, isLoading: isLoadingHistory } = useGetChatHistory(
+    sourceId,
+    true
+  );
+
   // Send message mutation
   const sendMessageMutation = useSendMessage();
 
@@ -74,10 +84,25 @@ export function ChatInterface({
     enabled: USE_REAL_CENTRIFUGO,
   });
 
-  // Initialize welcome message on mount
+  // Load chat history from server or initialize welcome message
   useEffect(() => {
-    initializeWelcomeMessage(sourceId, sourceName);
-  }, [sourceId, sourceName, initializeWelcomeMessage]);
+    if (isLoadingHistory) return;
+
+    if (chatHistory && chatHistory.chats.length > 0) {
+      // Load existing chat history from backend
+      loadHistoryFromServer(sourceId, chatHistory.chats);
+    } else {
+      // No history - show welcome message
+      initializeWelcomeMessage(sourceId, sourceName);
+    }
+  }, [
+    sourceId,
+    sourceName,
+    chatHistory,
+    isLoadingHistory,
+    loadHistoryFromServer,
+    initializeWelcomeMessage,
+  ]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
