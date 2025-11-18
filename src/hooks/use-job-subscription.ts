@@ -210,6 +210,7 @@ export function useJobSubscription<P extends ProcessType>({
 
         case "extracting":
         case "generating_context":
+        case "generating_summary":
         case "generating":
         case "chunk":
           onProgress?.(typedEvent);

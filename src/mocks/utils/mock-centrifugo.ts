@@ -1,12 +1,15 @@
 /**
  * Mock Centrifugo streaming simulation for development
+ * Following unified WebSocket spec (docs/websocket-states-spec.md)
  */
 
 interface CentrifugoEvent {
-  type: "chat_started" | "gemini_chunk" | "gemini_complete" | "chat_error";
+  type: "job_started" | "chunk" | "complete" | "error";
   jobId: string;
+  process: "chat";
   content?: string;
   error?: string;
+  message?: string;
   timestamp: number;
 }
 
@@ -38,10 +41,11 @@ export async function simulateStreamingResponse(
     // Initial delay before starting
     await delay(500);
 
-    // Send chat_started event
+    // Send job_started event
     dispatchCentrifugoEvent(channel, {
-      type: "chat_started",
+      type: "job_started",
       jobId,
+      process: "chat",
       timestamp: Date.now(),
     });
 
@@ -58,8 +62,9 @@ export async function simulateStreamingResponse(
 
       // Send chunk
       dispatchCentrifugoEvent(channel, {
-        type: "gemini_chunk",
+        type: "chunk",
         jobId,
+        process: "chat",
         content: currentChunk,
         timestamp: Date.now(),
       });
@@ -71,16 +76,19 @@ export async function simulateStreamingResponse(
     // Send completion event
     await delay(200);
     dispatchCentrifugoEvent(channel, {
-      type: "gemini_complete",
+      type: "complete",
       jobId,
+      process: "chat",
       timestamp: Date.now(),
     });
   } catch (error) {
     // Send error event
     dispatchCentrifugoEvent(channel, {
-      type: "chat_error",
+      type: "error",
       jobId,
-      error: error instanceof Error ? error.message : "Unknown error",
+      process: "chat",
+      error: "AI_ERROR",
+      message: error instanceof Error ? error.message : "Unknown error",
       timestamp: Date.now(),
     });
   }
@@ -95,9 +103,11 @@ export function simulateStreamError(
   errorMessage: string
 ): void {
   dispatchCentrifugoEvent(channel, {
-    type: "chat_error",
+    type: "error",
     jobId,
-    error: errorMessage,
+    process: "chat",
+    error: "AI_ERROR",
+    message: errorMessage,
     timestamp: Date.now(),
   });
 }

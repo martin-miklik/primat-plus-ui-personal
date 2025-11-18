@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useChatStore } from "@/stores/chat-store";
 import { useSendMessage } from "@/lib/api/mutations/chat";
 import { listenToMockCentrifugo } from "@/mocks/utils/mock-centrifugo";
-import { useChatSubscription } from "@/hooks/use-chat-subscription";
+import { useJobSubscription } from "@/hooks/use-job-subscription";
 import { useCentrifuge } from "@/hooks/use-centrifuge";
 import { UserMessage } from "./user-message";
 import { AssistantMessage } from "./assistant-message";
@@ -86,80 +86,78 @@ export function ChatInterface({
     }
   }, [messages]);
 
-  // Handle events from either mock or real Centrifugo
-  const handleCentrifugoEvent = useCallback(
-    (event: {
-      type: "chat_started" | "gemini_chunk" | "gemini_complete" | "chat_error";
-      jobId: string;
-      content?: string;
-      error?: string;
-      timestamp: number;
-    }) => {
-      if (!activeJobId) return;
+  // Phase 2: Real Centrifugo subscription using unified hook
+  useJobSubscription({
+    channel: USE_REAL_CENTRIFUGO ? (activeChannel ?? undefined) : undefined,
+    process: "chat",
+    enabled: USE_REAL_CENTRIFUGO && !!activeChannel,
+    onStarted: () => {
+      setStreaming(true);
+    },
+    onProgress: (event) => {
+      // Handle chunk events
+      if (event.type === "chunk" && event.content) {
+        appendChunk(sourceId, `ai-${activeJobId}`, event.content);
+      }
+    },
+    onComplete: () => {
+      if (activeJobId) {
+        completeMessage(sourceId, `ai-${activeJobId}`);
+        setStreaming(false);
+        setActiveChannel(null);
+        setActiveJobId(null);
+      }
+    },
+    onError: (event, errorMsg) => {
+      if (activeJobId) {
+        setError(sourceId, `ai-${activeJobId}`, errorMsg);
+        setStreaming(false);
+        setActiveChannel(null);
+        setActiveJobId(null);
+        toast.error(t("errors.sendFailed"), {
+          description: errorMsg,
+        });
+      }
+    },
+  });
 
+  // Phase 1: Mock Centrifugo (for development with MSW)
+  // Mock events are now handled through the unified subscription hook
+  useEffect(() => {
+    if (USE_REAL_CENTRIFUGO || !activeChannel || !activeJobId) return;
+
+    const handleMockEvent = (event: any) => {
+      // Map mock events to store actions
       switch (event.type) {
-        case "chat_started":
+        case "job_started":
           setStreaming(true);
           break;
-
-        case "gemini_chunk":
+        case "chunk":
           if (event.content) {
             appendChunk(sourceId, `ai-${activeJobId}`, event.content);
           }
           break;
-
-        case "gemini_complete":
+        case "complete":
           completeMessage(sourceId, `ai-${activeJobId}`);
           setStreaming(false);
           setActiveChannel(null);
           setActiveJobId(null);
           break;
-
-        case "chat_error":
-          setError(
-            sourceId,
-            `ai-${activeJobId}`,
-            event.error || t("errors.generic")
-          );
+        case "error":
+          setError(sourceId, `ai-${activeJobId}`, event.message || event.error);
           setStreaming(false);
           setActiveChannel(null);
           setActiveJobId(null);
           toast.error(t("errors.sendFailed"), {
-            description: event.error || t("errors.generic"),
+            description: event.message || event.error,
           });
           break;
       }
-    },
-    [
-      activeJobId,
-      sourceId,
-      appendChunk,
-      completeMessage,
-      setStreaming,
-      setActiveChannel,
-      setActiveJobId,
-      setError,
-      t,
-    ]
-  );
+    };
 
-  // Phase 2: Real Centrifugo subscription
-  useChatSubscription({
-    channel: USE_REAL_CENTRIFUGO ? activeChannel : null,
-    enabled: USE_REAL_CENTRIFUGO && !!activeChannel,
-    onEvent: handleCentrifugoEvent,
-  });
-
-  // Phase 1: Mock Centrifugo (for development with MSW)
-  useEffect(() => {
-    if (USE_REAL_CENTRIFUGO || !activeChannel) return;
-
-    const cleanup = listenToMockCentrifugo(
-      activeChannel,
-      handleCentrifugoEvent
-    );
+    const cleanup = listenToMockCentrifugo(activeChannel, handleMockEvent);
     return cleanup;
-  }, [activeChannel, handleCentrifugoEvent]);
+  }, [activeChannel, activeJobId, sourceId, appendChunk, completeMessage, setStreaming, setActiveChannel, setActiveJobId, setError, t]);
 
   const handleInputFocus = () => {
     // Soft paywall check - show warning when approaching limit
