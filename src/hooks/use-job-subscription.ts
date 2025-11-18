@@ -93,7 +93,6 @@ function calculateProgress(event: JobEvent): number {
       return 50;
 
     case "chunk":
-      // Only for chat streaming (upload doesn't use chunks)
       return 50;
 
     case "complete":
