@@ -11,13 +11,22 @@ import { useTestResults } from "@/lib/api/queries/tests";
 
 interface ResultsPageProps {
   params: Promise<{
+    id: string;
+    topicId: string;
+    sourceId: string;
     testId: string;
     instanceId: string;
   }>;
 }
 
 export default function ResultsPage({ params }: ResultsPageProps) {
-  const { testId, instanceId } = use(params);
+  const {
+    id: subjectId,
+    topicId,
+    sourceId,
+    testId,
+    instanceId,
+  } = use(params);
   const t = useTranslations("tests");
 
   const { data: resultsData, isLoading, isError, refetch } = useTestResults(instanceId);
@@ -72,13 +81,13 @@ export default function ResultsPage({ params }: ResultsPageProps) {
 
       {/* Actions */}
       <div className="flex flex-wrap items-center justify-center gap-4 pt-6">
-        <Link href="/">
+        <Link href={`/predmety/${subjectId}/temata/${topicId}/zdroje/${sourceId}/testy`}>
           <Button variant="outline" size="lg">
             <Home className="mr-2 h-4 w-4" />
             {t("results.backHome")}
           </Button>
         </Link>
-        <Link href={`/testy/${testId}/instance/${instanceId}`}>
+        <Link href={`/predmety/${subjectId}/temata/${topicId}/zdroje/${sourceId}/testy/${testId}/instance/${instanceId}`}>
           <Button variant="outline" size="lg">
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t("results.reviewAnswers")}

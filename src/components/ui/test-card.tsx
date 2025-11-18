@@ -13,7 +13,8 @@ import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 
 interface TestCardProps {
-  id: string;
+  id: string; // instanceId
+  testId: string;
   name: string;
   subjectName: string;
   subjectColor?: string;
@@ -21,6 +22,10 @@ interface TestCardProps {
   totalQuestions: number;
   correctAnswers: number;
   completedAt: string;
+  // IDs needed for nested routes
+  subjectId: string;
+  topicId: string;
+  sourceId: string;
 }
 
 function getScoreBadgeColor(score: number): string {
@@ -35,6 +40,7 @@ function getScoreBadgeColor(score: number): string {
 
 export function TestCard({
   id,
+  testId,
   name,
   subjectName,
   subjectColor,
@@ -42,6 +48,9 @@ export function TestCard({
   totalQuestions,
   correctAnswers,
   completedAt,
+  subjectId,
+  topicId,
+  sourceId,
 }: TestCardProps) {
   const t = useTranslations("dashboard.sections.tests");
 
@@ -75,11 +84,10 @@ export function TestCard({
       </CardContent>
 
       <CardFooter className="gap-2 pt-0">
-        <Button variant="outline" size="sm" className="flex-1" asChild>
-          <Link href={`/tests/${id}`}>{t("detail")}</Link>
-        </Button>
-        <Button size="sm" className="flex-1" asChild>
-          <Link href={`/tests/${id}/retake`}>{t("retake")}</Link>
+        <Button variant="default" size="sm" className="w-full" asChild>
+          <Link href={`/predmety/${subjectId}/temata/${topicId}/zdroje/${sourceId}/testy/${testId}/instance/${id}/vysledky`}>
+            {t("viewResults")}
+          </Link>
         </Button>
       </CardFooter>
     </Card>

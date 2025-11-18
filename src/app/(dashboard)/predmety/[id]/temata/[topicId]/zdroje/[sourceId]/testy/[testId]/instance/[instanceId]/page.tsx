@@ -18,13 +18,22 @@ import { useTestInstance } from "@/lib/api/queries/test-instance";
 
 interface TestTakingPageProps {
   params: Promise<{
+    id: string;
+    topicId: string;
+    sourceId: string;
     testId: string;
     instanceId: string;
   }>;
 }
 
 export default function TestTakingPage({ params }: TestTakingPageProps) {
-  const { testId, instanceId } = use(params);
+  const {
+    id: subjectId,
+    topicId,
+    sourceId,
+    testId,
+    instanceId,
+  } = use(params);
   const t = useTranslations("tests");
   const router = useRouter();
 
@@ -69,7 +78,7 @@ export default function TestTakingPage({ params }: TestTakingPageProps) {
     try {
       await completeTest.mutateAsync();
       // Navigate to results page
-      router.push(`/testy/${testId}/instance/${instanceId}/vysledky`);
+      router.push(`/predmety/${subjectId}/temata/${topicId}/zdroje/${sourceId}/testy/${testId}/instance/${instanceId}/vysledky`);
     } catch {
       // Error is handled by mutation
     }

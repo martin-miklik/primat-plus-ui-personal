@@ -118,11 +118,7 @@ export function TestCard({ test, onStartTest }: TestCardProps) {
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
-            <span>
-              {test.instanceCount === 0
-                ? t("card.noAttempts")
-                : t("card.attempts", { count: test.instanceCount })}
-            </span>
+            <span>{t("card.created")}</span>
           </div>
 
           <Button

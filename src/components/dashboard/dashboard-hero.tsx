@@ -64,7 +64,7 @@ const actionButtons = [
   {
     key: "takeTest",
     icon: FileText,
-    href: "/tests",
+    href: "/predmety",
     variant: "default" as const,
   },
   {

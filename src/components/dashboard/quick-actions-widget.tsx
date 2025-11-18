@@ -31,7 +31,7 @@ export function QuickActionsWidget() {
           title={t("takeTest.title")}
           description={t("takeTest.description")}
           icon={FileText}
-          href="/tests"
+          href="/predmety"
         />
         <ActionCard
           title={t("statistics.title")}

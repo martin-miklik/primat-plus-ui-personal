@@ -40,6 +40,9 @@ export default function TestsPage({ params }: TestsPageProps) {
   const generateDialog = useDialog("generate-test");
 
   const [generatingTestId, setGeneratingTestId] = useState<string | null>(null);
+  const [generatingChannel, setGeneratingChannel] = useState<string | null>(
+    null
+  );
 
   // Fetch source and tests
   const { data: sourceData } = useSource(sourceId);
@@ -50,14 +53,16 @@ export default function TestsPage({ params }: TestsPageProps) {
 
   const startTestMutation = useStartTest();
 
-  const handleTestGenerated = (testId: string) => {
+  const handleTestGenerated = (testId: string, channel?: string) => {
     setGeneratingTestId(testId);
+    setGeneratingChannel(channel || null);
     // Refetch tests list to show the new generating test
     refetch();
   };
 
   const handleGenerationComplete = () => {
     setGeneratingTestId(null);
+    setGeneratingChannel(null);
     refetch();
   };
 
@@ -72,7 +77,9 @@ export default function TestsPage({ params }: TestsPageProps) {
       }
 
       // Navigate to test taking page
-      router.push(`/testy/${testId}/instance/${instanceId}`);
+      router.push(
+        `/predmety/${subjectId}/temata/${topicId}/zdroje/${sourceId}/testy/${testId}/instance/${instanceId}`
+      );
     } catch {
       // Error is handled by the mutation
     }
@@ -108,6 +115,8 @@ export default function TestsPage({ params }: TestsPageProps) {
         {generatingTestId && (
           <TestGenerationProgress
             testId={generatingTestId}
+            channel={generatingChannel}
+            sourceId={sourceId}
             onComplete={handleGenerationComplete}
           />
         )}

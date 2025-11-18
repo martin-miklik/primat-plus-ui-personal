@@ -132,8 +132,7 @@ export const mockTests: Test[] = [
       },
       {
         type: "true_false",
-        question:
-          "Grafem kvadratické funkce y = ax² + bx + c je parabola.",
+        question: "Grafem kvadratické funkce y = ax² + bx + c je parabola.",
         options: [
           { id: "true", text: "Pravda" },
           { id: "false", text: "Nepravda" },
@@ -155,10 +154,7 @@ export const mockTests: Test[] = [
     userId: 1,
     questionCount: 8,
     difficulty: ["medium", "hard"],
-    questionTypes: [
-      "multiple_choice_single",
-      "open_ended",
-    ],
+    questionTypes: ["multiple_choice_single", "open_ended"],
     reviewMode: "after",
     status: "ready",
     generatedQuestions: [
@@ -200,8 +196,7 @@ export const mockTests: Test[] = [
       },
       {
         type: "multiple_choice_single",
-        question:
-          "Kterou metodu NELZE použít k řešení kvadratické rovnice?",
+        question: "Kterou metodu NELZE použít k řešení kvadratické rovnice?",
         options: [
           { id: "a", text: "Vzorec pro diskriminant" },
           { id: "b", text: "Rozklad na součin" },
@@ -530,8 +525,10 @@ export const mockTestResults = mockTestInstances
     const test = mockTests.find((t) => t.id === instance.testId);
     // We'll need to import sources and subjects to get full details
     // For now, use placeholder values
-    const correctAnswers = Math.round((instance.totalQuestions * (instance.score ?? 0)) / 100);
-    
+    const correctAnswers = Math.round(
+      (instance.totalQuestions * (instance.score ?? 0)) / 100
+    );
+
     return {
       id: instance.id,
       testId: instance.testId,
@@ -544,5 +541,9 @@ export const mockTestResults = mockTestInstances
       completedAt: instance.completedAt ?? new Date().toISOString(),
       questionCount: test?.questionCount ?? instance.totalQuestions,
       percentage: instance.percentage ?? 0,
+      // IDs for nested routes - using mock IDs from the test's source
+      subjectId: "1", // Mock subject ID (Matematika)
+      topicId: "1", // Mock topic ID
+      sourceId: test?.sourceId?.toString() ?? "1", // From test's source
     };
   });

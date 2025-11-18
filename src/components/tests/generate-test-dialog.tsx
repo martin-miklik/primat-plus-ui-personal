@@ -40,7 +40,7 @@ import { FREE_TIER_LIMITS } from "@/lib/constants";
 
 interface GenerateTestDialogProps {
   sourceId: number;
-  onTestGenerated?: (testId: string) => void;
+  onTestGenerated?: (testId: string, channel?: string) => void;
 }
 
 export function GenerateTestDialog({
@@ -80,7 +80,7 @@ export function GenerateTestDialog({
 
     try {
       const response = await generateTest.mutateAsync(data);
-      onTestGenerated?.(response.data.testId);
+      onTestGenerated?.(response.data.testId, response.data.channel);
       dialog.close();
       form.reset();
     } catch (error) {

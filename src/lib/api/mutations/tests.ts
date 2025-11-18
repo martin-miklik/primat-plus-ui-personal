@@ -60,7 +60,7 @@ export function useStartTest() {
       post<TestInstanceStartResponseWrapper>(`/tests/${testId}/instances`, {}),
 
     onSuccess: (response, testId) => {
-      // Invalidate test detail to update instance count
+      // Invalidate test detail in case it changes
       queryClient.invalidateQueries({ queryKey: ["tests", "detail", testId] });
       toast.success("Test byl zahájen");
     },

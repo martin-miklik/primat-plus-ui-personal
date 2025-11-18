@@ -249,7 +249,7 @@ export type TestResultsResponse = z.infer<typeof testResultsResponseSchema>;
 
 // Test result for dashboard display
 export interface TestResult {
-  id: string;
+  id: string; // instanceId
   testId: string;
   name: string;
   subjectName: string;
@@ -258,6 +258,10 @@ export interface TestResult {
   totalQuestions: number;
   correctAnswers: number;
   completedAt: string;
+  // IDs needed for nested routes
+  subjectId: string;
+  topicId: string;
+  sourceId: string;
 }
 export type TestGenerationProgress = z.infer<typeof testGenerationProgressSchema>;
 export type TestListItem = z.infer<typeof testListItemSchema>;

@@ -1,33 +1,55 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
-import { useTestGeneration } from "@/hooks/use-test-generation";
+import { useJobSubscription } from "@/hooks/use-job-subscription";
 
 interface TestGenerationProgressProps {
   testId: string;
+  channel: string | null;
+  sourceId: number;
   onComplete?: () => void;
   onError?: (error: string) => void;
 }
 
 export function TestGenerationProgress({
   testId,
+  channel,
+  sourceId,
   onComplete,
   onError,
 }: TestGenerationProgressProps) {
   const t = useTranslations("tests");
-  const { progress, isReady, isFailed, error } = useTestGeneration(testId);
+  const queryClient = useQueryClient();
 
-  // Call callbacks when status changes
-  if (isReady && onComplete) {
-    onComplete();
-  }
+  // WebSocket subscription for test generation progress
+  const { status, progress, error } = useJobSubscription<"test">({
+    channel: channel || undefined,
+    process: "test",
+    enabled: !!channel,
+    onComplete: () => {
+      // Refetch tests list when generation completes
+      queryClient.invalidateQueries({
+        queryKey: ["tests", sourceId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["tests", "detail", testId],
+      });
+      toast.success(t("progress.ready"));
+      onComplete?.();
+    },
+    onError: (event, errorMessage) => {
+      toast.error(errorMessage);
+      onError?.(errorMessage);
+    },
+  });
 
-  if (isFailed && error && onError) {
-    onError(error);
-  }
+  const isReady = status === "complete";
+  const isFailed = status === "error";
 
   return (
     <Card className="p-6">
@@ -41,7 +63,7 @@ export function TestGenerationProgress({
           ) : (
             <Sparkles className="h-8 w-8 text-primary animate-pulse" />
           )}
-          
+
           <div className="flex-1">
             <h3 className="font-semibold text-lg">
               {isReady
@@ -83,4 +105,3 @@ export function TestGenerationProgress({
     </Card>
   );
 }
-

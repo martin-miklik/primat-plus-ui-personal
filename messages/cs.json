@@ -124,8 +124,7 @@
         "title": "Nedávné testy",
         "viewAll": "Zobrazit vše",
         "empty": "Vyzkoušejte své znalosti testem",
-        "detail": "Detail",
-        "retake": "Zkusit znovu"
+        "viewResults": "Zobrazit výsledky"
       }
     },
     "quickActions": {
@@ -507,8 +506,7 @@
     },
     "card": {
       "title": "Test ({count} otázek)",
-      "noAttempts": "Žádné pokusy",
-      "attempts": "{count} pokusů",
+      "created": "Vytvořeno",
       "start": "Spustit test"
     },
     "generate": {

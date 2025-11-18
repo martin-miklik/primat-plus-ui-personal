@@ -25,8 +25,8 @@ export function HorizontalTestsSection({
       <SectionHeader
         title={t("title")}
         icon={FileText}
-        viewAllHref="/tests"
-        viewAllLabel={t("viewAll")}
+        viewAllHref="#"
+        viewAllLabel=""
       />
 
       {isLoading ? (
@@ -38,7 +38,7 @@ export function HorizontalTestsSection({
       ) : tests.length === 0 ? (
         <NoDataState
           entityName="tests"
-          onCreate={() => (window.location.href = "/tests")}
+          onCreate={() => (window.location.href = "/predmety")}
           createLabel={t("empty")}
           className="border py-12"
         />
@@ -48,6 +48,7 @@ export function HorizontalTestsSection({
             <TestCard
               key={test.id}
               id={test.id}
+              testId={test.testId}
               name={test.name}
               subjectName={test.subjectName}
               subjectColor={test.subjectColor}
@@ -55,6 +56,9 @@ export function HorizontalTestsSection({
               totalQuestions={test.totalQuestions}
               correctAnswers={test.correctAnswers}
               completedAt={test.completedAt}
+              subjectId={test.subjectId}
+              topicId={test.topicId}
+              sourceId={test.sourceId}
             />
           ))}
         </CarouselSection>
@@ -62,6 +66,7 @@ export function HorizontalTestsSection({
     </div>
   );
 }
+
 
 
 
