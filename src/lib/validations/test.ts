@@ -65,7 +65,7 @@ export const testConfigurationSchema = z.object({
 
 // Test schema
 export const testSchema = z.object({
-  id: z.string().uuid(),
+  id: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
   sourceId: z.number().int().positive(),
   userId: z.number().int().positive(),
   questionCount: z.number().int().positive(),
@@ -82,8 +82,8 @@ export const testSchema = z.object({
 
 // Test instance schema
 export const testInstanceSchema = z.object({
-  id: z.string().uuid(),
-  testId: z.string().uuid(),
+  id: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
+  testId: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
   userId: z.number().int().positive(),
   status: testInstanceStatusSchema,
   score: z.number().int().nonnegative().optional().nullable(),
@@ -98,8 +98,8 @@ export const testInstanceSchema = z.object({
 
 // User answer schema
 export const userAnswerSchema = z.object({
-  id: z.string().uuid(),
-  instanceId: z.string().uuid(),
+  id: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
+  instanceId: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
   questionIndex: z.number().int().nonnegative(),
   answer: z.union([
     z.string(),
@@ -125,14 +125,15 @@ export const submitAnswerSchema = z.object({
 
 // Test generation response
 export const testGenerationResponseSchema = z.object({
-  testId: z.string().uuid(),
+  testId: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
   status: testStatusSchema,
+  channel: z.string().optional(), // WebSocket channel for real-time updates
 });
 
 // Test instance start response
 export const testInstanceStartResponseSchema = z.object({
-  instanceId: z.string().uuid(),
-  testId: z.string().uuid(),
+  instanceId: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
+  testId: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
   status: testInstanceStatusSchema,
   reviewMode: reviewModeSchema,
   questions: z.array(frontendQuestionSchema),
@@ -193,8 +194,8 @@ export const questionResultSchema = z.object({
 
 // Test results response
 export const testResultsResponseSchema = z.object({
-  instanceId: z.string().uuid(),
-  testId: z.string().uuid(),
+  instanceId: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
+  testId: z.coerce.string(), // Backend uses auto-increment integers, coerce to string
   score: z.number().int().nonnegative(),
   totalQuestions: z.number().int().positive(),
   percentage: z.number().min(0).max(100),

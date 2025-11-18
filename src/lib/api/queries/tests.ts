@@ -1,27 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { get } from "@/lib/api/client";
 import {
-  Test,
-  TestListItem,
   TestResultsResponse,
-  TestStatus,
+  TestListItem,
+  Test,
 } from "@/lib/validations/test";
 
-// API Response types
-interface TestsResponse {
+// Response wrappers
+interface TestsListWrapper {
   data: TestListItem[];
 }
 
-interface TestResponse {
+interface TestWrapper {
   data: Test;
-}
-
-interface TestStatusResponse {
-  data: {
-    testId: string;
-    status: TestStatus;
-    generationError: string | null;
-  };
 }
 
 interface TestResultsResponseWrapper {
@@ -29,55 +20,56 @@ interface TestResultsResponseWrapper {
 }
 
 /**
- * Query: Get all tests for a source
+ * Query: Get all tests for a specific source
  */
-export function useTests(sourceId: number | null) {
+export function useTests(sourceId: number) {
   return useQuery({
     queryKey: ["tests", sourceId],
-    queryFn: async () => {
-      const response = await get<TestsResponse>(`/sources/${sourceId}/tests`);
-      // Sort by createdAt (newest first)
-      const sortedData = response.data.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      return {
-        ...response,
-        data: sortedData,
-      };
-    },
+    queryFn: () => get<TestsListWrapper>(`/sources/${sourceId}/tests`),
     enabled: !!sourceId,
   });
 }
 
 /**
- * Query: Get single test by ID
+ * Query: Get a single test by ID
  */
 export function useTest(testId: string | null) {
   return useQuery({
     queryKey: ["tests", "detail", testId],
-    queryFn: () => get<TestResponse>(`/tests/${testId}`),
+    queryFn: () => get<TestWrapper>(`/tests/${testId}`),
     enabled: !!testId,
   });
 }
 
 /**
- * Query: Get test generation status (for polling during generation)
+ * Query: Get test generation status
+ * 
+ * NOTE: This hook is DEPRECATED - Use Centrifugo WebSocket instead!
+ * Backend publishes real-time updates via WebSocket according to
+ * docs/websocket-states-spec.md
+ * 
+ * Events:
+ * - job_started → "Připravujeme test..."
+ * - generating → "AI píše otázky..."
+ * - complete → "Test je připraven!" (includes testId)
+ * - error → Show error message
+ * 
+ * Use the `channel` field from test generation response to subscribe.
  */
-export function useTestStatus(testId: string | null, enabled: boolean = true) {
-  return useQuery({
-    queryKey: ["tests", "status", testId],
-    queryFn: () => get<TestStatusResponse>(`/tests/${testId}/status`),
-    enabled: !!testId && enabled,
-    refetchInterval: (query) => {
-      // Poll every 1 second while generating
-      if (query.state.data?.data?.status === "generating") {
-        return 1000;
-      }
-      return false; // Stop polling when ready or failed
-    },
-  });
-}
+// export function useTestStatus(testId: string | null, enabled: boolean = true) {
+//   return useQuery({
+//     queryKey: ["tests", "status", testId],
+//     queryFn: () => get<TestStatusWrapper>(`/tests/${testId}/status`),
+//     enabled: !!testId && enabled,
+//     refetchInterval: (query) => {
+//       // Poll every 1 second while generating
+//       if (query.state.data?.data?.status === "generating") {
+//         return 1000;
+//       }
+//       return false; // Stop polling when ready or failed
+//     },
+//   });
+// }
 
 /**
  * Query: Get test results for a completed instance
@@ -90,3 +82,4 @@ export function useTestResults(instanceId: string | null) {
     enabled: !!instanceId,
   });
 }
+

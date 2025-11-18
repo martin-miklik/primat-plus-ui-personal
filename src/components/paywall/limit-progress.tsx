@@ -17,9 +17,7 @@ export function LimitProgress({ label, used, max }: LimitProgressProps) {
         <span className="text-muted-foreground">{label}</span>
         <span
           className={
-            isAtLimit
-              ? "text-destructive font-medium"
-              : "text-muted-foreground"
+            isAtLimit ? "text-destructive font-medium" : "text-muted-foreground"
           }
         >
           {used} / {max}
@@ -32,8 +30,8 @@ export function LimitProgress({ label, used, max }: LimitProgressProps) {
             isAtLimit
               ? "bg-destructive"
               : isNearLimit
-                ? "bg-yellow-500"
-                : "bg-primary"
+              ? "bg-yellow-500"
+              : "bg-primary"
           )}
           style={{ width: `${Math.min(percentage, 100)}%` }}
         />
@@ -41,4 +39,3 @@ export function LimitProgress({ label, used, max }: LimitProgressProps) {
     </div>
   );
 }
-
