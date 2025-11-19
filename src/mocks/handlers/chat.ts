@@ -4,6 +4,25 @@ import { simulateStreamingResponse, simulateStreamError } from "@/mocks/utils/mo
 import { apiPath } from "@/mocks/config";
 
 export const chatHandlers = [
+  // GET /api/v1/chat/source/:sourceId - Get chat history for a source
+  http.get(apiPath("/chat/source/:sourceId"), async ({ params }) => {
+    const sourceId = Number(params.sourceId);
+    
+    // Simulate network delay
+    await delay(100);
+
+    // Return empty chat history for now (no persisted history in mock)
+    return HttpResponse.json(
+      {
+        success: true,
+        sourceId,
+        chats: [],
+        count: 0,
+      },
+      { status: 200 }
+    );
+  }),
+
   // POST /api/v1/chat/send - Send chat message
   http.post(apiPath("/chat/send"), async ({ request }) => {
     const body = (await request.json()) as {

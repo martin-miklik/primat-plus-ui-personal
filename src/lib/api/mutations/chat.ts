@@ -10,11 +10,17 @@ interface SendMessageInput {
   model: ChatModel;
 }
 
+interface SendMessageData {
+  jobId: string;
+  channel: string;
+  status: "queued";
+}
+
 interface SendMessageResponse {
   success: boolean;
-  channel: string;
-  jobId: string;
-  status: "queued";
+  timestamp?: string;
+  version?: string;
+  data: SendMessageData;
   message?: string;
 }
 
@@ -27,7 +33,7 @@ export function useSendMessage() {
       message,
       sourceId,
       model,
-    }: SendMessageInput): Promise<SendMessageResponse> => {
+    }: SendMessageInput): Promise<SendMessageData> => {
       const channel = generateChatChannel(sourceId);
 
       const response = await post<SendMessageResponse>("/chat/send", {
@@ -37,7 +43,8 @@ export function useSendMessage() {
         model, // Send "fast" or "accurate" directly
       });
 
-      return response;
+      // Extract data from nested response structure
+      return response.data;
     },
     onError: (error: Error) => {
       console.error("Failed to send chat message:", error);
@@ -47,4 +54,3 @@ export function useSendMessage() {
     },
   });
 }
-

@@ -3,7 +3,7 @@
  * Following unified WebSocket spec (docs/websocket-states-spec.md)
  */
 
-interface CentrifugoEvent {
+export interface CentrifugoEvent {
   type: "job_started" | "chunk" | "complete" | "error";
   jobId: string;
   process: "chat";

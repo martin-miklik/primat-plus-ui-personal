@@ -5,10 +5,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { useChatStore } from "@/stores/chat-store";
+import { useChatStore, type ChatMessage } from "@/stores/chat-store";
 import { useSendMessage } from "@/lib/api/mutations/chat";
 import { useGetChatHistory } from "@/lib/api/queries/chat";
-import { listenToMockCentrifugo } from "@/mocks/utils/mock-centrifugo";
+import {
+  listenToMockCentrifugo,
+  type CentrifugoEvent,
+} from "@/mocks/utils/mock-centrifugo";
 import { useJobSubscription } from "@/hooks/use-job-subscription";
 import { useCentrifuge } from "@/hooks/use-centrifuge";
 import { UserMessage } from "./user-message";
@@ -28,6 +31,9 @@ const USE_REAL_CENTRIFUGO =
   process.env.NEXT_PUBLIC_ENABLE_MSW === "false" ||
   process.env.NEXT_PUBLIC_CHAT_USE_REAL_API === "true";
 
+// Constant empty array to avoid creating new references
+const EMPTY_MESSAGES: ChatMessage[] = [];
+
 interface ChatInterfaceProps {
   sourceId: number;
   sourceName: string;
@@ -45,8 +51,13 @@ export function ChatInterface({
   const scrollRef = useRef<HTMLDivElement>(null);
   const { checkLimit, showPaywall, isAtLimit } = usePaywall();
 
-  // Chat store
-  const messages = useChatStore((state) => state.getMessages(sourceId));
+  // Chat store - use stable selector to avoid infinite loops
+  const selectMessages = useCallback(
+    (state: ReturnType<typeof useChatStore.getState>) =>
+      state.messagesBySource[sourceId] ?? EMPTY_MESSAGES,
+    [sourceId]
+  );
+  const messages = useChatStore(selectMessages);
   const selectedModel = useChatStore((state) => state.selectedModel);
   const isStreaming = useChatStore((state) => state.isStreaming);
   const activeChannel = useChatStore((state) => state.activeChannel);
@@ -82,27 +93,23 @@ export function ChatInterface({
   // Centrifuge connection (only for Phase 2)
   const { isConnected, isConnecting } = useCentrifuge({
     enabled: USE_REAL_CENTRIFUGO,
+    debug: true, // Enable debug logging
   });
 
   // Load chat history from server or initialize welcome message
   useEffect(() => {
     if (isLoadingHistory) return;
 
-    if (chatHistory && chatHistory.chats.length > 0) {
+    if (chatHistory && chatHistory.chats && chatHistory.chats.length > 0) {
       // Load existing chat history from backend
       loadHistoryFromServer(sourceId, chatHistory.chats);
     } else {
       // No history - show welcome message
       initializeWelcomeMessage(sourceId, sourceName);
     }
-  }, [
-    sourceId,
-    sourceName,
-    chatHistory,
-    isLoadingHistory,
-    loadHistoryFromServer,
-    initializeWelcomeMessage,
-  ]);
+    // Zustand actions are stable and don't need to be in dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceId, sourceName, chatHistory, isLoadingHistory]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -113,7 +120,7 @@ export function ChatInterface({
 
   // Phase 2: Real Centrifugo subscription using unified hook
   useJobSubscription({
-    channel: USE_REAL_CENTRIFUGO ? (activeChannel ?? undefined) : undefined,
+    channel: USE_REAL_CENTRIFUGO ? activeChannel ?? undefined : undefined,
     process: "chat",
     enabled: USE_REAL_CENTRIFUGO && !!activeChannel,
     onStarted: () => {
@@ -151,7 +158,7 @@ export function ChatInterface({
   useEffect(() => {
     if (USE_REAL_CENTRIFUGO || !activeChannel || !activeJobId) return;
 
-    const handleMockEvent = (event: any) => {
+    const handleMockEvent = (event: CentrifugoEvent) => {
       // Map mock events to store actions
       switch (event.type) {
         case "job_started":
@@ -169,12 +176,16 @@ export function ChatInterface({
           setActiveJobId(null);
           break;
         case "error":
-          setError(sourceId, `ai-${activeJobId}`, event.message || event.error);
+          setError(
+            sourceId,
+            `ai-${activeJobId}`,
+            event.message || event.error || "Unknown error"
+          );
           setStreaming(false);
           setActiveChannel(null);
           setActiveJobId(null);
           toast.error(t("errors.sendFailed"), {
-            description: event.message || event.error,
+            description: event.message || event.error || "Unknown error",
           });
           break;
       }
@@ -182,7 +193,9 @@ export function ChatInterface({
 
     const cleanup = listenToMockCentrifugo(activeChannel, handleMockEvent);
     return cleanup;
-  }, [activeChannel, activeJobId, sourceId, appendChunk, completeMessage, setStreaming, setActiveChannel, setActiveJobId, setError, t]);
+    // Zustand actions are stable and don't need to be in dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeChannel, activeJobId, sourceId, t]);
 
   const handleInputFocus = () => {
     // Soft paywall check - show warning when approaching limit
@@ -212,6 +225,14 @@ export function ChatInterface({
       // Store channel and jobId for subscription
       setActiveChannel(response.channel);
       setActiveJobId(response.jobId);
+
+      // Debug: Log channel and jobId
+      console.log("[Chat] Message sent, subscribing to:", {
+        channel: response.channel,
+        jobId: response.jobId,
+        isConnected,
+        isConnecting,
+      });
 
       // Create placeholder for AI response
       startAssistantMessage(sourceId, `ai-${response.jobId}`, selectedModel);
@@ -299,10 +320,10 @@ export function ChatInterface({
       <Separator />
 
       {/* Input */}
-      <ChatInput 
-        onSend={handleSend} 
+      <ChatInput
+        onSend={handleSend}
         onFocus={handleInputFocus}
-        disabled={isStreaming || isAtLimit("chat")} 
+        disabled={isStreaming || isAtLimit("chat")}
         placeholder={isAtLimit("chat") ? t("limitReached") : undefined}
       />
     </div>

@@ -169,6 +169,8 @@ export function useJobSubscription<P extends ProcessType>({
   // Handle incoming WebSocket events
   const handlePublication = useCallback(
     (data: JobEvent) => {
+      console.log(`[JobSubscription] Received event:`, data);
+      
       // Validate process type matches
       if (data.process !== process) {
         console.warn(
@@ -238,9 +240,11 @@ export function useJobSubscription<P extends ProcessType>({
     enabled: enabled && !!channel,
     onPublication: handlePublication,
     onSubscribed: () => {
+      console.log(`[JobSubscription] Subscribed to channel: ${channel}`);
       setState((prev) => ({ ...prev, isSubscribed: true }));
     },
     onUnsubscribed: () => {
+      console.log(`[JobSubscription] Unsubscribed from channel: ${channel}`);
       setState((prev) => ({ ...prev, isSubscribed: false }));
     },
     onError: (error) => {
