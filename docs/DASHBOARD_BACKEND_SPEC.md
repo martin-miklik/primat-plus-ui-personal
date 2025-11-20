@@ -94,7 +94,7 @@ GET /api/v1/dashboard
 | Average Test Score | 15 min | No | Medium |
 | Study Streak | 1 hour | Yes (flashcard_reviews) | Medium |
 | Reviewed Today | 15 min | Yes (flashcard_reviews) | Medium |
-| Recommended Action | 45 min | No | High |
+| Recommended Action | 45 min | No | Low |
 
 **Total Estimated Time:** 3.5 hours (without review table) or 4.5 hours (with review table)
 
