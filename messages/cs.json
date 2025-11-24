@@ -20,9 +20,6 @@
   "nav": {
     "dashboard": "Přehled",
     "subjects": "Předměty",
-    "learn": "Učit se",
-    "tests": "Testy",
-    "settings": "Nastavení",
     "navigationLabel": "Navigace"
   },
   "user": {

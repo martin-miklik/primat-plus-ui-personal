@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Settings, User, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/stores/auth-store";
@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -19,7 +18,6 @@ import {
 export function NavUserHeader() {
   const router = useRouter();
   const t = useTranslations("user");
-  const tNav = useTranslations("nav");
   const { user, clearAuth } = useAuthStore();
 
   const handleLogout = () => {
@@ -55,17 +53,6 @@ export function NavUserHeader() {
             </div>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push("/nastaveni")}>
-            <Settings className="mr-2 size-4" />
-            {tNav("settings")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/nastaveni/profile")}>
-            <User className="mr-2 size-4" />
-            {t("profile")}
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 size-4" />

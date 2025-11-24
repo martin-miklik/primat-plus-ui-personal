@@ -18,10 +18,8 @@ import { useSource } from "@/lib/api/queries/sources";
 // Custom page title overrides
 const pageTitleOverrides: Record<string, string> = {
   predmety: "Předměty",
-  learn: "Učit se",
   tests: "Testy",
   testy: "Testy",
-  settings: "Nastavení",
   flashcards: "Flashkarty",
   materials: "Materiály",
   chat: "AI Chat",

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { BookOpen, GraduationCap, Home, Settings } from "lucide-react";
+import { BookOpen, GraduationCap, Home } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -41,14 +41,6 @@ export function AppSidebar() {
       title: tNav("subjects"),
       url: "/predmety",
       icon: BookOpen,
-    },
-  ];
-
-  const settingsNavigation = [
-    {
-      title: tNav("settings"),
-      url: "/nastaveni",
-      icon: Settings,
     },
   ];
 
@@ -118,29 +110,6 @@ export function AppSidebar() {
           </div>
         )}
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs text-muted-foreground">
-            {tNav("settings")}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsNavigation.map((item) => {
-                const isActive =
-                  pathname === item.url || pathname.startsWith(item.url + "/");
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url}>
-                        <item.icon />
-                        <Typography variant="body">{item.title}</Typography>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs text-muted-foreground">
             {tTheme("displayMode")}
