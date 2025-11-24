@@ -46,11 +46,6 @@ const REASON_MESSAGES = {
     description:
       "Ve Free verzi můžete generovat max. 30 kartiček najednou. Premium nabízí až 100 kartiček.",
   },
-  free_period_expired: {
-    title: "Zkušební období vypršelo",
-    description:
-      "Vaše 14denní zkušební období Free verze vypršelo. Přejděte na Premium a pokračujte bez omezení.",
-  },
 };
 
 export function PaywallSheet() {

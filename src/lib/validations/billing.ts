@@ -22,25 +22,25 @@ export const billingLimitsSchema = z.object({
   limits: z.object({
     subjects: z.object({
       used: z.number(),
-      max: z.number(),
-      percentage: z.number(),
+      max: z.number().nullable(), // Null for premium users
+      percentage: z.number().nullable(), // Null for premium users
       isAtLimit: z.boolean(),
     }),
     sources: z.object({
       used: z.number(),
-      max: z.number(),
-      percentage: z.number(),
+      max: z.number().nullable(), // Null for premium users
+      percentage: z.number().nullable(), // Null for premium users
       isAtLimit: z.boolean(),
     }),
     chatConversations: z.object({
       used: z.number(),
-      max: z.number(),
-      percentage: z.number(),
+      max: z.number().nullable(), // Null for premium users
+      percentage: z.number().nullable(), // Null for premium users
       isAtLimit: z.boolean(),
     }),
-    testQuestions: z.object({ max: z.number() }),
-    flashcards: z.object({ max: z.number() }),
-    fileSize: z.object({ max: z.number() }),
+    testQuestions: z.object({ max: z.number().nullable() }), // Null for premium
+    flashcards: z.object({ max: z.number().nullable() }), // Null for premium
+    fileSize: z.object({ max: z.number().nullable() }), // Null for premium
   }),
 });
 
@@ -75,8 +75,7 @@ export type PaywallReason =
   | "chat_limit_soft"
   | "chat_limit_hard"
   | "test_question_limit"
-  | "flashcard_limit"
-  | "free_period_expired";
+  | "flashcard_limit";
 
 export type PaywallAction =
   | "create_subject"

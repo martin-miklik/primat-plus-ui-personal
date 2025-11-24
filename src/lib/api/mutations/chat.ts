@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { post } from "@/lib/api/client";
 import { toast } from "sonner";
 import { generateChatChannel } from "@/lib/utils/chat-helpers";
+import { handleMutationError } from "@/lib/utils/paywall-helpers";
 import type { ChatModel } from "@/stores/chat-store";
 
 interface SendMessageInput {
@@ -48,9 +49,13 @@ export function useSendMessage() {
     },
     onError: (error: Error) => {
       console.error("Failed to send chat message:", error);
-      toast.error("Nepodařilo se odeslat zprávu", {
-        description: error.message || "Zkuste to prosím znovu.",
-      });
+      // Handle paywall trigger or show error
+      const paywallTriggered = handleMutationError(error);
+      if (!paywallTriggered) {
+        toast.error("Nepodařilo se odeslat zprávu", {
+          description: error.message || "Zkuste to prosím znovu.",
+        });
+      }
     },
   });
 }

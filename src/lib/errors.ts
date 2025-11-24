@@ -4,7 +4,9 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
-    public code?: string
+    public code?: string,
+    public context?: Record<string, unknown>,
+    public endpoint?: string
   ) {
     super(message);
     this.name = "ApiError";

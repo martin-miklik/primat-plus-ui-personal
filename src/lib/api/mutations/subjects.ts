@@ -7,6 +7,7 @@ import {
 } from "@/lib/validations/subject";
 import { QUERY_KEYS } from "@/lib/constants";
 import { toast } from "sonner";
+import { handleMutationError } from "@/lib/utils/paywall-helpers";
 
 // API Response types
 interface SubjectResponse {
@@ -73,7 +74,11 @@ export function useCreateSubject() {
       if (context?.previousSubjects) {
         queryClient.setQueryData(QUERY_KEYS.SUBJECTS, context.previousSubjects);
       }
-      toast.error(error.message || "Failed to create subject");
+      // Handle paywall trigger or show error
+      const paywallTriggered = handleMutationError(error);
+      if (!paywallTriggered) {
+        toast.error(error.message || "Failed to create subject");
+      }
     },
 
     onSuccess: (response) => {

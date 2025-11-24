@@ -6,6 +6,7 @@ import {
   Flashcard,
 } from "@/lib/validations/flashcard";
 import { toast } from "sonner";
+import { handleMutationError } from "@/lib/utils/paywall-helpers";
 
 // API Response types
 interface GenerateFlashcardsApiResponse {
@@ -48,7 +49,11 @@ export function useGenerateFlashcards(sourceId: number) {
     },
 
     onError: (error: Error) => {
-      toast.error(error.message || "Nepodařilo se vygenerovat kartičky");
+      // Handle paywall trigger or show error
+      const paywallTriggered = handleMutationError(error);
+      if (!paywallTriggered) {
+        toast.error(error.message || "Nepodařilo se vygenerovat kartičky");
+      }
     },
   });
 }

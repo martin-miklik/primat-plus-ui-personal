@@ -1,5 +1,6 @@
 import { ApiError, NetworkError } from "@/lib/errors";
 import { API_TIMEOUT, API_BASE_URL } from "@/lib/constants";
+import { isPaywallError } from "@/lib/utils/error-mapping";
 
 interface RequestOptions extends RequestInit {
   timeout?: number;
@@ -72,11 +73,32 @@ export async function apiClient<T>(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
 
-      throw new ApiError(
-        errorData.message || `HTTP ${response.status}: ${response.statusText}`,
+      // Extract error details from various possible response formats
+      const errorMessage =
+        errorData.message ||
+        errorData.title ||
+        errorData.error?.message ||
+        `HTTP ${response.status}: ${response.statusText}`;
+
+      const errorCode = errorData.code || errorData.error?.code;
+      const errorContext = errorData.context || errorData.error?.context;
+
+      // Create enriched error with endpoint info for paywall detection
+      const apiError = new ApiError(
+        errorMessage,
         response.status,
-        errorData.code
+        errorCode,
+        errorContext,
+        endpoint
       );
+
+      // Mark as paywall error if it matches criteria
+      // This allows mutation hooks to handle paywall triggers
+      if (isPaywallError(response.status, errorCode)) {
+        (apiError as any).isPaywallError = true;
+      }
+
+      throw apiError;
     }
 
     // Return parsed JSON response

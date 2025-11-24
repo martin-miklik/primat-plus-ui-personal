@@ -1,4 +1,8 @@
-import type { BillingLimits, BillingPlan, Subscription } from "@/lib/validations/billing";
+import type {
+  BillingLimits,
+  BillingPlan,
+  Subscription,
+} from "@/lib/validations/billing";
 
 export const mockBillingLimits: BillingLimits = {
   subscriptionType: "free",
@@ -16,6 +20,7 @@ export const mockBillingLimits: BillingLimits = {
   },
 };
 
+// Backend returns only one plan (matching actual implementation)
 export const mockBillingPlans: BillingPlan[] = [
   {
     id: 1,
@@ -27,25 +32,10 @@ export const mockBillingPlans: BillingPlan[] = [
     features: [
       "Neomezené předměty",
       "Neomezené materiály",
-      "AI chat bez limitů",
-      "Testy do 100 otázek",
-      "Prioritní podpora",
-    ],
-  },
-  {
-    id: 2,
-    name: "Premium Yearly",
-    priceCzk: 1990.0,
-    priceFormatted: "1 990 Kč",
-    pricePerMonth: 165.83,
-    billingPeriod: "yearly",
-    trialDays: 14,
-    savingsPercent: 17,
-    savingsAmount: 398.0,
-    features: [
-      "Všechny Premium funkce",
-      "Ušetříte 17% ročně",
-      "Prioritní podpora",
+      "Neomezené chat konverzace",
+      "Neomezené testové otázky",
+      "Neomezené kartičky",
+      "Žádné limity na velikost souborů",
     ],
   },
 ];
@@ -85,3 +75,24 @@ export const mockTrialSubscription: Subscription = {
   ],
 };
 
+// Premium user limits (shows NULL for unlimited)
+export const mockPremiumLimits: BillingLimits = {
+  subscriptionType: "premium",
+  subscriptionExpiresAt: "2025-12-14T12:00:00Z",
+  daysSinceRegistration: 30,
+  daysUntilPaywall: 0,
+  hasUsedTrial: true,
+  limits: {
+    subjects: { used: 5, max: null, percentage: null, isAtLimit: false },
+    sources: { used: 12, max: null, percentage: null, isAtLimit: false },
+    chatConversations: {
+      used: 8,
+      max: null,
+      percentage: null,
+      isAtLimit: false,
+    },
+    testQuestions: { max: null },
+    flashcards: { max: null },
+    fileSize: { max: null },
+  },
+};

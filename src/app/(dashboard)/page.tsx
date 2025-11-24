@@ -6,7 +6,6 @@ import { useAuthStore } from "@/stores/auth-store";
 import { DashboardHero } from "@/components/dashboard/dashboard-hero";
 import { HorizontalSubjectsSection } from "@/components/dashboard/horizontal-subjects-section";
 import { HorizontalTopicsSection } from "@/components/dashboard/horizontal-topics-section";
-import { HorizontalCardsSection } from "@/components/dashboard/horizontal-cards-section";
 import { HorizontalTestsSection } from "@/components/dashboard/horizontal-tests-section";
 import { ErrorState } from "@/components/states";
 
@@ -45,15 +44,17 @@ export default function DashboardPage() {
     );
   }
 
+  const stats = data?.data.stats;
+
   return (
     <div className="w-full space-y-8">
       {/* Hero Section */}
       <DashboardHero
         userName={user?.name || user?.nickname || undefined}
-        streak={data?.data.studyStreak}
-        dueToday={data?.data.dueCardsCount}
-        reviewedToday={12} // TODO: Add to API
-        totalCards={data?.data.totalCards}
+        streak={stats?.studyStreak}
+        dueToday={stats?.dueCardsCount}
+        reviewedToday={stats?.reviewedToday}
+        totalCards={stats?.flashcardsCount}
         isLoading={isLoading}
       />
 
@@ -74,13 +75,6 @@ export default function DashboardPage() {
         <motion.div variants={sectionItem}>
           <HorizontalTopicsSection
             topics={data?.data.recentTopics}
-            isLoading={isLoading}
-          />
-        </motion.div>
-
-        <motion.div variants={sectionItem}>
-          <HorizontalCardsSection
-            cards={data?.data.recentCards}
             isLoading={isLoading}
           />
         </motion.div>

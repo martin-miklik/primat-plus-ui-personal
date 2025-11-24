@@ -9,6 +9,7 @@ import {
   SubmitAnswer,
 } from "@/lib/validations/test";
 import { toast } from "sonner";
+import { handleMutationError } from "@/lib/utils/paywall-helpers";
 
 // API Response wrappers
 interface TestGenerationResponseWrapper {
@@ -44,7 +45,11 @@ export function useGenerateTest(sourceId: number) {
     },
 
     onError: (error: Error) => {
-      toast.error(error.message || "Nepodařilo se vytvořit test");
+      // Handle paywall trigger or show error
+      const paywallTriggered = handleMutationError(error);
+      if (!paywallTriggered) {
+        toast.error(error.message || "Nepodařilo se vytvořit test");
+      }
     },
   });
 }

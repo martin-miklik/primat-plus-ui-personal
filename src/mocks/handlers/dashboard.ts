@@ -1,7 +1,6 @@
 import { http, HttpResponse, delay } from "msw";
 import { mockSubjects } from "@/mocks/fixtures/subjects";
 import { mockTopics } from "@/mocks/fixtures/topics";
-import { mockCards } from "@/mocks/fixtures/cards";
 import { mockTestResults } from "@/mocks/fixtures/tests";
 import { apiPath } from "@/mocks/config";
 
@@ -11,7 +10,15 @@ export const dashboardHandlers = [
 
     // Get random 3-5 subjects for "recent"
     const recentSubjectsCount = Math.floor(Math.random() * 3) + 3; // 3-5
-    const recentSubjects = mockSubjects.slice(0, recentSubjectsCount);
+    const recentSubjects = mockSubjects.slice(0, recentSubjectsCount).map((s) => ({
+      id: s.id,
+      name: s.name,
+      description: s.description,
+      icon: s.icon,
+      color: s.color,
+      topicsCount: Math.floor(Math.random() * 10) + 1,
+      createdAt: new Date().toISOString(),
+    }));
 
     // Get 3-5 most recently studied topics
     const recentTopicsCount = Math.floor(Math.random() * 3) + 3; // 3-5
@@ -21,16 +28,16 @@ export const dashboardHandlers = [
         const dateB = b.lastStudied ? new Date(b.lastStudied).getTime() : 0;
         return dateB - dateA;
       })
-      .slice(0, recentTopicsCount);
-
-    // Get 5 most recently reviewed cards
-    const recentCards = [...mockCards]
-      .sort((a, b) => {
-        const dateA = a.reviewedAt ? new Date(a.reviewedAt).getTime() : 0;
-        const dateB = b.reviewedAt ? new Date(b.reviewedAt).getTime() : 0;
-        return dateB - dateA;
-      })
-      .slice(0, 5);
+      .slice(0, recentTopicsCount)
+      .map((t) => ({
+        id: t.id,
+        name: t.name,
+        subjectId: t.subjectId,
+        subjectName: t.subjectName,
+        subjectColor: t.subjectColor,
+        cardsCount: t.cardsCount,
+        createdAt: new Date().toISOString(),
+      }));
 
     // Get 3-5 most recent test results
     const recentTestsCount = Math.floor(Math.random() * 3) + 3; // 3-5
@@ -41,24 +48,39 @@ export const dashboardHandlers = [
       )
       .slice(0, recentTestsCount);
 
-    // Random due cards count (0-50)
+    // Random stats
     const dueCardsCount = Math.floor(Math.random() * 51);
-
-    // Random study streak (0-30 days)
     const studyStreak = Math.floor(Math.random() * 31);
-
-    // Total cards count
-    const totalCards = mockCards.length;
+    const flashcardsCount = Math.floor(Math.random() * 200) + 50;
+    const reviewedToday = Math.floor(Math.random() * 30);
 
     return HttpResponse.json({
       data: {
+        stats: {
+          subjectsCount: mockSubjects.length,
+          topicsCount: mockTopics.length,
+          sourcesCount: Math.floor(Math.random() * 20) + 5,
+          flashcardsCount,
+          dueCardsCount,
+          testsCompletedCount: mockTestResults.length,
+          averageTestScore: Math.floor(Math.random() * 40) + 60,
+          studyStreak,
+          reviewedToday,
+        },
         recentSubjects,
         recentTopics,
-        recentCards,
         recentTests,
-        dueCardsCount,
-        studyStreak,
-        totalCards,
+        recommendedAction: {
+          type: dueCardsCount > 0 ? "practice_cards" : "create_content",
+          message:
+            dueCardsCount > 0
+              ? `Máte ${dueCardsCount} kartiček připravených k procvičování`
+              : "Začněte vytvořením prvního předmětu",
+          subjectId: dueCardsCount > 0 ? mockSubjects[0].id : null,
+          subjectName: dueCardsCount > 0 ? mockSubjects[0].name : null,
+          sourceId: dueCardsCount > 0 ? 1 : null,
+          count: dueCardsCount,
+        },
       },
     });
   }),

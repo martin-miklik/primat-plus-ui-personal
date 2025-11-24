@@ -2,17 +2,35 @@ import { useQuery } from "@tanstack/react-query";
 import { get } from "@/lib/api/client";
 import { Subject } from "@/lib/validations/subject";
 import { Topic } from "@/lib/validations/topic";
-import { Card } from "@/lib/validations/card";
 import { TestResult } from "@/lib/validations/test";
 
+interface DashboardStats {
+  subjectsCount: number;
+  topicsCount: number;
+  sourcesCount: number;
+  flashcardsCount: number;
+  dueCardsCount: number;
+  testsCompletedCount: number;
+  averageTestScore: number;
+  studyStreak: number;
+  reviewedToday: number;
+}
+
+interface RecommendedAction {
+  type: string;
+  message: string;
+  subjectId: number | null;
+  subjectName: string | null;
+  sourceId: number | null;
+  count: number;
+}
+
 interface DashboardData {
+  stats: DashboardStats;
   recentSubjects: Subject[];
   recentTopics: Topic[];
-  recentCards: Card[];
   recentTests: TestResult[];
-  dueCardsCount: number;
-  studyStreak: number;
-  totalCards: number;
+  recommendedAction: RecommendedAction;
 }
 
 interface DashboardResponse {

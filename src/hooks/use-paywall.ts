@@ -35,7 +35,11 @@ export function usePaywall() {
 
         case "chat_input":
           // Soft check for input focus (show warning at 80%)
-          return limits.limits.chatConversations.percentage < 80;
+          // Null percentage means unlimited (premium user)
+          return (
+            limits.limits.chatConversations.percentage === null ||
+            limits.limits.chatConversations.percentage < 80
+          );
 
         case "chat_send":
           // Hard check for sending message
@@ -64,9 +68,8 @@ export function usePaywall() {
     (resource: "subjects" | "sources" | "chat") => {
       if (isPremiumUser || !limits) return false;
 
-      return limits.limits[
-        resource === "chat" ? "chatConversations" : resource
-      ].isAtLimit;
+      return limits.limits[resource === "chat" ? "chatConversations" : resource]
+        .isAtLimit;
     },
     [isPremiumUser, limits]
   );
@@ -80,4 +83,3 @@ export function usePaywall() {
     isPremiumUser,
   };
 }
-
