@@ -8,6 +8,7 @@ import { HorizontalSubjectsSection } from "@/components/dashboard/horizontal-sub
 import { HorizontalTopicsSection } from "@/components/dashboard/horizontal-topics-section";
 import { HorizontalTestsSection } from "@/components/dashboard/horizontal-tests-section";
 import { ErrorState } from "@/components/states";
+import { CreateSubjectDialog } from "@/components/dialogs/create-subject-dialog";
 
 const container = {
   hidden: { opacity: 0 },
@@ -86,6 +87,9 @@ export default function DashboardPage() {
           />
         </motion.div>
       </motion.div>
+
+      {/* Create Subject Dialog */}
+      <CreateSubjectDialog />
     </div>
   );
 }

@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 
 interface MultipleChoiceQuestionProps {
   question: FrontendQuestion;
-  initialAnswer?: string | string[];
-  onSubmit: (answer: string | string[]) => void;
+  initialAnswer?: string;
+  onSubmit: (answer: string) => void;
   disabled?: boolean;
   showSubmit?: boolean;
 }
@@ -29,10 +29,10 @@ export function MultipleChoiceQuestion({
   const isMultiple = question.type === "multiple_choice_multiple";
 
   const [selectedSingle, setSelectedSingle] = useState<string>(
-    (initialAnswer as string) || ""
+    initialAnswer || ""
   );
   const [selectedMultiple, setSelectedMultiple] = useState<string[]>(
-    (initialAnswer as string[]) || []
+    initialAnswer ? initialAnswer.split(",").filter(Boolean) : []
   );
 
   const hasAnswer = isMultiple
@@ -41,7 +41,7 @@ export function MultipleChoiceQuestion({
 
   const handleSubmit = () => {
     if (!hasAnswer) return;
-    onSubmit(isMultiple ? selectedMultiple : selectedSingle);
+    onSubmit(isMultiple ? selectedMultiple.join(",") : selectedSingle);
   };
 
   const handleMultipleToggle = (optionId: string) => {

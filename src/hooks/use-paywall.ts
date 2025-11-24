@@ -9,8 +9,7 @@ export function usePaywall() {
   const { data: limits, isLoading } = useBillingLimits();
   const openPaywall = usePaywallStore((state) => state.open);
 
-  const isPremiumUser =
-    user?.subscriptionType === "premium" || user?.subscriptionType === "trial";
+  const isPremiumUser = user?.subscriptionType === "premium";
 
   const checkLimit = useCallback(
     (action: PaywallAction): boolean => {

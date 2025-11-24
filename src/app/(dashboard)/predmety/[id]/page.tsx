@@ -139,7 +139,7 @@ export default function SubjectDetailPage({ params }: SubjectDetailPageProps) {
       {!isLoading && !isError && topics.length > 0 && (
         <AnimatePresence mode="popLayout">
           <motion.div
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
             layout
           >
             {topics.map((topic, index) => (

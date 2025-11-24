@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useMemo } from "react";
+import { use, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/states/empty-states";
 import { MaterialCard } from "@/components/materials/material-card";
 import { MaterialCardSkeleton } from "@/components/materials/material-card-skeleton";
-import { UploadMaterialDialog } from "@/components/dialogs/upload-material-dialog";
+import { UploadMaterialDialog, DeleteSourceDialog } from "@/components/dialogs";
 import { useDialog } from "@/hooks/use-dialog";
 import { useUpload } from "@/hooks/use-upload";
 import { useSources } from "@/lib/api/queries/sources";
 import { useUploadStore } from "@/stores/upload-store";
+import { Source } from "@/lib/validations/source";
 import { Typography } from "@/components/ui/Typography";
 import { useTopic } from "@/lib/api/queries/topics";
 
@@ -31,6 +32,8 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
 
   const t = useTranslations("sources");
   const uploadDialog = useDialog("upload-material");
+  const deleteDialog = useDialog("delete-source");
+  const [selectedSource, setSelectedSource] = useState<Source | null>(null);
 
   // Fetch topic and sources
   const { data: topicData } = useTopic(topicId);
@@ -93,13 +96,26 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
       }
     });
 
-    // Sort by createdAt (newest first)
+    // Sort: uploading files first, then by createdAt (newest first)
     return combined.sort((a, b) => {
+      // Prioritize uploading files (those with uploadState)
+      if (a.uploadState && !b.uploadState) return -1;
+      if (!a.uploadState && b.uploadState) return 1;
+      
+      // Both uploading or both not uploading, sort by createdAt
       const dateA = new Date(a.source.createdAt).getTime();
       const dateB = new Date(b.source.createdAt).getTime();
       return dateB - dateA;
     });
   }, [sourcesData?.data, uploadingFiles]);
+
+  const handleDelete = (id: number) => {
+    const source = (sourcesData?.data || []).find((s) => s.id === id);
+    if (source) {
+      setSelectedSource(source);
+      deleteDialog.open();
+    }
+  };
 
   return (
     <>
@@ -189,6 +205,7 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
                     material={source}
                     subjectId={subjectId}
                     uploadState={uploadState}
+                    onDelete={handleDelete}
                   />
                 </motion.div>
               ))}
@@ -199,6 +216,7 @@ export default function TopicDetailPage({ params }: TopicDetailPageProps) {
 
       {/* Upload Dialog */}
       <UploadMaterialDialog topicId={topicId} />
+      <DeleteSourceDialog source={selectedSource} />
     </>
   );
 }

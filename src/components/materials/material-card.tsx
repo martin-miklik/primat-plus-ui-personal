@@ -17,9 +17,17 @@ import {
   FileBarChart,
   Upload,
   AlertCircle,
+  MoreVertical,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Source } from "@/lib/validations/source";
 import { Badge } from "@/components/ui/badge";
@@ -27,13 +35,12 @@ import { Typography } from "@/components/ui/Typography";
 import { SummarySheet } from "@/components/materials/summary-sheet";
 import { JobStatusIndicator } from "@/components/job-status/job-status-indicator";
 import { useJobSubscription } from "@/hooks/use-job-subscription";
+import { useUploadStore } from "@/stores/upload-store";
 
 interface MaterialCardProps {
   material: Source;
   subjectId?: number;
-  onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
-  onClick?: (id: number) => void;
 
   /** Optional upload state for sources being processed */
   uploadState?: {
@@ -79,10 +86,12 @@ export function MaterialCard({
   material,
   subjectId,
   uploadState,
+  onDelete,
 }: MaterialCardProps) {
   const t = useTranslations("sources");
   const queryClient = useQueryClient();
   const [summarySheetOpen, setSummarySheetOpen] = useState(false);
+  const removeFile = useUploadStore((state) => state.removeFile);
 
   // WebSocket subscription for upload progress (if uploadState is provided)
   const { status, progress, error } = useJobSubscription<"upload">({
@@ -95,6 +104,14 @@ export function MaterialCard({
         queryKey: ["sources", material.topicId],
       });
       toast.success(t("upload.success"));
+      
+      // Remove completed file from upload store after a short delay
+      // to allow the UI to show the completion state briefly
+      if (uploadState?.fileId) {
+        setTimeout(() => {
+          removeFile(uploadState.fileId);
+        }, 2000);
+      }
     },
     onError: (event, errorMessage) => {
       toast.error(errorMessage);
@@ -197,6 +214,38 @@ export function MaterialCard({
     >
       {/* Status Badge */}
       {getStatusBadge()}
+
+      {/* Delete Menu - shown when not uploading and status is processed */}
+      {!uploadState && onDelete && material.status === "processed" && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-20 h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100 transition-opacity duration-200"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">Otevřít menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(material.id);
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              {t("card.delete")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {/* Processing Overlay */}
       {uploadState && status !== "complete" && (

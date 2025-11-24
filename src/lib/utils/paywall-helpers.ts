@@ -15,7 +15,7 @@ export function handleMutationError(error: unknown): boolean {
   }
 
   // Check if this is a paywall error
-  const isPaywall = (error as any).isPaywallError;
+  const isPaywall = (error as ApiError & { isPaywallError?: boolean }).isPaywallError;
 
   if (isPaywall) {
     // Trigger paywall modal - infer reason from endpoint

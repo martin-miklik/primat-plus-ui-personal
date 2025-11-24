@@ -46,9 +46,11 @@ export function NavUserHeader() {
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <UserAvatar />
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{user.name}</span>
+              <span className="truncate font-semibold">
+                {user.name || user.nickname || "Uživatel"}
+              </span>
               <span className="text-muted-foreground truncate text-xs">
-                {user.email}
+                {user.email || user.name || user.nickname || "Uživatel"}
               </span>
             </div>
           </div>

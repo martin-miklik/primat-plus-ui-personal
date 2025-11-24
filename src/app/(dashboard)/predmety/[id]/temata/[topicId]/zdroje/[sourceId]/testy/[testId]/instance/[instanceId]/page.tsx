@@ -149,7 +149,7 @@ export default function TestTakingPage({ params }: TestTakingPageProps) {
         {session.currentQuestion.type === "multiple_choice_multiple" && (
           <MultipleChoiceQuestion
             question={session.currentQuestion}
-            initialAnswer={currentAnswer?.answer as string[]}
+            initialAnswer={currentAnswer?.answer as string}
             onSubmit={handleAnswerSubmit}
             disabled={isAnswered || submitAnswer.isPending}
             showSubmit={!isAnswered}

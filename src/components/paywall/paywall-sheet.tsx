@@ -113,7 +113,7 @@ export function PaywallSheet() {
             className="gap-2"
           >
             <Sparkles className="h-4 w-4" />
-            Vyzkoušet Premium zdarma 14 dní
+            Vyzkoušet Premium zdarma na 14 dní
           </Button>
         </div>
       </DialogContent>

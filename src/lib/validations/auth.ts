@@ -18,7 +18,6 @@ export const userSchema = z.object({
 export const loginSchema = z.object({
   name: z.string().min(1, "nameRequired"),
   password: z.string().min(8, "passwordMin"),
-  remember: z.boolean().default(false).optional(),
 });
 
 // Auth response schema (matches backend: { accessToken, user })

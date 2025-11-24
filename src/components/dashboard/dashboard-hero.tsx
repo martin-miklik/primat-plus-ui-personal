@@ -3,18 +3,16 @@
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
-  Brain,
   Plus,
-  FileText,
   Layers,
   Flame,
   Target,
   CheckCircle2,
 } from "lucide-react";
-import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDialog } from "@/hooks/use-dialog";
 
 interface DashboardHeroProps {
   userName?: string;
@@ -48,32 +46,6 @@ const item = {
   },
 };
 
-const actionButtons = [
-  {
-    key: "learn",
-    icon: Brain,
-    href: "/learn",
-    variant: "primary" as const,
-  },
-  {
-    key: "newSubject",
-    icon: Plus,
-    href: "/subjects?action=create",
-    variant: "default" as const,
-  },
-  {
-    key: "takeTest",
-    icon: FileText,
-    href: "/predmety",
-    variant: "default" as const,
-  },
-  {
-    key: "cards",
-    icon: Layers,
-    href: "/learn",
-    variant: "default" as const,
-  },
-];
 
 export function DashboardHero({
   userName,
@@ -86,6 +58,7 @@ export function DashboardHero({
   const tWelcome = useTranslations("dashboard.welcome");
   const tActions = useTranslations("dashboard.quickActions");
   const tStats = useTranslations("dashboard.dailyOverview");
+  const createDialog = useDialog("create-subject");
 
   const greeting = userName
     ? tWelcome("greeting", { name: userName })
@@ -120,46 +93,16 @@ export function DashboardHero({
               </p>
             </motion.div>
 
-            {/* Quick Actions */}
-            <motion.div
-              variants={item}
-              className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
-            >
-              {actionButtons.map((action) => (
-                <motion.div
-                  key={action.key}
-                  variants={item}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Link href={action.href}>
-                    <Card
-                      className={cn(
-                        "group cursor-pointer border backdrop-blur-sm transition-all duration-200 hover:shadow-lg",
-                        action.variant === "primary"
-                          ? "border-primary/20 bg-primary/10 hover:bg-primary/15"
-                          : "border-border/50 bg-background/50 hover:bg-background/80"
-                      )}
-                    >
-                      <div className="flex flex-col items-center gap-3 p-4 text-center">
-                        <div
-                          className={cn(
-                            "flex size-12 items-center justify-center rounded-xl transition-colors",
-                            action.variant === "primary"
-                              ? "bg-primary/20 text-primary"
-                              : "bg-muted/50 text-foreground group-hover:bg-muted"
-                          )}
-                        >
-                          <action.icon className="size-6" />
-                        </div>
-                        <span className="text-sm font-semibold">
-                          {tActions(`${action.key}.title`)}
-                        </span>
-                      </div>
-                    </Card>
-                  </Link>
-                </motion.div>
-              ))}
+            {/* New Subject Button */}
+            <motion.div variants={item}>
+              <Button
+                onClick={createDialog.open}
+                size="lg"
+                className="w-full sm:w-auto gap-2"
+              >
+                <Plus className="size-5" />
+                {tActions("newSubject.title")}
+              </Button>
             </motion.div>
           </div>
 

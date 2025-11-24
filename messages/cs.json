@@ -83,10 +83,7 @@
       "viewAll": "Zobrazit vše",
       "score": "Skóre",
       "completedOn": "Dokončeno",
-      "questions": "otázek",
-      "empty": "Zatím žádné testy",
-      "emptyDescription": "Vyzkoušejte své znalosti testem",
-      "takeTest": "Udělat test"
+      "questions": "otázek"
     },
     "dueCards": {
       "title": "Kartičky k procvičení dnes",
@@ -120,7 +117,9 @@
       "tests": {
         "title": "Nedávné testy",
         "viewAll": "Zobrazit vše",
-        "empty": "Vyzkoušejte své znalosti testem",
+        "emptyTitle": "Zatím žádné testy",
+        "emptyDescription": "Začněte vytvořením prvního testu a vyzkoušejte své znalosti",
+        "createTest": "Vytvořit test",
         "viewResults": "Zobrazit výsledky"
       }
     },
@@ -252,6 +251,14 @@
       "title": "Nepodařilo se načíst zdroje",
       "description": "Došlo k chybě při načítání zdrojů. Zkuste to prosím znovu.",
       "retry": "Zkusit znovu"
+    },
+    "dialog": {
+      "deleteTitle": "Smazat zdroj",
+      "deleteDescription": "Tato akce je nevratná.",
+      "deleteConfirmation": "Opravdu chcete smazat zdroj \"{name}\"?",
+      "deleteWarning": "Všechny kartičky, testy a související data budou také smazány.",
+      "deleting": "Mazání...",
+      "deleteButton": "Smazat zdroj"
     },
     "card": {
       "note": "Poznámka",

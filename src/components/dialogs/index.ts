@@ -5,3 +5,4 @@ export * from "./create-topic-dialog";
 export * from "./edit-topic-dialog";
 export * from "./delete-topic-dialog";
 export * from "./upload-material-dialog";
+export * from "./delete-source-dialog";

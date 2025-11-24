@@ -95,7 +95,7 @@ export async function apiClient<T>(
       // Mark as paywall error if it matches criteria
       // This allows mutation hooks to handle paywall triggers
       if (isPaywallError(response.status, errorCode)) {
-        (apiError as any).isPaywallError = true;
+        (apiError as ApiError & { isPaywallError?: boolean }).isPaywallError = true;
       }
 
       throw apiError;

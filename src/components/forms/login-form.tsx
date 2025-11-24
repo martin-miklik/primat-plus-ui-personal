@@ -10,7 +10,6 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { loginSchema, LoginInput } from "@/lib/validations/auth";
 import { useState } from "react";
@@ -24,11 +23,11 @@ interface LoginFormProps {
  *
  * Features:
  * - Name and password validation with Zod
- * - Remember me checkbox
  * - Inline error messages via Field API
  * - Loading state during submission
  * - Submit on Enter (native form behavior)
  * - Accessible with ARIA labels
+ * - Session persistence enabled by default (localStorage)
  *
  * @example
  * <LoginForm onSubmit={async (data) => {
@@ -45,7 +44,6 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
     defaultValues: {
       name: "",
       password: "",
-      remember: false,
     },
   });
 
@@ -97,17 +95,6 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
               {tv(form.formState.errors.password.message ?? "passwordMin")}
             </FieldError>
           )}
-        </Field>
-
-        <Field orientation="horizontal">
-          <Checkbox
-            id="remember"
-            disabled={isSubmitting}
-            {...form.register("remember")}
-          />
-          <FieldLabel htmlFor="remember" className="font-normal">
-            {t("rememberMe")}
-          </FieldLabel>
         </Field>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>

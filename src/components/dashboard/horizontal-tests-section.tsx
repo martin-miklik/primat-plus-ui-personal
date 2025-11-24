@@ -6,8 +6,9 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { CarouselSection } from "@/components/ui/carousel-section";
 import { TestCard } from "@/components/ui/test-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { NoDataState } from "@/components/states";
+import { EmptyState } from "@/components/states";
 import { TestResult } from "@/lib/validations/test";
+import { Inbox } from "lucide-react";
 
 interface HorizontalTestsSectionProps {
   tests?: TestResult[];
@@ -36,10 +37,14 @@ export function HorizontalTestsSection({
           ))}
         </CarouselSection>
       ) : tests.length === 0 ? (
-        <NoDataState
-          entityName="tests"
-          onCreate={() => (window.location.href = "/predmety")}
-          createLabel={t("empty")}
+        <EmptyState
+          icon={<Inbox className="h-12 w-12" />}
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
+          action={{
+            label: t("createTest"),
+            onClick: () => (window.location.href = "/predmety"),
+          }}
           className="border py-12"
         />
       ) : (

@@ -1,17 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Upload, FolderOpen, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/states/empty-states";
 import { MaterialCard } from "@/components/materials/material-card";
 import { MaterialCardSkeleton } from "@/components/materials/material-card-skeleton";
-import { UploadMaterialDialog } from "@/components/dialogs/upload-material-dialog";
+import { UploadMaterialDialog, DeleteSourceDialog } from "@/components/dialogs";
 import { useDialog } from "@/hooks/use-dialog";
 import { useUpload } from "@/hooks/use-upload";
 import { useSources } from "@/lib/api/queries/sources";
 import { useUploadStore } from "@/stores/upload-store";
+import { Source } from "@/lib/validations/source";
 
 interface MaterialsListProps {
   topicId: number | null;
@@ -21,6 +22,8 @@ interface MaterialsListProps {
 export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
   const t = useTranslations("sources");
   const uploadDialog = useDialog("upload-material");
+  const deleteDialog = useDialog("delete-source");
+  const [selectedSource, setSelectedSource] = useState<Source | null>(null);
 
   // Fetch sources
   const {
@@ -80,8 +83,26 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
       }
     });
 
-    return combined;
+    // Sort: uploading files first, then by createdAt (newest first)
+    return combined.sort((a, b) => {
+      // Prioritize uploading files (those with uploadState)
+      if (a.uploadState && !b.uploadState) return -1;
+      if (!a.uploadState && b.uploadState) return 1;
+      
+      // Both uploading or both not uploading, sort by createdAt
+      const dateA = new Date(a.source.createdAt).getTime();
+      const dateB = new Date(b.source.createdAt).getTime();
+      return dateB - dateA;
+    });
   }, [sourcesData?.data, uploadingFiles]);
+
+  const handleDelete = (id: number) => {
+    const source = (sourcesData?.data || []).find((s) => s.id === id);
+    if (source) {
+      setSelectedSource(source);
+      deleteDialog.open();
+    }
+  };
 
   if (!topicId) {
     return (
@@ -163,11 +184,12 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
           {!isLoading && !isError && sourcesWithUploadState.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {sourcesWithUploadState.map(({ source, uploadState }) => (
-                <MaterialCard
-                  key={source.id}
-                  material={source}
-                  uploadState={uploadState}
-                />
+              <MaterialCard
+                key={source.id}
+                material={source}
+                uploadState={uploadState}
+                onDelete={handleDelete}
+              />
               ))}
             </div>
           )}
@@ -176,6 +198,7 @@ export function MaterialsList({ topicId, topicName }: MaterialsListProps) {
 
       {/* Upload Dialog */}
       <UploadMaterialDialog topicId={topicId} />
+      <DeleteSourceDialog source={selectedSource} />
     </>
   );
 }
