@@ -75,6 +75,38 @@ export const mockTrialSubscription: Subscription = {
   ],
 };
 
+export const mockPremiumSubscription: Subscription = {
+  subscriptionType: "premium",
+  subscriptionExpiresAt: "2025-12-14T12:00:00Z",
+  daysRemaining: 18,
+  autoRenew: true,
+  currentPlan: {
+    id: 1,
+    name: "Premium Monthly",
+    priceCzk: 199.0,
+    priceFormatted: "199 Kč",
+    billingPeriod: "monthly",
+    trialDays: 14,
+    features: ["Neomezené předměty", "Neomezené materiály"],
+    nextBillingDate: "2025-12-14",
+    nextBillingAmount: 199.0,
+  },
+  paymentHistory: [
+    {
+      date: "2025-11-14",
+      amount: 199.0,
+      status: "paid",
+      description: "Primát Plus - Premium Monthly (Trial)",
+    },
+    {
+      date: "2025-10-14",
+      amount: 199.0,
+      status: "paid",
+      description: "Primát Plus - Premium Monthly",
+    },
+  ],
+};
+
 // Premium user limits (shows NULL for unlimited)
 export const mockPremiumLimits: BillingLimits = {
   subscriptionType: "premium",

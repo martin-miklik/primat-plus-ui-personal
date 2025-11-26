@@ -17,9 +17,15 @@ interface AnswerState {
  * Hook for managing test session state
  * Tracks current question, answers, and navigation
  */
-export function useTestSession(questions: FrontendQuestion[]) {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Map<number, AnswerState>>(new Map());
+export function useTestSession(
+  questions: FrontendQuestion[],
+  initialAnswers?: Map<number, AnswerState>,
+  initialQuestionIndex: number = 0
+) {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialQuestionIndex);
+  const [answers, setAnswers] = useState<Map<number, AnswerState>>(
+    initialAnswers || new Map()
+  );
 
   const currentQuestion = questions[currentQuestionIndex];
   const totalQuestions = questions.length;

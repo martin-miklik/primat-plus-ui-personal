@@ -146,7 +146,19 @@ function QuestionResultCard({ result }: QuestionResultCardProps) {
     if (Array.isArray(answer)) {
       return answer.map((a) => getOptionText(a)).join(", ");
     }
-    return getOptionText(String(answer));
+    
+    // Handle comma-separated string (e.g., "a,c,d")
+    const answerStr = String(answer);
+    if (answerStr.includes(",")) {
+      return answerStr
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean)
+        .map((id) => getOptionText(id))
+        .join(", ");
+    }
+    
+    return getOptionText(answerStr);
   };
 
   return (

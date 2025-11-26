@@ -20,6 +20,7 @@
   "nav": {
     "dashboard": "Přehled",
     "subjects": "Předměty",
+    "subscription": "Předplatné",
     "navigationLabel": "Navigace"
   },
   "user": {
@@ -548,7 +549,9 @@
       "next": "Další",
       "complete": "Dokončit test",
       "goToQuestion": "Přejít na otázku",
-      "notAllAnswered": "Nezodpověděli jste všechny otázky. Dokončit test můžete i s prázdnými odpověďmi."
+      "notAllAnswered": "Nezodpověděli jste všechny otázky. Dokončit test můžete i s prázdnými odpověďmi.",
+      "autoAdvancing": "Automaticky pokračuji na další otázku",
+      "answerBeforeNavigating": "Nejprve zodpovězte současnou otázku před přechodem na jinou"
     },
     "question": {
       "selectMultiple": "Vyberte všechny správné odpovědi",
@@ -571,6 +574,16 @@
       "evaluatingDesc": "AI vyhodnocuje vaši odpověď...",
       "saved": "Odpověď uložena",
       "savedDesc": "Vaše odpověď byla uložena. Výsledky uvidíte po dokončení testu."
+    },
+    "evaluation": {
+      "timeout": "Vyhodnocení trvá příliš dlouho",
+      "timeoutMessage": "Vyhodnocení odpovědi trvá déle než očekáváno. Zkuste to prosím znovu později.",
+      "complete": "Vyhodnocení dokončeno",
+      "score": "Hodnocení",
+      "evaluating": "AI vyhodnocuje vaši odpověď",
+      "starting": "Připravuji se na vyhodnocení...",
+      "analyzing": "Analyzuji vaši odpověď...",
+      "pleaseWait": "Prosím počkejte, AI vyhodnocuje vaši odpověď..."
     },
     "results": {
       "title": "Výsledky testu",
@@ -687,6 +700,106 @@
       "title": "Nepodařilo se načíst kartičky",
       "description": "Došlo k chybě při načítání kartiček. Zkuste to prosím znovu.",
       "retry": "Zkusit znovu"
+    }
+  },
+  "subscription": {
+    "title": "Předplatné",
+    "management": "Moje předplatné",
+    "plans": "Dostupné plány",
+    "selectPlan": "Vybrat plán",
+    "currentPlan": "Aktuální předplatné",
+    "checkout": {
+      "title": "Dokončení objednávky",
+      "subtitle": "Zkontrolujte podrobnosti před přechodem na platbu",
+      "selectedPlan": "Vybraný plán",
+      "paymentDetails": "Podrobnosti platby",
+      "recurringPayment": "Opakovaná platba",
+      "reason": "Důvod platby",
+      "reasonText": "Platba za prémiové předplatné Primát Plus",
+      "amount": "Částka",
+      "amountType": "Typ částky",
+      "fixedAmount": "Fixní částka",
+      "billingPeriod": "Platební období",
+      "monthly": "Měsíčně",
+      "yearly": "Ročně",
+      "billingFrequency": "Frekvence strhávání",
+      "everyMonth": "Každý měsíc",
+      "everyYear": "Každý rok",
+      "frequencyType": "Typ frekvence",
+      "fixedFrequency": "Fixní",
+      "nextBillingDate": "První platba",
+      "afterTrial": "Po skončení zkušebního období (14 dní)",
+      "communication": "Komunikace a změny",
+      "contactMethod": "Kontakt pro změny nastavení",
+      "supportEmail": "podpora@primat.cz",
+      "howToCancel": "Zrušení předplatného",
+      "cancelInfo": "Předplatné můžete kdykoliv zrušit v nastavení účtu",
+      "cancelLink": "Podmínky zrušení",
+      "termsLink": "Podmínky opakovaných plateb",
+      "consent": "Souhlas",
+      "consentRecurring": "Souhlasím s podmínkami opakovaných plateb",
+      "consentStorage": "Souhlasím s uložením platebních údajů na straně platební brány GoPay a jejich zpracováním podle mezinárodního bezpečnostního standardu PCI-DSS Level 1 (nejvyšší úroveň datové bezpečnosti ve finančním sektoru)",
+      "continueToPayment": "Pokračovat na platbu",
+      "processing": "Připravuji platbu...",
+      "backToPlans": "Zpět na plány",
+      "errors": {
+        "noPlanSelected": "Nebyl vybrán žádný plán",
+        "alreadySubscribed": "Již máte aktivní předplatné",
+        "trialUsed": "Zkušební období již bylo použito",
+        "consentRequired": "Musíte souhlasit s podmínkami"
+      }
+    },
+    "manage": {
+      "title": "Správa předplatného",
+      "subtitle": "Spravujte své předplatné a platby",
+      "currentSubscription": "Aktuální předplatné",
+      "plan": "Plán",
+      "status": "Stav",
+      "active": "Aktivní",
+      "trial": "Zkušební období",
+      "daysRemaining": "Zbývá dní",
+      "nextBilling": "Další platba",
+      "amount": "Částka",
+      "autoRenewal": "Automatické obnovení",
+      "enabled": "Zapnuto",
+      "disabled": "Vypnuto",
+      "paymentMethod": "Platební metoda",
+      "noPaymentMethod": "Žádná platební metoda",
+      "changePaymentMethod": "Změnit platební metodu",
+      "paymentHistory": "Historie plateb",
+      "date": "Datum",
+      "description": "Popis",
+      "status": "Stav",
+      "noPaymentHistory": "Zatím žádné platby",
+      "dangerZone": "Nebezpečná zóna",
+      "cancelSubscription": "Zrušit předplatné",
+      "cancelWarning": "Po zrušení budete mít přístup k prémiovým funkcím do konce aktuálního platebního období.",
+      "cancelConfirm": "Opravdu chcete zrušit předplatné?",
+      "cancelButton": "Ano, zrušit předplatné",
+      "cancelling": "Ruším...",
+      "keepSubscription": "Ponechat předplatné",
+      "cancelSuccess": "Předplatné bylo zrušeno",
+      "cancelSuccessDesc": "Vaše předplatné bude aktivní do {date}",
+      "upgradePrompt": "Upgradujte na Premium a odemkněte všechny funkce",
+      "upgradeCta": "Vybrat plán"
+    },
+    "success": {
+      "title": "Platba úspěšná!",
+      "description": "Vaše prémiové předplatné bylo aktivováno. Nyní máte přístup ke všem funkcím Primát Plus.",
+      "trialInfo": "Zkušební období",
+      "trialDays": "14 dní zdarma",
+      "renewalInfo": "Po skončení zkušebního období bude vaše předplatné automaticky obnoveno.",
+      "goToDashboard": "Přejít na dashboard",
+      "goToManagement": "Spravovat předplatné",
+      "redirecting": "Přesměrování...",
+      "mockNotice": "Toto je testovací platba"
+    },
+    "failed": {
+      "title": "Platba se nezdařila",
+      "description": "Při zpracování platby došlo k chybě. Zkuste to prosím znovu nebo kontaktujte podporu.",
+      "tryAgain": "Zkusit znovu",
+      "goBack": "Zpět na dashboard",
+      "contactSupport": "Kontaktovat podporu"
     }
   }
 }

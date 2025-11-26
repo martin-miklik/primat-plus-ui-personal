@@ -1,33 +1,34 @@
 "use client";
 
-import { useBillingPlans, useSubscription } from "@/lib/api/queries/billing";
-import {
-  useCheckout,
-  useCancelSubscription,
-} from "@/lib/api/mutations/billing";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useBillingPlans } from "@/lib/api/queries/billing";
 import { PricingTable } from "@/components/paywall/pricing-table";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { Typography } from "@/components/ui/Typography";
+import ElectricBorder from "@/components/ElectricBorder";
 
 export default function SubscriptionPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { data: plans, isLoading: plansLoading } = useBillingPlans();
-  const { data: subscription, isLoading: subLoading } = useSubscription();
-  const checkoutMutation = useCheckout();
-  const cancelMutation = useCancelSubscription();
 
-  const handleUpgrade = (planId: number) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api/v1";
-    checkoutMutation.mutate({
-      planId,
-      returnUrl: `${window.location.origin}/predplatne/uspech`,
-      notifyUrl: `${apiUrl}/billing/gopay-webhook`,
-    });
+  const isPremium =
+    user?.subscriptionType === "premium" || user?.subscriptionType === "trial";
+
+  // Redirect premium users to management page
+  useEffect(() => {
+    if (isPremium && !plansLoading) {
+      router.push("/predplatne/sprava");
+    }
+  }, [isPremium, plansLoading, router]);
+
+  const handleSelectPlan = (planId: number) => {
+    router.push(`/predplatne/checkout?planId=${planId}`);
   };
 
-  if (plansLoading || subLoading) {
+  if (plansLoading || isPremium) {
     return (
       <div className="flex justify-center p-12">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -35,86 +36,66 @@ export default function SubscriptionPage() {
     );
   }
 
-  const isPremium =
-    user?.subscriptionType === "premium" || user?.subscriptionType === "trial";
-
   return (
-    <div className="container max-w-5xl py-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Předplatné</h1>
-        <p className="text-muted-foreground">
-          Spravujte své předplatné Primát Plus
-        </p>
-      </div>
+    <div className="container space-y-12">
+      {/* Header */}
 
-      {/* Current Subscription */}
-      {isPremium && subscription?.currentPlan && (
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Aktuální předplatné</h2>
-          <div className="space-y-2">
-            <p>
-              <strong>Plán:</strong> {subscription.currentPlan.name}
-            </p>
-            <p>
-              <strong>Stav:</strong>{" "}
-              {subscription.subscriptionType === "trial"
-                ? "Zkušební období"
-                : "Aktivní"}
-            </p>
-            {subscription.daysRemaining && (
-              <p>
-                <strong>Zbývá dnů:</strong> {subscription.daysRemaining}
-              </p>
-            )}
-            {subscription.currentPlan.nextBillingDate && (
-              <p>
-                <strong>Další platba:</strong>{" "}
-                {new Date(
-                  subscription.currentPlan.nextBillingDate
-                ).toLocaleDateString("cs-CZ")}
-              </p>
-            )}
-          </div>
-
-          {subscription.autoRenew && (
-            <Button
-              variant="destructive"
-              className="mt-4"
-              onClick={() => cancelMutation.mutate()}
-              disabled={cancelMutation.isPending}
-            >
-              Zrušit předplatné
-            </Button>
-          )}
-        </Card>
-      )}
+      <Typography variant="h1" className="text-4xl md:text-5xl">
+        Předplatné
+      </Typography>
 
       {/* Available Plans */}
-      {!isPremium && plans && (
-        <>
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Dostupné plány</h2>
-            <PricingTable plans={plans} />
-          </div>
+      {plans && plans.length > 0 && (
+        <div className="space-y-8">
+          <PricingTable plans={plans} />
 
-          <div className="grid md:grid-cols-2 gap-4">
-            {plans.map((plan) => (
-              <Button
-                key={plan.id}
-                size="lg"
-                onClick={() => handleUpgrade(plan.id)}
-                disabled={checkoutMutation.isPending}
+          {/* Call to Action */}
+          <ElectricBorder
+            color="#FFCC03"
+            speed={1}
+            chaos={0.5}
+            thickness={3}
+            style={{ borderRadius: 16 }}
+            className="max-w-md mx-auto"
+          >
+            <div className="max-w-md mx-auto">
+              <button
+                onClick={() => handleSelectPlan(plans[0].id)}
+                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 transition-all duration-300 p-8 hover:cursor-pointer  w-full"
               >
-                {checkoutMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                Vybrat {plan.name}
-              </Button>
-            ))}
-          </div>
-        </>
+                <div className="relative z-10 text-center space-y-4">
+                  <div className="text-2xl font-bold">
+                    Vyzkoušet {plans[0].trialDays} dní zdarma
+                  </div>
+                  <div className="text-muted-foreground">
+                    Poté {plans[0].priceFormatted} měsíčně
+                  </div>
+                  <div className="pt-2">
+                    <div className="inline-flex items-center gap-2 text-primary text-lg font-semibold group-hover:gap-3 transition-all">
+                      <span>Začít nyní</span>
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 8l4 4m0 0l-4 4m4-4H3"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {/* Animated gradient effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            </div>
+          </ElectricBorder>
+        </div>
       )}
     </div>
   );
 }
-

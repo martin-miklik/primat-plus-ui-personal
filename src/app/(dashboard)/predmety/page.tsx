@@ -54,7 +54,9 @@ export default function SubjectsPage() {
       {/* Page Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <Typography variant="h1">{t("title")}</Typography>
+          <Typography variant="h1">
+            {t("title")}
+          </Typography>
           <Typography variant="muted" className="mt-2">
             {t("subtitle")}
           </Typography>

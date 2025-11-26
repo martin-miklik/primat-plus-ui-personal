@@ -4,16 +4,60 @@ import { useTranslations } from "next-intl";
 import { CheckCircle2, XCircle, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
-import { AnswerFeedbackResponse } from "@/lib/validations/test";
+import { AnswerFeedbackResponse, Option } from "@/lib/validations/test";
 import { cn } from "@/lib/utils";
 
 interface QuestionFeedbackProps {
   feedback: AnswerFeedbackResponse;
+  options?: Option[];
+  questionType?: string;
   className?: string;
 }
 
-export function QuestionFeedback({ feedback, className }: QuestionFeedbackProps) {
+export function QuestionFeedback({ feedback, options, questionType: _questionType, className }: QuestionFeedbackProps) {
   const t = useTranslations("tests");
+
+  // Helper to get array of answer texts
+  const getAnswerTexts = (answer: string | string[] | boolean | undefined): string[] => {
+    if (answer === undefined || answer === null) return [t("results.noAnswer")];
+    
+    // Handle boolean (true/false questions)
+    if (typeof answer === "boolean") {
+      return [answer ? t("question.true") : t("question.false")];
+    }
+    
+    // Handle true/false as strings
+    if (answer === "true") return [t("question.true")];
+    if (answer === "false") return [t("question.false")];
+    
+    // If no options provided, return as-is
+    if (!options || options.length === 0) {
+      if (Array.isArray(answer)) return answer;
+      return [String(answer)];
+    }
+    
+    // Map option IDs to text
+    const getOptionText = (id: string) => {
+      const option = options.find(opt => opt.id === id);
+      return option ? option.text : id;
+    };
+    
+    if (Array.isArray(answer)) {
+      return answer.map(a => getOptionText(a));
+    }
+    
+    // Handle comma-separated string
+    const answerStr = String(answer);
+    if (answerStr.includes(",")) {
+      return answerStr
+        .split(",")
+        .map(id => id.trim())
+        .filter(Boolean)
+        .map(id => getOptionText(id));
+    }
+    
+    return [getOptionText(answerStr)];
+  };
 
   // For open-ended questions being evaluated
   if (feedback.jobId) {
@@ -77,11 +121,19 @@ export function QuestionFeedback({ feedback, className }: QuestionFeedbackProps)
             <p className="text-sm font-medium text-muted-foreground mb-1">
               {t("feedback.correctAnswer")}:
             </p>
-            <p className="text-sm">
-              {Array.isArray(feedback.correctAnswer)
-                ? feedback.correctAnswer.join(", ")
-                : String(feedback.correctAnswer)}
-            </p>
+            {(() => {
+              const answers = getAnswerTexts(feedback.correctAnswer);
+              if (answers.length === 1) {
+                return <p className="text-sm text-green-600 dark:text-green-400">{answers[0]}</p>;
+              }
+              return (
+                <ul className="list-disc list-inside text-sm text-green-600 dark:text-green-400 space-y-1">
+                  {answers.map((answer, idx) => (
+                    <li key={idx}>{answer}</li>
+                  ))}
+                </ul>
+              );
+            })()}
           </div>
         )}
 

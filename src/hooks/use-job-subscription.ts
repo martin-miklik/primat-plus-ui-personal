@@ -170,7 +170,7 @@ export function useJobSubscription<P extends ProcessType>({
   const handlePublication = useCallback(
     (data: JobEvent) => {
       console.log(`[JobSubscription] Received event:`, data);
-      
+
       // Validate process type matches
       if (data.process !== process) {
         console.warn(

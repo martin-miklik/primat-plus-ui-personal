@@ -3,7 +3,7 @@ import { apiPath } from "@/mocks/config";
 import {
   mockBillingLimits,
   mockBillingPlans,
-  mockFreeSubscription,
+  mockPremiumSubscription,
 } from "../fixtures/billing";
 
 // Simulate delay for realistic API behavior
@@ -54,9 +54,10 @@ export const billingHandlers = [
   http.get(apiPath("/billing/subscription"), async () => {
     await delay(300);
 
+    // Return premium subscription for testing (change to mockFreeSubscription to test free user flow)
     return HttpResponse.json({
       success: true,
-      data: mockFreeSubscription,
+      data: mockPremiumSubscription,
     });
   }),
 

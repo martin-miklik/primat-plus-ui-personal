@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown, CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/stores/auth-store";
@@ -18,6 +18,7 @@ import {
 export function NavUserHeader() {
   const router = useRouter();
   const t = useTranslations("user");
+  const tSub = useTranslations("subscription");
   const { user, clearAuth } = useAuthStore();
 
   const handleLogout = () => {
@@ -55,6 +56,11 @@ export function NavUserHeader() {
             </div>
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push("/predplatne/sprava")}>
+          <CreditCard className="mr-2 size-4" />
+          {tSub("management")}
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 size-4" />

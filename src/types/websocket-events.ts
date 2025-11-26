@@ -181,11 +181,57 @@ export interface TestErrorEvent extends BaseJobEvent {
   message: string;
 }
 
+// ============================================================================
+// Test Answer Evaluation Events (for open-ended questions)
+// ============================================================================
+
+export interface TestAnswerEvaluationStartedEvent extends BaseJobEvent {
+  type: "job_started";
+  process: "test";
+  userAnswerId?: number;
+  questionIndex?: number;
+}
+
+export interface TestAnswerEvaluatingEvent extends BaseJobEvent {
+  type: "generating";
+  process: "test";
+}
+
+export interface TestAnswerEvaluatedEvent extends BaseJobEvent {
+  type: "answer_evaluated";
+  process: "test";
+  userAnswerId: number;
+  questionIndex: number;
+  score: number;
+  isCorrect: boolean;
+  feedback: string;
+  evaluatedAt: string;
+}
+
+export interface TestAnswerEvaluationCompleteEvent extends BaseJobEvent {
+  type: "complete";
+  process: "test";
+  userAnswerId?: number;
+  questionIndex?: number;
+}
+
+export interface TestAnswerEvaluationErrorEvent extends BaseJobEvent {
+  type: "error";
+  process: "test";
+  error: string;
+  message: string;
+}
+
 export type TestEvent =
   | TestJobStartedEvent
   | TestGeneratingEvent
   | TestCompleteEvent
-  | TestErrorEvent;
+  | TestErrorEvent
+  | TestAnswerEvaluationStartedEvent
+  | TestAnswerEvaluatingEvent
+  | TestAnswerEvaluatedEvent
+  | TestAnswerEvaluationCompleteEvent
+  | TestAnswerEvaluationErrorEvent;
 
 // ============================================================================
 // Union Types

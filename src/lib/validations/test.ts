@@ -140,6 +140,7 @@ export const testInstanceStartResponseSchema = z.object({
   startedAt: z.string().datetime(),
   expiresAt: z.string().datetime(),
   resumed: z.boolean().optional(), // Flag to indicate if this is resuming an existing instance
+  userAnswers: z.array(userAnswerSchema).optional(), // Existing answers when resuming
 });
 
 // Answer submission response (for "during" mode with immediate feedback)
@@ -155,6 +156,7 @@ export const answerFeedbackResponseSchema = z.object({
   score: z.number().min(0).max(1).optional(),
   aiFeedback: z.string().optional(),
   jobId: z.string().optional(), // For async open-ended evaluation
+  channel: z.string().optional(), // WebSocket channel for open-ended evaluation
   message: z.string().optional(),
   saved: z.boolean().optional(), // For "after" mode
 });

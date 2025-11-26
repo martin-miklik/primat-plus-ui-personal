@@ -22,7 +22,7 @@ export function ModelToggle({ value, onChange, disabled }: ModelToggleProps) {
   const t = useTranslations("chat.models");
 
   // TODO: Enable "accurate" model when Gemini Pro is available
-  const accurateModelAvailable = false;
+  const accurateModelAvailable = true;
 
   return (
     <TooltipProvider>

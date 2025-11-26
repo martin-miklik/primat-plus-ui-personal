@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ interface TrueFalseQuestionProps {
   onSubmit: (answer: string) => void;
   disabled?: boolean;
   showSubmit?: boolean;
+  correctAnswer?: string | boolean; // For showing visual feedback
+  showFeedback?: boolean; // Whether to show correct/incorrect indicators
 }
 
 export function TrueFalseQuestion({
@@ -22,9 +24,20 @@ export function TrueFalseQuestion({
   onSubmit,
   disabled = false,
   showSubmit = true,
+  correctAnswer,
+  showFeedback = false,
 }: TrueFalseQuestionProps) {
   const t = useTranslations("tests");
   const [selected, setSelected] = useState<string | null>(initialAnswer || null);
+  
+  // Parse correct answer
+  const correctValue = correctAnswer === true || correctAnswer === "true" ? "true" : 
+                       correctAnswer === false || correctAnswer === "false" ? "false" : null;
+
+  // Reset state when initialAnswer changes (e.g., navigating between questions)
+  useEffect(() => {
+    setSelected(initialAnswer || null);
+  }, [initialAnswer, question.index]);
 
   const handleSubmit = () => {
     if (!selected) return;
@@ -49,14 +62,21 @@ export function TrueFalseQuestion({
             onClick={() => !disabled && setSelected("true")}
             disabled={disabled}
             className={cn(
-              "flex flex-col items-center gap-3 p-6 rounded-lg border-2 transition-all",
-              "hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20",
-              selected === "true"
+              "flex flex-col items-center gap-3 p-6 rounded-lg border-2 transition-all relative",
+              !disabled && "hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20",
+              selected === "true" && !showFeedback
                 ? "border-green-500 bg-green-50 dark:bg-green-950/20 shadow-lg"
                 : "border-border",
+              showFeedback && correctValue === "true" && "border-green-500 bg-green-50 dark:bg-green-950/20 shadow-lg",
+              showFeedback && selected === "true" && correctValue !== "true" && "border-red-500 bg-red-50 dark:bg-red-950/20",
               disabled && "opacity-50 cursor-not-allowed"
             )}
           >
+            {showFeedback && (selected === "true" || correctValue === "true") && (
+              <span className="absolute top-2 right-2 text-2xl">
+                {correctValue === "true" ? "✓" : "✗"}
+              </span>
+            )}
             <CheckCircle2
               className={cn(
                 "h-12 w-12",
@@ -73,14 +93,21 @@ export function TrueFalseQuestion({
             onClick={() => !disabled && setSelected("false")}
             disabled={disabled}
             className={cn(
-              "flex flex-col items-center gap-3 p-6 rounded-lg border-2 transition-all",
-              "hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20",
-              selected === "false"
+              "flex flex-col items-center gap-3 p-6 rounded-lg border-2 transition-all relative",
+              !disabled && "hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20",
+              selected === "false" && !showFeedback
                 ? "border-red-500 bg-red-50 dark:bg-red-950/20 shadow-lg"
                 : "border-border",
+              showFeedback && correctValue === "false" && "border-green-500 bg-green-50 dark:bg-green-950/20 shadow-lg",
+              showFeedback && selected === "false" && correctValue !== "false" && "border-red-500 bg-red-50 dark:bg-red-950/20",
               disabled && "opacity-50 cursor-not-allowed"
             )}
           >
+            {showFeedback && (selected === "false" || correctValue === "false") && (
+              <span className="absolute top-2 right-2 text-2xl">
+                {correctValue === "false" ? "✓" : "✗"}
+              </span>
+            )}
             <XCircle
               className={cn(
                 "h-12 w-12",

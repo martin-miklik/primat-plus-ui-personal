@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { BookOpen, GraduationCap, Home } from "lucide-react";
+import Image from "next/image";
+import { BookOpen, CreditCard, Home } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +16,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Typography } from "@/components/ui/Typography";
@@ -28,8 +30,10 @@ export function AppSidebar() {
   const tBrand = useTranslations("brand");
   const tTheme = useTranslations("theme");
   const { user } = useAuth();
+  const { state } = useSidebar();
 
   const isFreeUser = user?.subscriptionType === "free";
+  const isCollapsed = state === "collapsed";
 
   const mainNavigation = [
     {
@@ -42,24 +46,57 @@ export function AppSidebar() {
       url: "/predmety",
       icon: BookOpen,
     },
+    ...(isFreeUser
+      ? [
+          {
+            title: tNav("subscription"),
+            url: "/predplatne",
+            icon: CreditCard,
+          },
+        ]
+      : []),
   ];
 
   return (
-    <Sidebar variant="inset">
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-4 py-2">
-          <div className="bg-primary flex size-8 items-center justify-center rounded-lg">
-            <GraduationCap className="text-primary-foreground size-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">{tBrand("name")}</span>
-            <span className="text-muted-foreground text-xs">
-              {tBrand("tagline")}
-            </span>
+    <Sidebar collapsible="icon" className="relative p-0">
+      {/* <div
+        className="pointer-events-none absolute left-1/2 top-0 z-0 -translate-x-1/2"
+        style={{
+          width: "600px",
+          height: "600px",
+          background:
+            "radial-gradient(circle, rgba(255, 204, 0, 1) 0%, rgba(255, 204, 0, 0.4) 30%, transparent 70%)",
+        }}
+      /> */}
+
+      <SidebarHeader className="relative z-10 p-0">
+        <div className="bg-brand-yellow py-2.25 px-0 group-data-[collapsible=icon]:py-2">
+          <div className="flex items-center justify-center">
+            {isCollapsed ? (
+              <Image
+                src="/logo_miniature.svg"
+                alt={tBrand("name")}
+                width={24}
+                height={18}
+                className="h-auto"
+                priority
+              />
+            ) : (
+              <Image
+                src="/logo.svg"
+                alt={tBrand("name")}
+                width={136}
+                height={37}
+                className="h-auto w-42"
+                priority
+              />
+            )}
           </div>
         </div>
+        {/* <div className="from-brand-yellow/100  to-brand-yellow/0 bg-gradient-to-b h-4"/> */}
       </SidebarHeader>
-      <SidebarContent>
+
+      <SidebarContent className="relative z-10">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs text-muted-foreground">
             {tNav("navigationLabel")}
@@ -90,7 +127,7 @@ export function AppSidebar() {
       <SidebarFooter>
         {/* Upgrade CTA for free users */}
         {isFreeUser && (
-          <div className="px-4 py-3">
+          <div className="px-4 py-3 group-data-[collapsible=icon]:hidden">
             <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
               <div className="flex items-start gap-2 mb-2">
                 <Crown className="h-4 w-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
@@ -110,7 +147,7 @@ export function AppSidebar() {
           </div>
         )}
 
-        <SidebarGroup>
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel className="text-xs text-muted-foreground">
             {tTheme("displayMode")}
           </SidebarGroupLabel>

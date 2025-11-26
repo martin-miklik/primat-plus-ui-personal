@@ -56,65 +56,80 @@ export function PaywallSheet() {
   if (!reason) return null;
 
   const message = REASON_MESSAGES[reason];
-  const isSoftPaywall = reason === "chat_limit_soft";
 
   return (
     <Dialog open={isOpen} onOpenChange={close}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-2 mb-2">
-            <Crown className="h-6 w-6 text-yellow-500" />
-            <DialogTitle className="text-2xl">{message.title}</DialogTitle>
-          </div>
-          <DialogDescription className="text-base">
-            {message.description}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+        {/* Header with gradient background */}
+        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background p-6 md:p-8 border-b border-border/50">
+          <DialogHeader>
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 backdrop-blur-sm">
+                <Crown className="h-7 w-7 text-yellow-500" />
+              </div>
+              <div className="flex-1">
+                <DialogTitle className="text-2xl md:text-3xl mb-2">
+                  {message.title}
+                </DialogTitle>
+                <DialogDescription className="text-base md:text-lg">
+                  {message.description}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+        </div>
 
-        {/* Current Limits */}
-        {limits && (
-          <div className="my-6 space-y-3">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Vaše aktuální využití:
-            </h3>
-            <LimitProgress
-              label="Předměty"
-              used={limits.limits.subjects.used}
-              max={limits.limits.subjects.max}
-            />
-            <LimitProgress
-              label="Materiály"
-              used={limits.limits.sources.used}
-              max={limits.limits.sources.max}
-            />
-            <LimitProgress
-              label="AI konverzace"
-              used={limits.limits.chatConversations.used}
-              max={limits.limits.chatConversations.max}
-            />
-          </div>
-        )}
-
-        {/* Pricing Table */}
-        {plans && <PricingTable plans={plans} />}
-
-        {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          {isSoftPaywall && (
-            <Button variant="outline" onClick={close}>
-              Pokračovat Free
-            </Button>
+        <div className="p-6 md:p-8 space-y-8">
+          {/* Current Limits */}
+          {limits && (
+            <div className="rounded-2xl bg-muted/30 p-6 space-y-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Vaše aktuální využití
+              </h3>
+              <div className="space-y-3">
+                <LimitProgress
+                  label="Předměty"
+                  used={limits.limits.subjects.used}
+                  max={limits.limits.subjects.max}
+                />
+                <LimitProgress
+                  label="Materiály"
+                  used={limits.limits.sources.used}
+                  max={limits.limits.sources.max}
+                />
+                <LimitProgress
+                  label="AI konverzace"
+                  used={limits.limits.chatConversations.used}
+                  max={limits.limits.chatConversations.max}
+                />
+              </div>
+            </div>
           )}
-          <Button
-            onClick={() => {
-              close();
-              router.push("/predplatne");
-            }}
-            className="gap-2"
-          >
-            <Sparkles className="h-4 w-4" />
-            Vyzkoušet Premium zdarma na 14 dní
-          </Button>
+
+          {/* Pricing Table */}
+          {plans && (
+            <div>
+              <h3 className="text-xl font-semibold mb-6 text-center">
+                Odemkněte plný potenciál s Premium
+              </h3>
+              <PricingTable plans={plans} />
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4 border-t border-border/50">
+            <Button
+              onClick={() => {
+                close();
+                router.push("/predplatne");
+              }}
+              size="lg"
+              className="gap-2 min-w-[220px] shadow-lg"
+            >
+              <Sparkles className="h-5 w-5" />
+              Vyzkoušet Premium 14 dní zdarma
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

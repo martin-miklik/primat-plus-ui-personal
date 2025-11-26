@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,6 +24,11 @@ export function OpenEndedQuestion({
 }: OpenEndedQuestionProps) {
   const t = useTranslations("tests");
   const [answer, setAnswer] = useState(initialAnswer || "");
+
+  // Reset state when initialAnswer changes (e.g., navigating between questions)
+  useEffect(() => {
+    setAnswer(initialAnswer || "");
+  }, [initialAnswer, question.index]);
 
   const handleSubmit = () => {
     if (!answer.trim()) return;
@@ -53,11 +58,6 @@ export function OpenEndedQuestion({
         {/* Character Count */}
         <div className="flex justify-between items-center text-sm text-muted-foreground">
           <span>{t("question.characterCount", { count: answer.length })}</span>
-          {answer.length < 50 && answer.length > 0 && (
-            <span className="text-orange-600">
-              {t("question.minCharactersHint")}
-            </span>
-          )}
         </div>
 
         {/* Submit Button */}

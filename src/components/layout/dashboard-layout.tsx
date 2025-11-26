@@ -13,9 +13,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="overflow-x-hidden">
+      <SidebarInset className="overflow-x-hidden z-10">
         <AppHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 max-h-[calc(100vh-100px)] overflow-y-auto">
           {children}
         </div>
       </SidebarInset>

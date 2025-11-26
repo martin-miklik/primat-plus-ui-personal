@@ -18,11 +18,18 @@ import { useSource } from "@/lib/api/queries/sources";
 // Custom page title overrides
 const pageTitleOverrides: Record<string, string> = {
   predmety: "Předměty",
+  predplatne: "Předplatné",
+  sprava: "Správa",
+  uspech: "Úspěch",
+  checkout: "Objednávka",
   tests: "Testy",
   testy: "Testy",
   flashcards: "Flashkarty",
+  karticky: "Kartičky",
   materials: "Materiály",
   chat: "AI Chat",
+  temata: "Témata",
+  zdroje: "Zdroje",
 };
 
 function formatSegment(segment: string): string {
@@ -104,14 +111,14 @@ export function AppBreadcrumb() {
           allIndices.push(idx);
         }
       });
-      
+
       // Use the first unprocessed occurrence
       const originalIndex = allIndices[0];
       if (originalIndex === undefined) return;
-      
+
       processedOriginalIndices.add(originalIndex);
       const previousSegment = segments[originalIndex - 1];
-      
+
       // Check if this is a subject ID
       if (previousSegment === "predmety" && subjectData?.data) {
         breadcrumbs.push({
