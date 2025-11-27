@@ -100,9 +100,7 @@ export default function ManagementPage() {
     <div className="space-y-8">
       {/* Canceled Subscription Banner */}
       {isCanceled && subscription.subscriptionExpiresAt && (
-        <div
-          className="rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-background p-6 shadow-lg animate-fade-in"
-        >
+        <div className="rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-background p-6 shadow-lg animate-fade-in">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
@@ -114,14 +112,13 @@ export default function ManagementPage() {
               <p className="text-sm text-muted-foreground">
                 Tvé Premium funkce zůstanou aktivní do{" "}
                 <strong>
-                  {new Date(subscription.subscriptionExpiresAt).toLocaleDateString(
-                    "cs-CZ",
-                    {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}
+                  {new Date(
+                    subscription.subscriptionExpiresAt
+                  ).toLocaleDateString("cs-CZ", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </strong>
                 . Po tomto datu budeš mít pouze free přístup.
               </p>
@@ -146,7 +143,9 @@ export default function ManagementPage() {
               {t("title")}
             </Typography>
             <Badge
-              variant={isCanceled ? "destructive" : isTrial ? "secondary" : "default"}
+              variant={
+                isCanceled ? "destructive" : isTrial ? "secondary" : "default"
+              }
               className="text-xs px-2 py-1"
             >
               {isCanceled ? (
@@ -206,31 +205,32 @@ export default function ManagementPage() {
                   </div>
                 )}
 
-                {/* Next Billing */}
-                {subscription.currentPlan?.nextBillingAmount && (
-                  <div className="p-4 rounded-lg bg-background/60 border border-border/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        Další platba
-                      </span>
-                    </div>
-                    <p className="text-3xl font-bold">
-                      {subscription.currentPlan.nextBillingAmount} Kč
-                    </p>
-                    {subscription.currentPlan.nextBillingDate && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {new Date(
-                          subscription.currentPlan.nextBillingDate
-                        ).toLocaleDateString("cs-CZ", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                {/* Next Billing - Only show for active subscriptions */}
+                {subscription.currentPlan?.nextBillingAmount &&
+                  subscription.autoRenew && (
+                    <div className="p-4 rounded-lg bg-background/60 border border-border/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          Další platba
+                        </span>
+                      </div>
+                      <p className="text-3xl font-bold">
+                        {subscription.currentPlan.nextBillingAmount} Kč
                       </p>
-                    )}
-                  </div>
-                )}
+                      {subscription.currentPlan.nextBillingDate && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {new Date(
+                            subscription.currentPlan.nextBillingDate
+                          ).toLocaleDateString("cs-CZ", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  )}
               </div>
 
               {isTrial && !isCanceled && (
@@ -250,7 +250,7 @@ export default function ManagementPage() {
                   </div>
                 </div>
               )}
-              
+
               {isCanceled && (
                 <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
                   <div className="flex items-start gap-3">
@@ -350,11 +350,13 @@ export default function ManagementPage() {
               </h2>
 
               {/* Auto-renewal info */}
-              <div className={`p-4 rounded-lg border ${
-                subscription.autoRenew 
-                  ? "bg-background/60 border-border/50" 
-                  : "bg-orange-500/10 border-orange-500/20"
-              }`}>
+              <div
+                className={`p-4 rounded-lg border ${
+                  subscription.autoRenew
+                    ? "bg-background/60 border-border/50"
+                    : "bg-orange-500/10 border-orange-500/20"
+                }`}
+              >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">
                     Automatická obnova
@@ -416,7 +418,13 @@ export default function ManagementPage() {
               Máš otázku k předplatnému nebo potřebuješ změnit nastavení?
             </p>
             <Button variant="outline" size="sm" className="w-full" asChild>
-              <a href="mailto:podpora@primat.cz">Kontaktovat podporu</a>
+              <a
+                href="mailto:podpora@primat.cz"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Kontaktovat podporu
+              </a>
             </Button>
           </div>
         </div>
