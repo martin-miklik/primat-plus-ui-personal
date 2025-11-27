@@ -34,7 +34,8 @@ export function GuestGuard({ children }: GuestGuardProps) {
     if (!isValidated) {
       validateSession();
     }
-  }, [isValidated, validateSession]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isValidated]); // Only run when isValidated changes
 
   // Timeout fallback - if validation takes too long (15s), assume not authenticated
   // This prevents infinite loading if session validation gets stuck

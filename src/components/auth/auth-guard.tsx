@@ -35,7 +35,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (!isValidated) {
       validateSession();
     }
-  }, [isValidated, validateSession]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isValidated]); // Only run when isValidated changes, not when validateSession is recreated
 
   // Timeout fallback - if validation takes too long (15s), force redirect to login
   // This prevents infinite loading if session validation gets stuck
@@ -49,7 +50,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
       return () => clearTimeout(timeout);
     }
-  }, [isValidated, logout]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isValidated]); // Only run when isValidated changes
 
   // Redirect to login if not authenticated (after validation completes)
   useEffect(() => {
