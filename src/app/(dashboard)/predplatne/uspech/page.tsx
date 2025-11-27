@@ -23,7 +23,7 @@ export default function PaymentSuccessPage() {
   const hasRefreshed = useRef(false);
 
   const isSuccess = status === "success";
-  
+
   // Get billing limits to check if user has used trial
   const { data: limits } = useBillingLimits();
   const hasUsedTrial = limits?.hasUsedTrial ?? false;
