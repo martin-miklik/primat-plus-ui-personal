@@ -3,7 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Loader2, CreditCard, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  Loader2,
+  CreditCard,
+  CheckCircle2,
+  Calendar,
+  Sparkles,
+  Clock,
+  TrendingUp,
+  Receipt,
+  Settings,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -78,194 +88,282 @@ export default function ManagementPage() {
   const isTrial = subscription.subscriptionType === "trial";
 
   return (
-      <div className="container max-w-6xl py-8 space-y-8">
-        {/* Header */}
-        <div className="space-y-2">
-          <Typography variant="h1" className="text-3xl md:text-4xl">
-            {t("title")}
-          </Typography>
-          <Typography variant="muted" className="text-base md:text-lg">
-            {t("subtitle")}
-          </Typography>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Plan Card */}
-          <div className="rounded-2xl border border-border/50 bg-gradient-to-br from-primary/10 via-primary/5 to-background p-6 shadow-lg">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-primary/20">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
-              </div>
-              <span className="text-sm text-muted-foreground font-medium">
-                {t("plan")}
-              </span>
-            </div>
-            <p className="text-2xl font-bold">
-              {subscription.currentPlan?.name || "Premium"}
-            </p>
-            <Badge variant={isTrial ? "secondary" : "default"} className="mt-3">
-              {isTrial ? t("trial") : t("active")}
+    <div className="space-y-8">
+      {/* Header with Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Typography variant="h1" className="text-2xl md:text-3xl">
+              {t("title")}
+            </Typography>
+            <Badge
+              variant={isTrial ? "secondary" : "default"}
+              className="text-xs px-2 py-1"
+            >
+              {isTrial ? (
+                <>
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  {t("trial")}
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  {t("active")}
+                </>
+              )}
             </Badge>
           </div>
-
-          {/* Days Remaining Card */}
-          {subscription.daysRemaining !== null && (
-            <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-orange-500/10">
-                  <svg
-                    className="h-5 w-5 text-orange-600 dark:text-orange-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <span className="text-sm text-muted-foreground font-medium">
-                  {t("daysRemaining")}
-                </span>
-              </div>
-              <p className="text-2xl font-bold">{subscription.daysRemaining}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {isTrial ? "zkušebního období" : "předplatného"}
-              </p>
-            </div>
-          )}
-
-          {/* Next Billing Card */}
-          {subscription.currentPlan?.nextBillingAmount && (
-            <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-lg">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <span className="text-sm text-muted-foreground font-medium">
-                  {t("nextBilling")}
-                </span>
-              </div>
-              <p className="text-2xl font-bold">
-                {subscription.currentPlan.nextBillingAmount} Kč
-              </p>
-              {subscription.currentPlan.nextBillingDate && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {new Date(
-                    subscription.currentPlan.nextBillingDate
-                  ).toLocaleDateString("cs-CZ")}
-                </p>
-              )}
-            </div>
-          )}
+          <Typography variant="muted">
+            {subscription.currentPlan?.name || "Premium"}
+          </Typography>
         </div>
+      </div>
 
-        {/* Payment History */}
-        {subscription.paymentHistory &&
-          subscription.paymentHistory.length > 0 && (
-            <div className="rounded-2xl border border-border/50 bg-card/30 backdrop-blur-sm p-6 shadow-lg">
-              <h2 className="text-xl font-semibold mb-6">
-                {t("paymentHistory")}
-              </h2>
+      {/* Main Grid Layout */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left Column - Main Info (2/3 width) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Current Plan Overview */}
+          <div className="rounded-xl border border-border/50 bg-gradient-to-br from-primary/5 to-background overflow-hidden">
+            <div className="p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Aktuální předplatné
+                </h2>
+              </div>
 
-              <div className="space-y-3">
-                {subscription.paymentHistory.map((payment, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 rounded-xl bg-background/50 hover:bg-background/80 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <CreditCard className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{payment.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(payment.date).toLocaleDateString("cs-CZ")}
-                        </p>
-                      </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* Days Remaining */}
+                {subscription.daysRemaining !== null && (
+                  <div className="p-4 rounded-lg bg-background/60 border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        Zbývá
+                      </span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <p className="font-semibold">{payment.amount} Kč</p>
-                      <Badge
-                        variant={
-                          payment.status === "paid" ? "default" : "secondary"
-                        }
-                      >
-                        {payment.status}
-                      </Badge>
+                    <p className="text-3xl font-bold">
+                      {subscription.daysRemaining}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {isTrial ? "dní zkušební doby" : "dní předplatného"}
+                    </p>
+                  </div>
+                )}
+
+                {/* Next Billing */}
+                {subscription.currentPlan?.nextBillingAmount && (
+                  <div className="p-4 rounded-lg bg-background/60 border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        Další platba
+                      </span>
+                    </div>
+                    <p className="text-3xl font-bold">
+                      {subscription.currentPlan.nextBillingAmount} Kč
+                    </p>
+                    {subscription.currentPlan.nextBillingDate && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {new Date(
+                          subscription.currentPlan.nextBillingDate
+                        ).toLocaleDateString("cs-CZ", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {isTrial && (
+                <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">
+                        Zkušební období zdarma
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Po uplynutí zkušební doby bude automaticky strháno{" "}
+                        {subscription.currentPlan?.nextBillingAmount} Kč za
+                        měsíční předplatné.
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-        {/* Danger Zone */}
-        {subscription.autoRenew && (
-          <div className="rounded-2xl border-2 border-destructive/30 bg-destructive/5 p-6 shadow-lg">
-            <div className="flex items-start gap-4">
-              <div className="p-2 rounded-lg bg-destructive/10">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold mb-2 text-destructive">
-                  {t("dangerZone")}
-                </h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {t("cancelWarning")}
-                </p>
-                <Button
-                  variant="destructive"
-                  onClick={() => setCancelDialogOpen(true)}
-                  className="shadow-md"
-                >
-                  {t("cancelSubscription")}
-                </Button>
-              </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Cancel Dialog */}
-        <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-xl">
-                {t("cancelConfirm")}
-              </DialogTitle>
-              <DialogDescription className="text-base pt-2">
-                {t("cancelWarning")}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                variant="outline"
-                onClick={() => setCancelDialogOpen(false)}
-              >
-                {t("keepSubscription")}
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleCancelSubscription}
-                disabled={cancelMutation.isPending}
-              >
-                {cancelMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t("cancelling")}
-                  </>
-                ) : (
-                  t("cancelButton")
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          {/* Payment History */}
+          {subscription.paymentHistory &&
+            subscription.paymentHistory.length > 0 && (
+              <div className="rounded-xl border border-border/50 bg-card/50 overflow-hidden">
+                <div className="p-6">
+                  <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Receipt className="h-5 w-5 text-muted-foreground" />
+                    {t("paymentHistory")}
+                  </h2>
+
+                  <div className="space-y-2">
+                    {subscription.paymentHistory.map((payment, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-background/60 border border-border/30 hover:border-primary/30 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-md bg-primary/10">
+                            <CreditCard className="h-3.5 w-3.5 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">
+                              {payment.description}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(payment.date).toLocaleDateString(
+                                "cs-CZ",
+                                {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                }
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 sm:justify-end">
+                          <p className="font-semibold text-sm">
+                            {payment.amount} Kč
+                          </p>
+                          <Badge
+                            variant={
+                              payment.status === "paid"
+                                ? "default"
+                                : "secondary"
+                            }
+                            className="text-xs"
+                          >
+                            {payment.status === "paid"
+                              ? "Zaplaceno"
+                              : payment.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+        </div>
+
+        {/* Right Column - Settings & Actions (1/3 width) */}
+        <div className="space-y-6">
+          {/* Settings Card */}
+          <div className="rounded-xl border border-border/50 bg-card/50 overflow-hidden">
+            <div className="p-6 space-y-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Settings className="h-5 w-5 text-muted-foreground" />
+                Nastavení
+              </h2>
+
+              {/* Auto-renewal info */}
+              <div className="p-4 rounded-lg bg-background/60 border border-border/50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">
+                    Automatická obnova
+                  </span>
+                  <Badge
+                    variant={subscription.autoRenew ? "default" : "secondary"}
+                    className="text-xs"
+                  >
+                    {subscription.autoRenew ? "Zapnuto" : "Vypnuto"}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {subscription.autoRenew
+                    ? "Předplatné se automaticky obnoví na konci období"
+                    : "Předplatné skončí na konci období"}
+                </p>
+              </div>
+
+              {/* Payment method placeholder */}
+              <div className="p-4 rounded-lg bg-background/60 border border-border/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Platební metoda</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Platební karta (GoPay)
+                </p>
+              </div>
+            </div>
+
+            {/* Cancel Subscription */}
+            {subscription.autoRenew && (
+              <div className="p-6 pt-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCancelDialogOpen(true)}
+                  className="w-full text-muted-foreground hover:text-destructive hover:border-destructive/50"
+                >
+                  Zrušit předplatné
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Help Card */}
+          <div className="rounded-xl border border-border/50 bg-gradient-to-br from-muted/30 to-background p-6">
+            <h3 className="font-semibold mb-2 text-sm">Potřebuješ pomoc?</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Máš otázku k předplatnému nebo potřebuješ změnit nastavení?
+            </p>
+            <Button variant="outline" size="sm" className="w-full" asChild>
+              <a href="mailto:podpora@primat.cz">Kontaktovat podporu</a>
+            </Button>
+          </div>
+        </div>
       </div>
+
+      {/* Cancel Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">{t("cancelConfirm")}</DialogTitle>
+            <DialogDescription className="text-base pt-2">
+              Opravdu chceš zrušit předplatné? Tvé Premium funkce zůstanou
+              aktivní do konce aktuálního období.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setCancelDialogOpen(false)}
+            >
+              {t("keepSubscription")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelSubscription}
+              disabled={cancelMutation.isPending}
+            >
+              {cancelMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t("cancelling")}
+                </>
+              ) : (
+                t("cancelButton")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
