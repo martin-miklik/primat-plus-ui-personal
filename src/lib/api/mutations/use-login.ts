@@ -68,7 +68,7 @@ export function useLogin() {
         if (error instanceof ApiError || error instanceof NetworkError) {
           throw error;
         }
-        throw new ApiError("An unexpected error occurred during login");
+        throw new ApiError("Došlo k neočekávané chybě při přihlášení");
       }
     },
   });

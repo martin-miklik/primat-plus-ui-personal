@@ -48,7 +48,7 @@ export function useSendMessage() {
       return response.data;
     },
     onError: (error: Error) => {
-      console.error("Failed to send chat message:", error);
+      console.error("Nepodařilo se odeslat zprávu:", error);
       // Handle paywall trigger or show error
       const paywallTriggered = handleMutationError(error);
       if (!paywallTriggered) {

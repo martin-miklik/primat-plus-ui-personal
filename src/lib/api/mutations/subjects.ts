@@ -77,12 +77,12 @@ export function useCreateSubject() {
       // Handle paywall trigger or show error
       const paywallTriggered = handleMutationError(error);
       if (!paywallTriggered) {
-        toast.error(error.message || "Failed to create subject");
+        toast.error(error.message || "Předmět nebyl vytvořen");
       }
     },
 
     onSuccess: (response) => {
-      toast.success(response.message || "Subject created successfully");
+      toast.success(response.message || "Předmět byl úspěšně vytvořen");
     },
 
     onSettled: () => {
@@ -150,11 +150,11 @@ export function useUpdateSubject(id: number) {
           context.previousSubject
         );
       }
-      toast.error(error.message || "Failed to update subject");
+      toast.error(error.message || "Předmět nebyl aktualizován");
     },
 
     onSuccess: (response) => {
-      toast.success(response.message || "Subject updated successfully");
+      toast.success(response.message || "Předmět byl úspěšně aktualizován");
     },
 
     onSettled: () => {
@@ -200,14 +200,14 @@ export function useDeleteSubject() {
       if (context?.previousSubjects) {
         queryClient.setQueryData(QUERY_KEYS.SUBJECTS, context.previousSubjects);
       }
-      toast.error(error.message || "Failed to delete subject");
+      toast.error(error.message || "Předmět nebyl smazán");
     },
 
     onSuccess: (response, id) => {
       // Remove from cache
       queryClient.removeQueries({ queryKey: QUERY_KEYS.SUBJECT(id) });
 
-      toast.success(response.message || "Subject deleted successfully");
+      toast.success(response.message || "Předmět byl úspěšně smazán");
     },
 
     onSettled: () => {

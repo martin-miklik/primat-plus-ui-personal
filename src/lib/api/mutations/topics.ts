@@ -81,11 +81,11 @@ export function useCreateTopic(subjectId: number) {
           context.previousTopics
         );
       }
-      toast.error(error.message || "Failed to create topic");
+      toast.error(error.message || "Téma nebylo vytvořeno");
     },
 
     onSuccess: (response) => {
-      toast.success(response.message || "Topic created successfully");
+      toast.success(response.message || "Téma bylo úspěšně vytvořeno");
     },
 
     onSettled: () => {
@@ -149,11 +149,11 @@ export function useUpdateTopic(topicId: number, subjectId: number) {
           context.previousTopics
         );
       }
-      toast.error(error.message || "Failed to update topic");
+      toast.error(error.message || "Téma nebylo aktualizováno");
     },
 
     onSuccess: (response) => {
-      toast.success(response.message || "Topic updated successfully");
+      toast.success(response.message || "Téma bylo úspěšně aktualizováno");
     },
 
     onSettled: () => {
@@ -205,11 +205,11 @@ export function useDeleteTopic(subjectId: number) {
           context.previousTopics
         );
       }
-      toast.error(error.message || "Failed to delete topic");
+      toast.error(error.message || "Téma nebylo smazáno");
     },
 
     onSuccess: (response) => {
-      toast.success(response.message || "Topic deleted successfully");
+      toast.success(response.message || "Téma bylo úspěšně smazáno");
     },
 
     onSettled: () => {
