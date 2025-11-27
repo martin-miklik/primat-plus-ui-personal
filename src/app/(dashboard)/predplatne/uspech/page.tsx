@@ -7,14 +7,16 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2, Sparkles } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const { validateSession } = useAuth();
   const t = useTranslations("subscription.success");
   const tFailed = useTranslations("subscription.failed");
-  
+
   const status = searchParams.get("status");
   const isMock = searchParams.get("mock");
   const [isRefreshing, setIsRefreshing] = useState(true);
@@ -22,26 +24,33 @@ export default function PaymentSuccessPage() {
   const isSuccess = status === "success";
 
   useEffect(() => {
-    // Invalidate billing queries to refresh subscription status
+    // Refresh all data including auth store
     const refreshData = async () => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BILLING_LIMITS });
+      // Refresh user data in auth store (updates subscription type)
+      await validateSession();
+
+      // Invalidate billing queries to refresh subscription details
+      await queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.BILLING_LIMITS,
+      });
       await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.BILLING_SUBSCRIPTION,
       });
+
       setIsRefreshing(false);
     };
-    
+
     refreshData();
 
-    // Auto-redirect to management page after 3 seconds on success
+    // Auto-redirect to dashboard after 3 seconds on success
     if (isSuccess) {
       const timer = setTimeout(() => {
-        router.push("/predplatne/sprava");
+        router.push("/");
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     }
-  }, [queryClient, isSuccess, router]);
+  }, [queryClient, isSuccess, router, validateSession]);
 
   return (
     <div className="flex items-center justify-center p-4">
@@ -69,7 +78,7 @@ export default function PaymentSuccessPage() {
                   {t("mockNotice")}
                 </div>
               )}
-              
+
               {isRefreshing ? (
                 <div className="flex items-center justify-center gap-3 text-muted-foreground mb-8">
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -91,7 +100,7 @@ export default function PaymentSuccessPage() {
                   </p>
                 </div>
               )}
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   variant="outline"
@@ -151,4 +160,3 @@ export default function PaymentSuccessPage() {
     </div>
   );
 }
-

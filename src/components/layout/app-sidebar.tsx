@@ -59,37 +59,31 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="relative p-0">
-      {/* <div
-        className="pointer-events-none absolute left-1/2 top-0 z-0 -translate-x-1/2"
-        style={{
-          width: "600px",
-          height: "600px",
-          background:
-            "radial-gradient(circle, rgba(255, 204, 0, 1) 0%, rgba(255, 204, 0, 0.4) 30%, transparent 70%)",
-        }}
-      /> */}
-
       <SidebarHeader className="relative z-10 p-0">
         <div className="bg-brand-yellow py-2.25 px-0 group-data-[collapsible=icon]:py-2">
           <div className="flex items-center justify-center">
             {isCollapsed ? (
-              <Image
-                src="/logo_miniature.svg"
-                alt={tBrand("name")}
-                width={24}
-                height={18}
-                className="h-auto"
-                priority
-              />
+              <Link href="/">
+                <Image
+                  src="/logo_miniature.svg"
+                  alt={tBrand("name")}
+                  width={24}
+                  height={18}
+                  className="h-auto"
+                  priority
+                />
+              </Link>
             ) : (
-              <Image
-                src="/logo.svg"
-                alt={tBrand("name")}
-                width={136}
-                height={37}
-                className="h-auto w-42"
-                priority
-              />
+              <Link href="/">
+                <Image
+                  src="/logo.svg"
+                  alt={tBrand("name")}
+                  width={136}
+                  height={37}
+                  className="h-auto w-42"
+                  priority
+                />
+              </Link>
             )}
           </div>
         </div>

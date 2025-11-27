@@ -3,26 +3,27 @@ import { post } from "@/lib/api/client";
 import { QUERY_KEYS } from "@/lib/constants";
 
 interface CheckoutRequest {
-  planId: number;
   returnUrl: string;
-  notifyUrl: string;
+  paymentDetails: boolean;
+  paymentTerms: boolean;
+  gdpr: boolean;
 }
 
 interface CheckoutResponse {
-  paymentId: string;
-  gatewayUrl: string;
+  gateway_url: string;
+  gopay_id: number;
   status: string;
 }
 
 export function useCheckout() {
   return useMutation({
     mutationFn: (data: CheckoutRequest) =>
-      post<{ data: CheckoutResponse }>("/billing/checkout", data).then(
+      post<{ data: CheckoutResponse }>("/payments/create", data).then(
         (r) => r.data
       ),
     onSuccess: (data) => {
       // Redirect to GoPay
-      window.location.href = data.gatewayUrl;
+      window.location.href = data.gateway_url;
     },
   });
 }
@@ -48,4 +49,3 @@ export function useCancelSubscription() {
     },
   });
 }
-

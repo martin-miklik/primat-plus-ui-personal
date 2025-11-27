@@ -3,50 +3,71 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
-import { Shield } from "lucide-react";
+import { Shield, FileText, Lock } from "lucide-react";
 
 interface ConsentCheckboxesProps {
-  recurringConsent: boolean;
-  storageConsent: boolean;
-  onRecurringChange: (checked: boolean) => void;
-  onStorageChange: (checked: boolean) => void;
+  paymentTermsConsent: boolean;
+  paymentDetailsConsent: boolean;
+  gdprConsent: boolean;
+  onPaymentTermsChange: (checked: boolean) => void;
+  onPaymentDetailsChange: (checked: boolean) => void;
+  onGdprChange: (checked: boolean) => void;
 }
 
 export function ConsentCheckboxes({
-  recurringConsent,
-  storageConsent,
-  onRecurringChange,
-  onStorageChange,
+  paymentTermsConsent,
+  paymentDetailsConsent,
+  gdprConsent,
+  onPaymentTermsChange,
+  onPaymentDetailsChange,
+  onGdprChange,
 }: ConsentCheckboxesProps) {
   const t = useTranslations("subscription.checkout");
 
   return (
     <div className="space-y-5">
       <ConsentItem
-        id="recurring-consent"
-        checked={recurringConsent}
-        onChange={onRecurringChange}
+        id="payment-terms"
+        checked={paymentTermsConsent}
+        onChange={onPaymentTermsChange}
+        icon={<FileText className="h-4 w-4 text-primary" />}
       >
         {t("consentRecurring")}{" "}
         <a
-          href="#"
+          href="https://www.primat.cz/podminky-uzivani"
           className="text-primary underline hover:no-underline font-medium"
           target="_blank"
           rel="noopener noreferrer"
         >
-          ({t("termsLink")})
+          (Podmínky užívání)
         </a>
       </ConsentItem>
 
       <ConsentItem
-        id="storage-consent"
-        checked={storageConsent}
-        onChange={onStorageChange}
+        id="payment-details"
+        checked={paymentDetailsConsent}
+        onChange={onPaymentDetailsChange}
+        icon={<Shield className="h-4 w-4 text-primary" />}
       >
-        <div className="flex items-start gap-2">
-          <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-          <span>{t("consentStorage")}</span>
-        </div>
+        {t("consentStorage")}
+      </ConsentItem>
+
+      <ConsentItem
+        id="gdpr"
+        checked={gdprConsent}
+        onChange={onGdprChange}
+        icon={<Lock className="h-4 w-4 text-primary" />}
+      >
+        Souhlasím se{" "}
+        <a
+          href="https://www.primat.cz/ochrana-osobnich-udaju"
+          className="text-primary underline hover:no-underline font-medium"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          zpracováním osobních údajů
+        </a>{" "}
+        v souladu s GDPR
       </ConsentItem>
     </div>
   );
@@ -56,11 +77,13 @@ function ConsentItem({
   id,
   checked,
   onChange,
+  icon,
   children,
 }: {
   id: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  icon: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -71,12 +94,15 @@ function ConsentItem({
         onCheckedChange={onChange}
         className="mt-0.5"
       />
-      <Label
-        htmlFor={id}
-        className="text-sm font-normal leading-relaxed cursor-pointer flex-1"
-      >
-        {children}
-      </Label>
+      <div className="flex items-start gap-2 flex-1">
+        <div className="mt-0.5">{icon}</div>
+        <Label
+          htmlFor={id}
+          className="text-sm font-normal leading-relaxed cursor-pointer flex-1"
+        >
+          {children}
+        </Label>
+      </div>
     </div>
   );
 }
