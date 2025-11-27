@@ -2,7 +2,11 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useBillingPlans, useBillingLimits } from "@/lib/api/queries/billing";
+import {
+  useBillingPlans,
+  useBillingLimits,
+  useSubscription,
+} from "@/lib/api/queries/billing";
 import {
   Loader2,
   Sparkles,
@@ -23,22 +27,39 @@ export default function SubscriptionPage() {
   const { user } = useAuth();
   const { data: plans, isLoading: plansLoading } = useBillingPlans();
   const { data: limits, isLoading: limitsLoading } = useBillingLimits();
+  const { data: subscription, isLoading: subLoading } = useSubscription();
 
   const isPremium =
     user?.subscriptionType === "premium" || user?.subscriptionType === "trial";
 
-  // Redirect premium users to management page
+  // Redirect premium users to management page (unless they canceled and want to reactivate)
   useEffect(() => {
-    if (isPremium && !plansLoading) {
+    if (isPremium && !plansLoading && !subLoading) {
+      // Allow canceled premium users to access this page to reactivate
+      if (subscription && !subscription.autoRenew) {
+        return; // Let them see the plans to reactivate
+      }
+
+      // Active premium users should go to management
       router.push("/predplatne/sprava");
     }
-  }, [isPremium, plansLoading, router]);
+  }, [isPremium, plansLoading, subLoading, subscription, router]);
 
   const handleSelectPlan = (planId: number) => {
     router.push(`/predplatne/checkout?planId=${planId}`);
   };
 
-  if (plansLoading || limitsLoading || isPremium) {
+  // Show loading while checking subscription status
+  if (plansLoading || limitsLoading || subLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show loading while redirecting active premium users
+  if (isPremium && subscription?.autoRenew) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

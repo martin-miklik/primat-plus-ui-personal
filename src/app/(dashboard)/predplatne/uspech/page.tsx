@@ -81,7 +81,8 @@ export default function PaymentSuccessPage() {
 
       return () => clearTimeout(timer);
     }
-  }, [queryClient, isSuccess, router, validateSession]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccess]); // Run once on mount + when success status changes
 
   return (
     <div className="flex items-center justify-center p-4">
