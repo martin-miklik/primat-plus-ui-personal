@@ -99,6 +99,18 @@ export const useAuthStore = create<AuthState>()(
       {
         name: "auth-storage",
         storage: createJSONStorage(() => localStorage),
+        // Add error handling for corrupted localStorage
+        onRehydrateStorage: () => (state, error) => {
+          if (error) {
+            console.error("Failed to rehydrate auth store:", error);
+            // Clear corrupted storage
+            try {
+              localStorage.removeItem("auth-storage");
+            } catch (e) {
+              console.error("Failed to clear corrupted storage:", e);
+            }
+          }
+        },
       }
     ),
     { name: "AuthStore" }

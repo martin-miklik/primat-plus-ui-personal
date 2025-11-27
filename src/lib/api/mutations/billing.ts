@@ -37,12 +37,17 @@ export function useCancelSubscription() {
         "/payments/cancel",
         {}
       ).then((r) => r.data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      // Invalidate all billing-related queries
+      await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.BILLING_SUBSCRIPTION,
       });
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.BILLING_LIMITS,
+      });
+      // Also refetch user data to update auth store
+      await queryClient.invalidateQueries({
+        queryKey: ["auth", "me"],
       });
     },
   });

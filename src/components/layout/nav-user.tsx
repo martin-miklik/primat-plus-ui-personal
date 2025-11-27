@@ -3,7 +3,7 @@
 import { LogOut, Settings, User, ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -25,11 +25,11 @@ export function NavUser() {
   const router = useRouter();
   const t = useTranslations("user");
   const tNav = useTranslations("nav");
-  const { user, clearAuth } = useAuthStore();
+  const { user, logout } = useAuth();
   const { isMobile } = useSidebar();
 
   const handleLogout = () => {
-    clearAuth();
+    logout();
     router.push("/login");
   };
 

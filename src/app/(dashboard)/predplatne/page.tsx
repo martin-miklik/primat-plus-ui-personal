@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useBillingPlans } from "@/lib/api/queries/billing";
+import { useBillingPlans, useBillingLimits } from "@/lib/api/queries/billing";
 import {
   Loader2,
   Sparkles,
@@ -13,6 +13,7 @@ import {
   TrendingUp,
   BookOpen,
   MessageSquare,
+  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import StarBorder from "@/components/StarBorder";
@@ -21,6 +22,7 @@ export default function SubscriptionPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { data: plans, isLoading: plansLoading } = useBillingPlans();
+  const { data: limits, isLoading: limitsLoading } = useBillingLimits();
 
   const isPremium =
     user?.subscriptionType === "premium" || user?.subscriptionType === "trial";
@@ -36,7 +38,7 @@ export default function SubscriptionPage() {
     router.push(`/predplatne/checkout?planId=${planId}`);
   };
 
-  if (plansLoading || isPremium) {
+  if (plansLoading || limitsLoading || isPremium) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -45,6 +47,7 @@ export default function SubscriptionPage() {
   }
 
   const plan = plans?.[0];
+  const hasUsedTrial = limits?.hasUsedTrial ?? false;
 
   if (!plan) return null;
 
@@ -62,10 +65,17 @@ export default function SubscriptionPage() {
       <div className="container max-w-6xl py-12 md:py-20 space-y-16 px-4 md:px-8 flex flex-col items-center justify-center">
         {/* Hero Section */}
         <div className="text-center space-y-6 animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
-            <Sparkles className="h-4 w-4" />
-            <span>Speciální nabídka: {plan.trialDays} dní zdarma</span>
-          </div>
+          {hasUsedTrial ? (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border text-sm font-medium text-muted-foreground">
+              <AlertCircle className="h-4 w-4" />
+              <span>Zkušební období již využito</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
+              <Sparkles className="h-4 w-4" />
+              <span>Speciální nabídka: {plan.trialDays} dní zdarma</span>
+            </div>
+          )}
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight">
             Odemkni plný potenciál
@@ -92,6 +102,11 @@ export default function SubscriptionPage() {
               <div className="text-sm text-muted-foreground">
                 / {plan.billingPeriod === "monthly" ? "měsíc" : "rok"}
               </div>
+              {hasUsedTrial && (
+                <div className="text-xs text-muted-foreground">
+                  platba ihned
+                </div>
+              )}
             </div>
           </div>
 
@@ -109,7 +124,11 @@ export default function SubscriptionPage() {
             >
               <div className="flex items-center gap-3 px-8 py-4 text-lg font-semibold">
                 <Zap className="h-5 w-5 group-hover:rotate-12 transition-transform" />
-                <span>Začít zdarma na {plan.trialDays} dní</span>
+                <span>
+                  {hasUsedTrial
+                    ? "Začít Premium nyní"
+                    : `Začít zdarma na ${plan.trialDays} dní`}
+                </span>
                 <svg
                   className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                   fill="none"
@@ -131,8 +150,17 @@ export default function SubscriptionPage() {
             className="text-sm text-muted-foreground animate-fade-in"
             style={{ animationDelay: "0.4s" }}
           >
-            <Clock className="inline h-4 w-4 mr-1" />
-            Zruš kdykoliv během zkušební doby bez poplatku
+            {hasUsedTrial ? (
+              <>
+                <Shield className="inline h-4 w-4 mr-1" />
+                Zruš kdykoliv • První platba ihned
+              </>
+            ) : (
+              <>
+                <Clock className="inline h-4 w-4 mr-1" />
+                Zruš kdykoliv během zkušební doby bez poplatku
+              </>
+            )}
           </p>
         </div>
 

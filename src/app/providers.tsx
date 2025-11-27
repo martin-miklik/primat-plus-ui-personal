@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { makeQueryClient } from "@/lib/query-client";
+import { initializeStorage } from "@/lib/utils/storage-validator";
 
 // MSW initialization
 async function enableMocking() {
@@ -49,6 +50,9 @@ export function Providers({ children }: ProvidersProps) {
   const [mswReady, setMswReady] = useState(false);
 
   useEffect(() => {
+    // Validate and clean localStorage on app initialization
+    initializeStorage();
+    
     enableMocking().then(() => {
       setMswReady(true);
     });

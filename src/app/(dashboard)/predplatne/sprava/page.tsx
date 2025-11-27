@@ -13,6 +13,8 @@ import {
   TrendingUp,
   Receipt,
   Settings,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,9 +94,50 @@ export default function ManagementPage() {
   }
 
   const isTrial = subscription.subscriptionType === "trial";
+  const isCanceled = !subscription.autoRenew;
 
   return (
     <div className="space-y-8">
+      {/* Canceled Subscription Banner */}
+      {isCanceled && subscription.subscriptionExpiresAt && (
+        <div
+          className="rounded-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-background p-6 shadow-lg animate-fade-in"
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-5 w-5 text-orange-500" />
+                <h3 className="font-semibold text-lg">
+                  Předplatné bylo zrušeno
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Tvé Premium funkce zůstanou aktivní do{" "}
+                <strong>
+                  {new Date(subscription.subscriptionExpiresAt).toLocaleDateString(
+                    "cs-CZ",
+                    {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )}
+                </strong>
+                . Po tomto datu budeš mít pouze free přístup.
+              </p>
+            </div>
+            <Button
+              size="lg"
+              onClick={() => router.push("/predplatne")}
+              className="gap-2 shadow-md group"
+            >
+              <RefreshCw className="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
+              Reaktivovat předplatné
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Header with Badge */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -103,10 +146,15 @@ export default function ManagementPage() {
               {t("title")}
             </Typography>
             <Badge
-              variant={isTrial ? "secondary" : "default"}
+              variant={isCanceled ? "destructive" : isTrial ? "secondary" : "default"}
               className="text-xs px-2 py-1"
             >
-              {isTrial ? (
+              {isCanceled ? (
+                <>
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  Zrušeno
+                </>
+              ) : isTrial ? (
                 <>
                   <Sparkles className="h-3 w-3 mr-1" />
                   {t("trial")}
@@ -185,7 +233,7 @@ export default function ManagementPage() {
                 )}
               </div>
 
-              {isTrial && (
+              {isTrial && !isCanceled && (
                 <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
                   <div className="flex items-start gap-3">
                     <Sparkles className="h-5 w-5 text-primary mt-0.5" />
@@ -197,6 +245,31 @@ export default function ManagementPage() {
                         Po uplynutí zkušební doby bude automaticky strháno{" "}
                         {subscription.currentPlan?.nextBillingAmount} Kč za
                         měsíční předplatné.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {isCanceled && (
+                <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm text-orange-600 dark:text-orange-400">
+                        Automatická obnova zrušena
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Předplatné skončí{" "}
+                        {subscription.subscriptionExpiresAt &&
+                          new Date(
+                            subscription.subscriptionExpiresAt
+                          ).toLocaleDateString("cs-CZ", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        . Můžeš ho kdyk reaktivovat.
                       </p>
                     </div>
                   </div>
@@ -277,13 +350,17 @@ export default function ManagementPage() {
               </h2>
 
               {/* Auto-renewal info */}
-              <div className="p-4 rounded-lg bg-background/60 border border-border/50">
+              <div className={`p-4 rounded-lg border ${
+                subscription.autoRenew 
+                  ? "bg-background/60 border-border/50" 
+                  : "bg-orange-500/10 border-orange-500/20"
+              }`}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">
                     Automatická obnova
                   </span>
                   <Badge
-                    variant={subscription.autoRenew ? "default" : "secondary"}
+                    variant={subscription.autoRenew ? "default" : "destructive"}
                     className="text-xs"
                   >
                     {subscription.autoRenew ? "Zapnuto" : "Vypnuto"}
@@ -308,9 +385,9 @@ export default function ManagementPage() {
               </div>
             </div>
 
-            {/* Cancel Subscription */}
-            {subscription.autoRenew && (
-              <div className="p-6 pt-0">
+            {/* Cancel or Re-activate Subscription */}
+            <div className="p-6 pt-0">
+              {subscription.autoRenew ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -319,8 +396,17 @@ export default function ManagementPage() {
                 >
                   Zrušit předplatné
                 </Button>
-              </div>
-            )}
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => router.push("/predplatne")}
+                  className="w-full gap-2 group"
+                >
+                  <RefreshCw className="h-3.5 w-3.5 group-hover:rotate-180 transition-transform duration-500" />
+                  Reaktivovat
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Help Card */}

@@ -22,7 +22,14 @@ export function getAuthToken(): string | null {
 
     const parsed = JSON.parse(authStorage);
     return parsed?.state?.token || null;
-  } catch {
+  } catch (error) {
+    // If parsing fails, localStorage is corrupted - clear it
+    console.error("Failed to parse auth storage, clearing corrupted data:", error);
+    try {
+      localStorage.removeItem("auth-storage");
+    } catch (e) {
+      console.error("Failed to clear corrupted storage:", e);
+    }
     return null;
   }
 }
@@ -54,6 +61,11 @@ export async function apiClient<T>(
       if (token) {
         authHeaders.Authorization = `Bearer ${token}`;
       }
+    }
+
+    // Log request in development for debugging
+    if (process.env.NODE_ENV === "development") {
+      console.debug(`[API] ${restOptions.method || "GET"} ${url}`);
     }
 
     const response = await fetch(url, {

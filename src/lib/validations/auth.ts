@@ -10,6 +10,7 @@ export const userSchema = z.object({
   subscriptionType: z.enum(["free", "premium", "trial"]),
   subscriptionExpiresAt: z.string().nullable(),
   hasActiveSubscription: z.boolean().optional(),
+  hasUsedTrial: z.boolean().optional(),
   createdAt: z.string().datetime().nullable(),
   updatedAt: z.string().datetime().nullable(),
 });

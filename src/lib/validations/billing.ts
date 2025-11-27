@@ -49,6 +49,7 @@ export const subscriptionSchema = z.object({
   subscriptionExpiresAt: z.string().nullable(),
   daysRemaining: z.number().nullable(),
   autoRenew: z.boolean(),
+  hasUsedTrial: z.boolean().optional(),
   currentPlan: billingPlanSchema
     .extend({
       nextBillingDate: z.string().optional(),

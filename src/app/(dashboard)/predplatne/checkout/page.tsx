@@ -12,11 +12,12 @@ import {
   CreditCard,
   Lock,
   AlertCircle,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useSubscriptionGuard } from "@/hooks/use-subscription-guard";
-import { useBillingPlans } from "@/lib/api/queries/billing";
+import { useBillingPlans, useBillingLimits } from "@/lib/api/queries/billing";
 import { useCheckout } from "@/lib/api/mutations/billing";
 import { GoPayTerms } from "@/components/subscription/gopay-terms";
 import { ConsentCheckboxes } from "@/components/subscription/consent-checkboxes";
@@ -31,6 +32,7 @@ export default function CheckoutPage() {
   const { isLoading: isGuardLoading } = useSubscriptionGuard("free");
 
   const { data: plans, isLoading: plansLoading } = useBillingPlans();
+  const { data: limits, isLoading: limitsLoading } = useBillingLimits();
   const checkoutMutation = useCheckout();
 
   const [paymentTermsConsent, setPaymentTermsConsent] = useState(false);
@@ -91,8 +93,10 @@ export default function CheckoutPage() {
   const allConsentsGiven =
     paymentTermsConsent && paymentDetailsConsent && gdprConsent;
 
+  const hasUsedTrial = limits?.hasUsedTrial ?? false;
+
   // Loading state
-  if (isGuardLoading || plansLoading || !selectedPlan) {
+  if (isGuardLoading || plansLoading || limitsLoading || !selectedPlan) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -199,7 +203,9 @@ export default function CheckoutPage() {
                   <div>
                     <h3 className="font-bold">{selectedPlan.name}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {selectedPlan.trialDays} dní zdarma
+                      {hasUsedTrial
+                        ? "Okamžitá platba"
+                        : `${selectedPlan.trialDays} dní zdarma`}
                     </p>
                   </div>
                 </div>
@@ -216,7 +222,41 @@ export default function CheckoutPage() {
                         : "rok"}
                     </span>
                   </div>
+                  {hasUsedTrial && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      První platba dnes
+                    </p>
+                  )}
                 </div>
+
+                {!hasUsedTrial && (
+                  <div className="mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="text-xs">
+                        <p className="font-medium text-primary">
+                          {selectedPlan.trialDays} dní zkušební doba zdarma
+                        </p>
+                        <p className="text-muted-foreground mt-1">
+                          Platba {selectedPlan.priceFormatted} bude stržena po
+                          uplynutí zkušební doby
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {hasUsedTrial && (
+                  <div className="mb-4 p-3 rounded-lg bg-muted/50 border border-border">
+                    <div className="flex items-start gap-2">
+                      <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-muted-foreground">
+                        Zkušební období již bylo využito. Platba bude provedena
+                        okamžitě.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   {selectedPlan.features.slice(0, 4).map((feature, i) => (

@@ -61,8 +61,17 @@ export function useAuth() {
       }
 
       // Network error - don't logout, assume session still valid (graceful degradation)
+      // BUT: mark as validated to prevent infinite loading
       console.error("Session validation error:", error);
       setValidated(true);
+      
+      // If we already had a user, keep them logged in (graceful degradation)
+      // If not, clear auth to prevent stuck state
+      if (!isAuthenticated) {
+        console.warn("No authenticated session found after validation error, clearing auth");
+        clearAuth();
+      }
+      
       return isAuthenticated;
     } finally {
       setLoading(false);

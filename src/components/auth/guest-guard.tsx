@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, ReactNode } from "react";
+import { useEffect, ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,6 +15,7 @@ interface GuestGuardProps {
  * Protects guest-only routes (like login page).
  * - Redirects to / if already authenticated
  * - Shows loading state during validation
+ * - Has timeout fallback to prevent infinite loading
  *
  * @example
  * <GuestGuard>
@@ -26,6 +27,7 @@ export function GuestGuard({ children }: GuestGuardProps) {
   const t = useTranslations("auth.session");
   const { isAuthenticated, isLoading, isValidated, validateSession } =
     useAuth();
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
   // Validate session on mount
   useEffect(() => {
@@ -33,6 +35,21 @@ export function GuestGuard({ children }: GuestGuardProps) {
       validateSession();
     }
   }, [isValidated, validateSession]);
+
+  // Timeout fallback - if validation takes too long (15s), assume not authenticated
+  // This prevents infinite loading if session validation gets stuck
+  useEffect(() => {
+    if (!isValidated) {
+      const timeout = setTimeout(() => {
+        console.warn(
+          "GuestGuard: Session validation timeout - assuming not authenticated"
+        );
+        setTimeoutReached(true);
+      }, 15000); // 15 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isValidated]);
 
   // Redirect to dashboard if authenticated (after validation completes)
   useEffect(() => {
@@ -42,7 +59,8 @@ export function GuestGuard({ children }: GuestGuardProps) {
   }, [isValidated, isAuthenticated, isLoading, router]);
 
   // Show loading state while validating
-  if (!isValidated || isLoading) {
+  // After timeout, allow guest access to prevent stuck state
+  if ((!isValidated || isLoading) && !timeoutReached) {
     return (
       <div className="flex items-center justify-center">
         <div className="text-center space-y-4">

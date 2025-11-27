@@ -3,7 +3,7 @@
 import { LogOut, ChevronDown, CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuth } from "@/hooks/use-auth";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,10 +19,10 @@ export function NavUserHeader() {
   const router = useRouter();
   const t = useTranslations("user");
   const tSub = useTranslations("subscription");
-  const { user, clearAuth } = useAuthStore();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    clearAuth();
+    logout();
     router.push("/login");
   };
 

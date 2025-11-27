@@ -23,21 +23,52 @@ export default function PaymentSuccessPage() {
 
   const isSuccess = status === "success";
 
+  // Failsafe: force stop refreshing after 15 seconds max
+  useEffect(() => {
+    const failsafeTimer = setTimeout(() => {
+      if (isRefreshing) {
+        console.warn(
+          "Payment success page refresh timeout - forcing completion"
+        );
+        setIsRefreshing(false);
+      }
+    }, 15000);
+
+    return () => clearTimeout(failsafeTimer);
+  }, [isRefreshing]);
+
   useEffect(() => {
     // Refresh all data including auth store
     const refreshData = async () => {
-      // Refresh user data in auth store (updates subscription type)
-      await validateSession();
+      try {
+        // Refresh user data in auth store (updates subscription type)
+        // Use a timeout to prevent infinite loading
+        const sessionPromise = validateSession();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Session validation timeout")),
+            10000
+          )
+        );
 
-      // Invalidate billing queries to refresh subscription details
-      await queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.BILLING_LIMITS,
-      });
-      await queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.BILLING_SUBSCRIPTION,
-      });
+        await Promise.race([sessionPromise, timeoutPromise]).catch((error) => {
+          console.error("Failed to validate session after payment:", error);
+          // Continue anyway - user already paid, don't block them
+        });
 
-      setIsRefreshing(false);
+        // Invalidate billing queries to refresh subscription details
+        await queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.BILLING_LIMITS,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: QUERY_KEYS.BILLING_SUBSCRIPTION,
+        });
+      } catch (error) {
+        console.error("Error refreshing data after payment:", error);
+        // Continue anyway - don't block the user
+      } finally {
+        setIsRefreshing(false);
+      }
     };
 
     refreshData();
