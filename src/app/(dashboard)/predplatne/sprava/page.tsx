@@ -44,12 +44,18 @@ export default function ManagementPage() {
 
   const handleCancelSubscription = () => {
     cancelMutation.mutate(undefined, {
-      onSuccess: (data) => {
+      onSuccess: () => {
         setCancelDialogOpen(false);
         toast.success(t("cancelSuccess"), {
-          description: t("cancelSuccessDesc", {
-            date: new Date(data.expiresAt).toLocaleDateString("cs-CZ"),
-          }),
+          description: subscription?.subscriptionExpiresAt
+            ? `Předplatné zůstane aktivní do ${new Date(
+                subscription.subscriptionExpiresAt
+              ).toLocaleDateString("cs-CZ", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}`
+            : "Automatická obnova byla zrušena",
         });
       },
       onError: () => {

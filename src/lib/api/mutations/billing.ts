@@ -28,17 +28,15 @@ export function useCheckout() {
   });
 }
 
-interface CancelResponse {
-  message: string;
-  expiresAt: string;
-}
-
 export function useCancelSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: () =>
-      post<{ data: CancelResponse }>("/billing/cancel", {}).then((r) => r.data),
+      post<{ data: { success: boolean; message: string } }>(
+        "/payments/cancel",
+        {}
+      ).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.BILLING_SUBSCRIPTION,
