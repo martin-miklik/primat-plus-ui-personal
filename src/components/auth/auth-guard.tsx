@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, ReactNode, useState, useRef } from "react";
+import { useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -13,10 +13,9 @@ interface AuthGuardProps {
  * AuthGuard Component
  *
  * Protects routes by requiring authentication.
- * - Validates session ONCE on mount
+ * - Validates session ONCE per browser session using store flag
  * - Shows loading state during validation
  * - Redirects to /login if not authenticated
- * - Has timeout fallback to prevent infinite loading
  *
  * @example
  * <AuthGuard>
@@ -26,38 +25,32 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const t = useTranslations("auth.session");
-  const { isAuthenticated, isLoading, isValidated, validateSession, logout } =
-    useAuth();
-  const [timeoutReached, setTimeoutReached] = useState(false);
-  const hasValidated = useRef(false);
 
-  // Validate session ONCE on mount only
+  // Get state from store - stable selectors
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const isValidated = useAuthStore((state) => state.isValidated);
+  const hasValidatedThisSession = useAuthStore(
+    (state) => state.hasValidatedThisSession
+  );
+
+  // Get action from store - stable reference
+  const validateSession = useAuthStore((state) => state.validateSession);
+
+  // Validate session ONCE on mount
   useEffect(() => {
-    if (!hasValidated.current && !isValidated) {
-      hasValidated.current = true;
+    if (!hasValidatedThisSession) {
       validateSession();
     }
-  }, []); // Empty deps - run once on mount
-
-  // Timeout fallback - if validation takes too long (15s), force redirect to login
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!isValidated) {
-        console.error("Session validation timeout - forcing logout");
-        setTimeoutReached(true);
-        logout();
-      }
-    }, 15000); // 15 second timeout
-
-    return () => clearTimeout(timeout);
-  }, []); // Run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run on mount, not when hasValidatedThisSession changes
 
   // Redirect to login if not authenticated (after validation completes)
   useEffect(() => {
-    if ((isValidated && !isAuthenticated && !isLoading) || timeoutReached) {
+    if (isValidated && !isAuthenticated && !isLoading) {
       router.push("/login");
     }
-  }, [isValidated, isAuthenticated, isLoading, timeoutReached, router]);
+  }, [isValidated, isAuthenticated, isLoading, router]);
 
   // Show loading state while validating
   if (!isValidated || isLoading) {
@@ -66,12 +59,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="text-muted-foreground">{t("checkingAuth")}</p>
-          {timeoutReached && (
-            <p className="text-sm text-destructive mt-2">
-              Přihlášení trvá příliš dlouho. Přesměrování na přihlašovací
-              stránku...
-            </p>
-          )}
         </div>
       </div>
     );

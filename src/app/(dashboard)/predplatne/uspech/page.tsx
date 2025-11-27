@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2, Sparkles } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/constants";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/stores/auth-store";
+import { useBillingLimits } from "@/lib/api/queries/billing";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const { validateSession } = useAuth();
   const t = useTranslations("subscription.success");
   const tFailed = useTranslations("subscription.failed");
 
@@ -23,20 +23,13 @@ export default function PaymentSuccessPage() {
   const hasRefreshed = useRef(false);
 
   const isSuccess = status === "success";
+  
+  // Get billing limits to check if user has used trial
+  const { data: limits } = useBillingLimits();
+  const hasUsedTrial = limits?.hasUsedTrial ?? false;
 
-  // Failsafe: force stop refreshing after 15 seconds max
-  useEffect(() => {
-    const failsafeTimer = setTimeout(() => {
-      if (isRefreshing) {
-        console.warn(
-          "Payment success page refresh timeout - forcing completion"
-        );
-        setIsRefreshing(false);
-      }
-    }, 15000);
-
-    return () => clearTimeout(failsafeTimer);
-  }, [isRefreshing]);
+  // Get forceRevalidate from store - stable reference, bypasses hasValidatedThisSession
+  const forceRevalidate = useAuthStore((state) => state.forceRevalidate);
 
   useEffect(() => {
     // Only refresh data ONCE when component mounts
@@ -45,20 +38,9 @@ export default function PaymentSuccessPage() {
 
     const refreshData = async () => {
       try {
-        // Refresh user data in auth store (updates subscription type)
-        // Use a timeout to prevent infinite loading
-        const sessionPromise = validateSession();
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Session validation timeout")),
-            10000
-          )
-        );
-
-        await Promise.race([sessionPromise, timeoutPromise]).catch((error) => {
-          console.error("Failed to validate session after payment:", error);
-          // Continue anyway - user already paid, don't block them
-        });
+        // Force re-validate to get updated user data (new subscription status)
+        // This bypasses hasValidatedThisSession check without triggering AuthGuard
+        await forceRevalidate();
 
         // Invalidate billing queries to refresh subscription details
         await queryClient.invalidateQueries({
@@ -78,14 +60,18 @@ export default function PaymentSuccessPage() {
     refreshData();
 
     // Auto-redirect to dashboard after 3 seconds on success
+    let timer: NodeJS.Timeout | undefined;
     if (isSuccess) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         router.push("/");
       }, 3000);
-
-      return () => clearTimeout(timer);
     }
-  }, []); // Run ONCE on mount - no dependencies
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - run once on mount
 
   return (
     <div className="flex items-center justify-center p-4">
@@ -120,20 +106,23 @@ export default function PaymentSuccessPage() {
                   <span>{t("redirecting")}</span>
                 </div>
               ) : (
-                <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 mb-8 max-w-md mx-auto">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Sparkles className="h-5 w-5 text-primary" />
+                // Only show trial info if user hasn't used their trial yet
+                !hasUsedTrial && (
+                  <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6 mb-8 max-w-md mx-auto">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                      </div>
+                      <span className="font-semibold">{t("trialInfo")}</span>
                     </div>
-                    <span className="font-semibold">{t("trialInfo")}</span>
+                    <p className="text-2xl font-bold text-primary mb-2">
+                      {t("trialDays")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("renewalInfo")}
+                    </p>
                   </div>
-                  <p className="text-2xl font-bold text-primary mb-2">
-                    {t("trialDays")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("renewalInfo")}
-                  </p>
-                </div>
+                )
               )}
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

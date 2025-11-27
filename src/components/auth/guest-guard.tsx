@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, ReactNode, useState, useRef } from "react";
+import { useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface GuestGuardProps {
   children: ReactNode;
@@ -13,10 +13,9 @@ interface GuestGuardProps {
  * GuestGuard Component
  *
  * Protects guest-only routes (like login page).
+ * - Validates session ONCE per browser session using store flag
  * - Redirects to / if already authenticated
  * - Shows loading state during validation
- * - Validates session ONCE on mount
- * - Has timeout fallback to prevent infinite loading
  *
  * @example
  * <GuestGuard>
@@ -26,32 +25,25 @@ interface GuestGuardProps {
 export function GuestGuard({ children }: GuestGuardProps) {
   const router = useRouter();
   const t = useTranslations("auth.session");
-  const { isAuthenticated, isLoading, isValidated, validateSession } =
-    useAuth();
-  const [timeoutReached, setTimeoutReached] = useState(false);
-  const hasValidated = useRef(false);
 
-  // Validate session ONCE on mount only
+  // Get state from store - stable selectors
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const isValidated = useAuthStore((state) => state.isValidated);
+  const hasValidatedThisSession = useAuthStore(
+    (state) => state.hasValidatedThisSession
+  );
+
+  // Get action from store - stable reference
+  const validateSession = useAuthStore((state) => state.validateSession);
+
+  // Validate session ONCE on mount
   useEffect(() => {
-    if (!hasValidated.current && !isValidated) {
-      hasValidated.current = true;
+    if (!hasValidatedThisSession) {
       validateSession();
     }
-  }, []); // Empty deps - run once on mount
-
-  // Timeout fallback - if validation takes too long (15s), assume not authenticated
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!isValidated) {
-        console.warn(
-          "GuestGuard: Session validation timeout - assuming not authenticated"
-        );
-        setTimeoutReached(true);
-      }
-    }, 15000); // 15 second timeout
-
-    return () => clearTimeout(timeout);
-  }, []); // Run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run on mount, not when hasValidatedThisSession changes
 
   // Redirect to dashboard if authenticated (after validation completes)
   useEffect(() => {
@@ -61,8 +53,7 @@ export function GuestGuard({ children }: GuestGuardProps) {
   }, [isValidated, isAuthenticated, isLoading, router]);
 
   // Show loading state while validating
-  // After timeout, allow guest access to prevent stuck state
-  if ((!isValidated || isLoading) && !timeoutReached) {
+  if (!isValidated || isLoading) {
     return (
       <div className="flex items-center justify-center">
         <div className="text-center space-y-4">
