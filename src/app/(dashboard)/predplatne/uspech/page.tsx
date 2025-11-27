@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ export default function PaymentSuccessPage() {
   const status = searchParams.get("status");
   const isMock = searchParams.get("mock");
   const [isRefreshing, setIsRefreshing] = useState(true);
+  const hasRefreshed = useRef(false);
 
   const isSuccess = status === "success";
 
@@ -38,7 +39,10 @@ export default function PaymentSuccessPage() {
   }, [isRefreshing]);
 
   useEffect(() => {
-    // Refresh all data including auth store
+    // Only refresh data ONCE when component mounts
+    if (hasRefreshed.current) return;
+    hasRefreshed.current = true;
+
     const refreshData = async () => {
       try {
         // Refresh user data in auth store (updates subscription type)
@@ -81,8 +85,7 @@ export default function PaymentSuccessPage() {
 
       return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuccess]); // Run once on mount + when success status changes
+  }, []); // Run ONCE on mount - no dependencies
 
   return (
     <div className="flex items-center justify-center p-4">

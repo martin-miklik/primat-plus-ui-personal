@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, ReactNode, useState } from "react";
+import { useEffect, ReactNode, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,6 +15,7 @@ interface GuestGuardProps {
  * Protects guest-only routes (like login page).
  * - Redirects to / if already authenticated
  * - Shows loading state during validation
+ * - Validates session ONCE on mount
  * - Has timeout fallback to prevent infinite loading
  *
  * @example
@@ -28,29 +29,29 @@ export function GuestGuard({ children }: GuestGuardProps) {
   const { isAuthenticated, isLoading, isValidated, validateSession } =
     useAuth();
   const [timeoutReached, setTimeoutReached] = useState(false);
+  const hasValidated = useRef(false);
 
-  // Validate session on mount
+  // Validate session ONCE on mount only
   useEffect(() => {
-    if (!isValidated) {
+    if (!hasValidated.current && !isValidated) {
+      hasValidated.current = true;
       validateSession();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isValidated]); // Only run when isValidated changes
+  }, []); // Empty deps - run once on mount
 
   // Timeout fallback - if validation takes too long (15s), assume not authenticated
-  // This prevents infinite loading if session validation gets stuck
   useEffect(() => {
-    if (!isValidated) {
-      const timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
+      if (!isValidated) {
         console.warn(
           "GuestGuard: Session validation timeout - assuming not authenticated"
         );
         setTimeoutReached(true);
-      }, 15000); // 15 second timeout
+      }
+    }, 15000); // 15 second timeout
 
-      return () => clearTimeout(timeout);
-    }
-  }, [isValidated]);
+    return () => clearTimeout(timeout);
+  }, []); // Run once on mount
 
   // Redirect to dashboard if authenticated (after validation completes)
   useEffect(() => {

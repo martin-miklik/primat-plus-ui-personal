@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, ReactNode, useState } from "react";
+import { useEffect, ReactNode, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
@@ -13,7 +13,7 @@ interface AuthGuardProps {
  * AuthGuard Component
  *
  * Protects routes by requiring authentication.
- * - Validates session on mount
+ * - Validates session ONCE on mount
  * - Shows loading state during validation
  * - Redirects to /login if not authenticated
  * - Has timeout fallback to prevent infinite loading
@@ -29,29 +29,28 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated, isLoading, isValidated, validateSession, logout } =
     useAuth();
   const [timeoutReached, setTimeoutReached] = useState(false);
+  const hasValidated = useRef(false);
 
-  // Validate session on mount
+  // Validate session ONCE on mount only
   useEffect(() => {
-    if (!isValidated) {
+    if (!hasValidated.current && !isValidated) {
+      hasValidated.current = true;
       validateSession();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isValidated]); // Only run when isValidated changes, not when validateSession is recreated
+  }, []); // Empty deps - run once on mount
 
   // Timeout fallback - if validation takes too long (15s), force redirect to login
-  // This prevents infinite loading if session validation gets stuck
   useEffect(() => {
-    if (!isValidated) {
-      const timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
+      if (!isValidated) {
         console.error("Session validation timeout - forcing logout");
         setTimeoutReached(true);
         logout();
-      }, 15000); // 15 second timeout
+      }
+    }, 15000); // 15 second timeout
 
-      return () => clearTimeout(timeout);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isValidated]); // Only run when isValidated changes
+    return () => clearTimeout(timeout);
+  }, []); // Run once on mount
 
   // Redirect to login if not authenticated (after validation completes)
   useEffect(() => {
