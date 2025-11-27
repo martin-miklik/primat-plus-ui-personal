@@ -44,7 +44,7 @@ export default function PaymentSuccessPage() {
   }, [queryClient, isSuccess, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-primary/5 to-background flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-4">
       <div className="container max-w-2xl">
         <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-8 md:p-12 text-center shadow-2xl">
           {isSuccess ? (
