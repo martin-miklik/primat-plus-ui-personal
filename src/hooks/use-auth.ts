@@ -34,7 +34,7 @@ export function useAuth() {
   } = useAuthStore();
 
   /**
-   * Validate current session by calling /api/auth/me
+   * Validate current session by calling /api/v1/me
    * Returns true if session is valid, false otherwise
    */
   const validateSession = useCallback(async (): Promise<boolean> => {
@@ -48,13 +48,19 @@ export function useAuth() {
 
     try {
       // Both MSW and real backend return { data: user }
-      const response = await get<SessionResponse>("/auth/me");
+      const response = await get<SessionResponse>("/me");
       setAuth(response.data, token);
       setValidated(true);
       return true;
     } catch (error) {
-      // Session invalid or expired
-      if (error instanceof ApiError && error.statusCode === 401) {
+      // Session invalid or expired, or endpoint not found (wrong route)
+      if (
+        error instanceof ApiError &&
+        (error.statusCode === 401 || error.statusCode === 404)
+      ) {
+        console.warn(
+          `Session validation failed with ${error.statusCode}, clearing auth`
+        );
         clearAuth();
         setValidated(true);
         return false;
@@ -64,14 +70,16 @@ export function useAuth() {
       // BUT: mark as validated to prevent infinite loading
       console.error("Session validation error:", error);
       setValidated(true);
-      
+
       // If we already had a user, keep them logged in (graceful degradation)
       // If not, clear auth to prevent stuck state
       if (!isAuthenticated) {
-        console.warn("No authenticated session found after validation error, clearing auth");
+        console.warn(
+          "No authenticated session found after validation error, clearing auth"
+        );
         clearAuth();
       }
-      
+
       return isAuthenticated;
     } finally {
       setLoading(false);
@@ -91,7 +99,7 @@ export function useAuth() {
    */
   const refreshSessionIfNeeded = useCallback(async (): Promise<void> => {
     const store = useAuthStore.getState();
-    
+
     // Check if token is expiring within 1 hour
     if (store.isTokenExpiringSoon()) {
       console.log("Token expiring soon, refreshing session...");

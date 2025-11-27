@@ -33,7 +33,7 @@ export const useAuthStore = create<AuthState>()(
         setAuth: (user, token) => {
           // JWT tokens from backend expire in 86400 seconds (24 hours)
           const expiresAt = Date.now() + 86400 * 1000;
-          
+
           set(
             {
               user,
@@ -90,7 +90,7 @@ export const useAuthStore = create<AuthState>()(
         isTokenExpiringSoon: () => {
           const state = get();
           if (!state.tokenExpiresAt) return false;
-          
+
           // Check if token expires within 1 hour
           const oneHour = 60 * 60 * 1000;
           return state.tokenExpiresAt - Date.now() < oneHour;
@@ -99,6 +99,14 @@ export const useAuthStore = create<AuthState>()(
       {
         name: "auth-storage",
         storage: createJSONStorage(() => localStorage),
+        // Only persist auth data, NOT loading/validation states
+        partialize: (state) => ({
+          user: state.user,
+          token: state.token,
+          tokenExpiresAt: state.tokenExpiresAt,
+          isAuthenticated: state.isAuthenticated,
+          // isLoading and isValidated are NEVER persisted - they're runtime state only
+        }),
         // Add error handling for corrupted localStorage
         onRehydrateStorage: () => (state, error) => {
           if (error) {
@@ -109,6 +117,12 @@ export const useAuthStore = create<AuthState>()(
             } catch (e) {
               console.error("Failed to clear corrupted storage:", e);
             }
+          }
+
+          // Always reset loading/validation states after hydration
+          if (state) {
+            state.isLoading = false;
+            state.isValidated = false;
           }
         },
       }

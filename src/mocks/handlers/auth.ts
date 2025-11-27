@@ -65,8 +65,8 @@ export const authHandlers = [
     });
   }),
 
-  // GET /api/v1/auth/me - Get current user
-  http.get(apiPath("/auth/me"), async ({ request }) => {
+  // GET /api/v1/me - Get current user
+  http.get(apiPath("/me"), async ({ request }) => {
     await delay(200);
 
     const authHeader = request.headers.get("Authorization");
@@ -119,8 +119,8 @@ export const authHandlers = [
     });
   }),
 
-  // PATCH /api/v1/auth/me - Update current user
-  http.patch(apiPath("/auth/me"), async ({ request }) => {
+  // PATCH /api/v1/me - Update current user
+  http.patch(apiPath("/me"), async ({ request }) => {
     await delay(300);
 
     const authHeader = request.headers.get("Authorization");
